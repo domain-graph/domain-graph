@@ -1,7 +1,7 @@
 import React from 'react';
 import { icon } from './base';
 
-export default icon(
+export const UploadCloud = icon(
   'UploadCloud',
   <>
     <polyline points="16 16 12 12 8 16"></polyline>

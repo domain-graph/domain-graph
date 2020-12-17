@@ -1,7 +1,7 @@
 import React from 'react';
 import { icon } from './base';
 
-export default icon(
+export const Eye = icon(
   'Eye',
   <>
     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>

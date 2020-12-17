@@ -5,10 +5,7 @@ import React, { useLayoutEffect, useRef } from 'react';
 import { EdgeGroup } from './types';
 import { useEdgeMutation } from './simulation';
 
-import ChevronsUp from '../icons/chevrons-up';
-import ChevronsDown from '../icons/chevrons-down';
-import ChevronUp from '../icons/chevron-up';
-import ChevronDown from '../icons/chevron-down';
+import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
 
 export interface DomainEdgeProps {
   edge: EdgeGroup;
