@@ -1,6 +1,6 @@
 {
   "name": "domain-graph",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Blank web application built with Typescript and LESS",
   "main": "lib/index.js",
   "files": [
