@@ -1,7 +1,7 @@
 import React from 'react';
 import { icon } from './base';
 
-export default icon(
+export const ChevronsUp = icon(
   'ChevronsUp',
   <>
     <polyline points="17 11 12 6 7 11"></polyline>

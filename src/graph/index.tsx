@@ -7,7 +7,6 @@ import { Edge, EdgeGroup, Node } from './types';
 import { DomainObject } from './domain-object';
 import { DomainEdge } from './domain-edge';
 import { Simulation } from './simulation';
-import Eye from '../icons/eye';
 import { NodePicker } from './node-picker';
 import { Spotlight } from './spotlight';
 

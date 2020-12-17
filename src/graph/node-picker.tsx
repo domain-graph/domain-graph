@@ -1,8 +1,7 @@
 import './node-picker.less';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import EyeOff from '../icons/eye-off';
-import Eye from '../icons/eye';
+import { Eye, EyeOff } from '../icons';
 
 import { Node } from './types';
 

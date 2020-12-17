@@ -1,7 +1,7 @@
 import React from 'react';
 import { icon } from './base';
 
-export default icon(
+export const Graph = icon(
   'Graph',
   <>
     <circle cx="18" cy="5" r="3"></circle>

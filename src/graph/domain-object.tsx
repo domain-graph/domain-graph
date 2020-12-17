@@ -4,11 +4,7 @@ import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 
 import { Node } from './types';
 import { useNodeMutation } from './simulation';
-import EyeOff from '../icons/eye-off';
-import Lock from '../icons/lock';
-import Unlock from '../icons/unlock';
-import Info from '../icons/info';
-import Graph from '../icons/graph';
+import { EyeOff, Graph, Lock, Unlock } from '../icons';
 import { CircleButton, RectButton } from '../svg-button';
 import { RadialMenu } from './radial-menu';
 

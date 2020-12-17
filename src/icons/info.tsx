@@ -1,7 +1,7 @@
 import React from 'react';
 import { icon } from './base';
 
-export default icon(
+export const Info = icon(
   'Info',
   <>
     <circle cx="12" cy="12" r="10"></circle>
