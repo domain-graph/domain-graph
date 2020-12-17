@@ -1,8 +1,8 @@
-[![master](https://github.com/{ORG_NAME}/{REPO_NAME}/workflows/build/badge.svg?branch=master&amp;event=push)](https://github.com/{ORG_NAME}/{REPO_NAME}/actions?query=workflow%3Abuild+branch%3Amaster+event%3Apush)
+[![master](https://github.com/domain-graph/domain-graph/workflows/build/badge.svg?branch=master&event=push)](https://github.com/domain-graph/domain-graph/actions?query=workflow%3Abuild+branch%3Amaster+event%3Apush)
 
-# domain-graph
+# DomainGraph
 
-Blank web application built with Typescript and LESS
+React component for visualizing GraphQL Schemas
 
 ## How To:
 
