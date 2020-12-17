@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    "lib": [
-      "es6",
-      "dom"
-    ],
+    "lib": ["es6", "dom"],
     "module": "commonjs",
     "noImplicitReturns": true,
-    "outDir": "dist",
+    "outDir": "lib",
+    "rootDir": "src",
     "sourceMap": true,
     "target": "es5",
-    "declaration": true
+    "declaration": true,
+    "jsx": "react",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strictNullChecks": true,
+    "downlevelIteration": true
   },
-  "include": [
-    "src"
-  ],
+  "include": ["src/**/*"],
   "exclude": []
 }
