@@ -1,0 +1,44 @@
+@import '../colors.less';
+
+.c-domain-object {
+  .handle {
+    cursor: grab;
+    circle {
+      fill: @color-brand-primary;
+      stroke: @color-border-dark-primary;
+      stroke-width: 2;
+    }
+  }
+
+  &.selected .handle circle {
+    stroke: @terra-cotta;
+    stroke-width: 4;
+  }
+
+  &.dragging {
+    .handle {
+      cursor: grabbing;
+    }
+  }
+
+  text {
+    font-family: sans-serif;
+    stroke: none;
+    text-anchor: middle;
+    alignment-baseline: middle;
+  }
+
+  .controls {
+    rect.click-target {
+      fill: transparent;
+    }
+
+    .control-wheel {
+      fill: transparent;
+
+      .c-icon {
+        stroke: @color-border-dark-primary;
+      }
+    }
+  }
+}

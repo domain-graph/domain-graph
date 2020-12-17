@@ -1,0 +1,39 @@
+@import '../colors.less';
+
+.c-spotlight {
+  font-family: sans-serif;
+  overflow: scroll;
+
+  background-color: transparent;
+
+  position: absolute;
+
+  top: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 400px;
+
+  .node-spotlight {
+    border: 2px solid @color-border-dark-primary;
+    background-color: @color-brand-primary;
+    margin: 10px;
+
+    border-radius: 30px;
+    padding: 10px 20px;
+  }
+
+  .edge-spotlight {
+    border: 2px solid @color-border-dark-primary;
+    background-color: @color-background-primary;
+
+    border-radius: 5px;
+    padding: 10px 20px;
+    margin: 10px 30px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 18px;
+  }
+}

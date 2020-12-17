@@ -1,0 +1,37 @@
+@import '../colors.less';
+
+.c-domain-edge {
+  .handle {
+    rect {
+      cursor: pointer;
+      rx: 3;
+      fill: @color-background-primary;
+      stroke: @color-border-dark-primary;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    &.selected {
+      rect {
+        stroke: @terra-cotta;
+        stroke-width: 4;
+      }
+    }
+  }
+
+  path {
+    stroke: @color-border-dark-primary;
+    stroke-width: 2;
+    fill: none;
+
+    &.optional {
+      stroke-dasharray: 4 2;
+    }
+
+    &.selected {
+      stroke: @terra-cotta;
+      stroke-width: 4;
+    }
+  }
+}

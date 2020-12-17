@@ -1,0 +1,27 @@
+@import '../colors.less';
+
+.c-svg-canvas {
+  user-select: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  cursor: grab;
+  &.dragging {
+    cursor: grabbing;
+  }
+  svg {
+    display: block !important;
+    border: none !important;
+    margin: 0 !important;
+  }
+}
+
+ul.hidden-nodes {
+  position: absolute;
+
+  top: 0;
+  right: 0;
+  font-family: sans-serif;
+}
