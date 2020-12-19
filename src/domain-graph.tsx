@@ -1,5 +1,6 @@
-import { Schema } from './tools/types';
 import React, { useMemo } from 'react';
+import { IntrospectionQuery } from 'graphql';
+
 import { GraphFactory } from './tools/factory';
 import { connectionHeuristic } from './tools/factory/heuristics/relay-connection';
 import { interospectionHeuristic } from './tools/factory/heuristics/introspection';
@@ -7,16 +8,16 @@ import { interospectionHeuristic } from './tools/factory/heuristics/introspectio
 import { Graph } from './graph';
 
 export interface DomainGraphProps {
-  schema: Schema;
+  introspection: IntrospectionQuery;
 }
 
-export const DomainGraph: React.VFC<DomainGraphProps> = ({ schema }) => {
+export const DomainGraph: React.VFC<DomainGraphProps> = ({ introspection }) => {
   const { nodes, edges } = useMemo(
     () =>
       new GraphFactory(connectionHeuristic, interospectionHeuristic).build(
-        schema,
+        introspection,
       ),
-    [schema],
+    [introspection],
   );
   return <Graph nodes={nodes} edges={edges} />;
 };
