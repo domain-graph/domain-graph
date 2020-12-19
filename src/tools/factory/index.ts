@@ -1,3 +1,5 @@
+import { IntrospectionQuery } from 'graphql';
+
 import { Node, Edge, Argument } from '../../types';
 import {
   Field,
@@ -106,9 +108,13 @@ export class GraphFactory {
   }
   private readonly heuristics: TypeHeuristic[];
 
-  build(schema: Schema): { nodes: Node[]; edges: Edge[] } {
+  build(introspection: IntrospectionQuery): { nodes: Node[]; edges: Edge[] } {
     const nodeIndex: Record<string, Node> = {};
     const edgeIndex: Record<string, Edge> = {};
+
+    const schema: Schema = {
+      data: (introspection as any) as Schema['data'],
+    };
 
     for (const type of schema.data.__schema.types) {
       const { node, edges } = buildNode(type, schema, this.heuristics);
