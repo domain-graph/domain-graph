@@ -1,0 +1,19 @@
+@import './colors.less';
+
+.c-uploader {
+  font-family: sans-serif;
+  text-align: center;
+
+  width: 500px;
+
+  margin: 150px auto;
+  padding: 50px;
+
+  border-radius: 100px;
+
+  border: 8px dashed @color-border-dark-primary;
+
+  &.drop-ready {
+    background-color: @color-background-secondary;
+  }
+}
