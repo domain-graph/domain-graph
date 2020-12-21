@@ -6,6 +6,7 @@ export { ChevronsRight } from './chevrons-right';
 export { ChevronsUp } from './chevrons-up';
 export { EyeOff } from './eye-off';
 export { Eye } from './eye';
+export { Folder } from './folder';
 export { Graph } from './graph';
 export { Info } from './info';
 export { Lock } from './lock';
