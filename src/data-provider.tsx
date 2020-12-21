@@ -2,7 +2,8 @@ import './data-provider.less';
 
 import { IntrospectionQuery } from 'graphql';
 import React, { ReactNode, useCallback, useState } from 'react';
-import { UploadCloud } from './icons';
+import { Folder, UploadCloud } from './icons';
+import { Button } from './components/button';
 
 export interface OpenFilesResult {
   canceled: boolean;
@@ -78,7 +79,12 @@ export const DataProvider: React.VFC<DataProviderProps> = ({
         To get a schema file, run the Apollo introspection query. Save the
         results and drag the file into this box.
       </p>
-      {!!onShowOpenDialog && <button onClick={handleClickOpen}>open</button>}
+      {!!onShowOpenDialog && (
+        <Button onClick={handleClickOpen}>
+          <Folder />
+          <span>Open file</span>
+        </Button>
+      )}
     </div>
   );
 };
