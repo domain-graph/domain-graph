@@ -1,8 +1,13 @@
 import './data-provider.less';
 
-import { IntrospectionQuery } from 'graphql';
-import React, { ReactNode, useCallback, useState } from 'react';
-import { Folder, UploadCloud } from './icons';
+import {
+  buildSchema,
+  GraphQLSchema,
+  introspectionFromSchema,
+  IntrospectionQuery,
+} from 'graphql';
+import React, { useCallback, useState } from 'react';
+import { AlertTriangle, Folder, UploadCloud } from './icons';
 import { Button } from './components/button';
 
 export interface OpenFilesResult {
@@ -24,9 +29,10 @@ export const DataProvider: React.VFC<DataProviderProps> = ({
   children,
   onShowOpenDialog,
 }) => {
-  const [data, setData] = useState<IntrospectionQuery>();
+  const [data, setData] = useState<IntrospectionQuery | null>(null);
 
   const [dropReady, setDropReady] = useState(false);
+  const [parseErrors, setParseErrors] = useState<readonly ParseError[]>([]);
 
   const handleDragOver = useCallback(
     (event: React.DragEvent<HTMLDivElement>) => {
@@ -48,17 +54,26 @@ export const DataProvider: React.VFC<DataProviderProps> = ({
       const text = new TextDecoder().decode(arrayBuffer);
 
       if (onDrop && (await onDrop(file.name, text))) {
-        setData(JSON.parse(text));
+        const { introspection, errors } = parse(text);
+
+        setParseErrors(errors);
+        setData(introspection);
       }
     },
     [onDrop],
   );
 
   const handleClickOpen = useCallback(async () => {
+    setParseErrors([]);
     const result = await onShowOpenDialog?.();
 
     if (result && !result.canceled && result.files.length) {
-      setData(JSON.parse(result.files[0].contents));
+      const text = result.files[0].contents;
+
+      const { introspection, errors } = parse(text);
+
+      setParseErrors(errors);
+      setData(introspection);
     }
   }, [onShowOpenDialog]);
 
@@ -85,6 +100,86 @@ export const DataProvider: React.VFC<DataProviderProps> = ({
           <span>Open file</span>
         </Button>
       )}
+      {!!parseErrors.length && (
+        <ul className="errors">
+          {parseErrors.map((parseError) => (
+            <li key={parseError.message}>
+              <AlertTriangle />
+              {parseError.message}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
+
+type ParseError = {
+  message: string;
+};
+
+function parse(
+  str: string,
+): { introspection: IntrospectionQuery | null; errors: readonly ParseError[] } {
+  const errors: ParseError[] = [];
+  let json: any = null;
+
+  try {
+    json = JSON.parse(str);
+  } catch {
+    // Parse as SDL
+
+    let schema: GraphQLSchema | null = null;
+
+    try {
+      schema = buildSchema(str);
+    } catch (ex) {
+      console.error(ex);
+      return {
+        introspection: null,
+        errors: [
+          {
+            message: 'Not a valid schema',
+          },
+        ],
+      };
+    }
+
+    const introspection = introspectionFromSchema(schema);
+
+    return {
+      introspection,
+      errors: [],
+    };
+  }
+
+  if (typeof json.__schema === 'object') {
+    for (const prop of [
+      'queryType',
+      'mutationType',
+      'subscriptionType',
+      'types',
+      'directives',
+    ]) {
+      if (typeof json.__schema[prop] === undefined) {
+        errors.push({
+          message: `Missing property "__schema.${prop}" in introspection`,
+        });
+      }
+    }
+  } else {
+    errors.push({ message: 'Missing property "__schema" in introspection' });
+  }
+
+  if (errors.length) {
+    return {
+      introspection: null,
+      errors,
+    };
+  } else {
+    return {
+      introspection: json,
+      errors,
+    };
+  }
+}
