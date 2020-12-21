@@ -1,3 +1,4 @@
+export { AlertTriangle } from './alert-triangle';
 export { ChevronDown } from './chevron-down';
 export { ChevronRight } from './chevron-right';
 export { ChevronUp } from './chevron-up';
