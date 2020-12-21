@@ -1,7 +1,7 @@
 {
   "name": "domain-graph",
   "version": "0.0.10",
-  "description": "Blank web application built with Typescript and LESS",
+  "description": "Beautiful interactive visualizations for GraphQL schemas",
   "main": "lib/index.js",
   "files": [
     "lib"
@@ -18,8 +18,16 @@
     "prepack": "npm run build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Steve Konves",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/domain-graph/domain-graph.git"
+  },
+  "bugs": {
+    "url": "https://github.com/domain-graph/domain-graph/issues"
+  },
+  "homepage": "https://github.com/domain-graph/domain-graph#readme",
   "devDependencies": {
     "@types/d3": "^6.2.0",
     "@types/d3-force": "^2.1.0",
