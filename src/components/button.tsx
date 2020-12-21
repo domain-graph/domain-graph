@@ -13,7 +13,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       : 'c-button';
 
     return (
-      <button className={className} {...rest}>
+      <button ref={ref} className={className} {...rest}>
         {props.children}
       </button>
     );
