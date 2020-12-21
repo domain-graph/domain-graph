@@ -11,9 +11,9 @@ import {
 } from '../tools/types';
 
 export interface SpotlightProps {
-  source: Node | null;
-  edge: Edge | null;
-  target: Node | null;
+  source: Node | undefined;
+  edge: Edge | undefined;
+  target: Node | undefined;
   onSelectEdge(edgeId: string): void;
 }
 

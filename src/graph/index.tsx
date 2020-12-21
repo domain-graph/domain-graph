@@ -17,18 +17,18 @@ export interface GraphProps {
 }
 
 export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
-  const [selectedSource, setSelectedSource] = useState<Node | null>(null);
-  const [selectedEdge, setSelectedEdge] = useState<Edge | null>(null);
-  const [selectedTarget, setSelectedTarget] = useState<Node | null>(null);
+  const [selection, setSelection] = useState<{
+    source?: Node;
+    edge?: Edge;
+    target?: Node;
+  }>({});
 
   const [allNodes, setAllNodes] = useState<Node[]>(
     nodes.map((node) => ({ ...node, isHidden: true })),
   );
 
   const handleHideAll = useCallback(() => {
-    setSelectedSource(null);
-    setSelectedEdge(null);
-    setSelectedTarget(null);
+    setSelection({});
     setAllNodes((prev) => prev.map((node) => ({ ...node, isHidden: true })));
   }, []);
 
@@ -37,19 +37,18 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
       prev.map((node) => {
         if (node.fixed) return node;
 
-        if (selectedSource?.id === node.id) {
-          setSelectedSource(null);
-          setSelectedEdge(null);
-          setSelectedTarget(null);
-        } else if (selectedTarget?.id === node.id) {
-          setSelectedEdge(null);
-          setSelectedTarget(null);
+        if (selection.source?.id === node.id) {
+          setSelection({});
+        } else if (selection.target?.id === node.id) {
+          setSelection((sel) => ({
+            source: sel.source,
+          }));
         }
 
         return node.fixed ? node : { ...node, isHidden: true };
       }),
     );
-  }, [selectedSource, selectedTarget]);
+  }, [selection]);
 
   const allEdges: EdgeGroup[] = useMemo(() => {
     const index = edges.reduce<{ [id: string]: EdgeGroup }>((acc, edge) => {
@@ -104,6 +103,11 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
   );
 
   const setIsHidden = useCallback((nodeId: string, isHidden: boolean) => {
+    setSelection((prev) => {
+      if (nodeId === prev.source?.id) return {};
+      if (nodeId === prev.target?.id) return { source: prev.source };
+      return prev;
+    });
     setAllNodes((prev) =>
       prev.some((node) => node.id === nodeId)
         ? prev.map((node) =>
@@ -161,9 +165,7 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
         setIsHidden(node.id, false);
       }
       // TODO: pan to node
-      setSelectedSource(node || null);
-      setSelectedEdge(null);
-      setSelectedTarget(null);
+      setSelection({ source: node });
     },
     [nodes, setIsHidden],
   );
@@ -183,13 +185,9 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
           setIsHidden(target.id, false);
         }
         // TODO: pad to edge center
-        setSelectedSource(source);
-        setSelectedEdge(edge);
-        setSelectedTarget(target);
+        setSelection({ source, edge, target });
       } else {
-        setSelectedSource(null);
-        setSelectedEdge(null);
-        setSelectedTarget(null);
+        setSelection({});
       }
     },
     [nodes, edges, setIsHidden],
@@ -202,7 +200,7 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
           {visibleEdges.map((edge) => (
             <DomainEdge
               key={edge.id}
-              selectedEdgeId={selectedEdge?.id}
+              selectedEdgeId={selection.edge?.id}
               edge={edge}
               onSelect={handleSelectEdge}
             />
@@ -213,7 +211,8 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
             <DomainObject
               key={node.id}
               isSelected={
-                selectedSource?.id === node.id || selectedTarget?.id === node.id
+                selection.source?.id === node.id ||
+                selection.target?.id === node.id
               }
               onPin={(id) => setIsPinned(id, true)}
               onUnpin={(id) => setIsPinned(id, false)}
@@ -242,9 +241,9 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
       />
 
       <Spotlight
-        source={selectedSource}
-        edge={selectedEdge}
-        target={selectedTarget}
+        source={selection.source}
+        edge={selection.edge}
+        target={selection.target}
         onSelectEdge={handleSelectEdge}
       />
     </Simulation>
