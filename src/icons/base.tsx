@@ -11,11 +11,11 @@ export interface IconProps {
 }
 
 export interface IconFactory {
-  (displayName: string, children: ReactNode): React.FC<IconProps>;
+  (displayName: string, children: ReactNode): React.VFC<IconProps>;
 }
 
 export const icon: IconFactory = (displayName: string, children: ReactNode) => {
-  const component: React.FC<IconProps> = ({
+  const component: React.VFC<IconProps> = ({
     size = 24,
     strokeWidth = 2,
     x = 0,
