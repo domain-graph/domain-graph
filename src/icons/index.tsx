@@ -13,3 +13,4 @@ export { Info } from './info';
 export { Lock } from './lock';
 export { Unlock } from './unlock';
 export { UploadCloud } from './upload-cloud';
+export { X } from './x';
