@@ -47,7 +47,7 @@ export const icon: IconFactory = (displayName: string, children: ReactNode) => {
     x = 0,
     y = 0,
   }) => (
-    <g transform={`translate(${x} ${y})`}>
+    <Translate x={x} y={y}>
       <svg
         className={`c-icon c-icon-${displayName.toLowerCase()}`}
         xmlns="http://www.w3.org/2000/svg"
@@ -61,10 +61,22 @@ export const icon: IconFactory = (displayName: string, children: ReactNode) => {
       >
         {children}
       </svg>
-    </g>
+    </Translate>
   );
 
   component.displayName = displayName;
 
   return component;
+};
+
+const Translate: React.FC<Pick<IconProps, 'x' | 'y'>> = ({
+  x,
+  y,
+  children,
+}) => {
+  return x || y ? (
+    <g transform={`translate(${x} ${y})`}>{children}</g>
+  ) : (
+    <>{children}</>
+  );
 };
