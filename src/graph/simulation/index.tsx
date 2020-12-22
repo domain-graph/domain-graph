@@ -4,6 +4,7 @@ import React, {
   useContext,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -88,11 +89,30 @@ export const Simulation: React.FC<{ nodes: Node[]; edges: EdgeGroup[] }> = ({
     setSvg(d3.select('svg'));
   }, []);
 
+  const filteredEdges = useMemo(
+    () => edges.filter((edge) => edge.source !== edge.target),
+    [edges],
+  );
+
+  const circularEdgeIdsByNode: Record<string, string[]> = useMemo(
+    () =>
+      edges
+        .filter((edge) => edge.source === edge.target)
+        .reduce<Record<string, string[]>>((acc, edge) => {
+          acc[edge.source] ||= [];
+
+          acc[edge.source].push(edge.id);
+
+          return acc;
+        }, {}),
+    [edges],
+  );
+
   const clonedNodes = useStableClone<Node, SimulationNode>(
     nodes,
     (a, b) => a.id === b.id,
   );
-  const clonedEdges = useStableClone(edges, (a, b) => a.id === b.id);
+  const clonedEdges = useStableClone(filteredEdges, (a, b) => a.id === b.id);
 
   const nodeMutations = useRef<{ [id: string]: NodeMutation }>({});
   const nodeSubscriber: NodeMutationSubscriber = useCallback(
@@ -155,6 +175,19 @@ export const Simulation: React.FC<{ nodes: Node[]; edges: EdgeGroup[] }> = ({
         node.each((d) => {
           if (typeof d.x === 'number' && typeof d.y === 'number') {
             nodeMutations.current[d.id]?.('tick', { x: d.x, y: d.y });
+
+            const edgeIds = circularEdgeIdsByNode[d.id];
+
+            if (edgeIds?.length) {
+              for (const edgeId of edgeIds) {
+                edgeMutations.current[edgeId]?.({
+                  x1: d.x,
+                  y1: d.y,
+                  x2: d.x,
+                  y2: d.y,
+                });
+              }
+            }
           }
         });
       });
@@ -165,7 +198,7 @@ export const Simulation: React.FC<{ nodes: Node[]; edges: EdgeGroup[] }> = ({
     } else {
       return undefined;
     }
-  }, [clonedNodes, clonedEdges, svg]);
+  }, [clonedNodes, clonedEdges, circularEdgeIdsByNode, svg]);
 
   return (
     <context.Provider value={{ nodeSubscriber, edgeSubscriber }}>
