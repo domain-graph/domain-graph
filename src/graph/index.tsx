@@ -193,6 +193,14 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
     [nodes, edges, setIsHidden],
   );
 
+  const handleCloseNode = useCallback((nodeId: string) => {
+    setSelection((prev) => {
+      if (prev.source?.id === nodeId) return {};
+      if (prev.target?.id === nodeId) return { source: prev.source };
+      return prev;
+    });
+  }, []);
+
   return (
     <Simulation nodes={visibleNodes} edges={visibleEdges}>
       <SvgCanvas>
@@ -244,6 +252,7 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
         source={selection.source}
         edge={selection.edge}
         target={selection.target}
+        onCloseNode={handleCloseNode}
         onSelectEdge={handleSelectEdge}
       />
     </Simulation>
