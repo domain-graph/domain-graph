@@ -117,7 +117,7 @@ const NodeSpotlight: React.FC<
     <div className="node-spotlight">
       <Controls
         isExpanded={isExpanded}
-        size={12}
+        size={16}
         onClose={() => onClose(id)}
         onExpand={() => setIsExpanded(true)}
         onCollapse={() => setIsExpanded(false)}
