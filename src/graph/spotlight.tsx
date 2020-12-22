@@ -1,19 +1,17 @@
 import './spotlight.less';
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Edge, Node } from '../graph/types';
-import { filter } from 'd3';
-import {
-  isEnumFieldType,
-  isListFieldType,
-  isScalarFieldType,
-} from '../tools/types';
+import { isEnumFieldType, isScalarFieldType } from '../tools/types';
+import { IconButton } from '../components/icon-button';
+import { Maximize2, Minimize2, X } from '../icons';
 
 export interface SpotlightProps {
   source: Node | undefined;
   edge: Edge | undefined;
   target: Node | undefined;
+  onCloseNode(nodeId: string): void;
   onSelectEdge(edgeId: string): void;
 }
 
@@ -21,15 +19,28 @@ export const Spotlight: React.FC<SpotlightProps> = ({
   source,
   edge,
   target,
+  onCloseNode,
   onSelectEdge,
 }) => {
   if (!source) return null;
 
   return (
     <div className="c-spotlight">
-      <NodeSpotlight {...source} onSelectEdge={onSelectEdge} />
+      <NodeSpotlight
+        {...source}
+        selectedEdgeId={edge?.id}
+        onClose={onCloseNode}
+        onSelectEdge={onSelectEdge}
+      />
       {edge && <EdgeSpotlight {...edge} />}
-      {target && <NodeSpotlight {...target} onSelectEdge={onSelectEdge} />}
+      {target && (
+        <NodeSpotlight
+          {...target}
+          selectedEdgeId={edge?.id}
+          onClose={onCloseNode}
+          onSelectEdge={onSelectEdge}
+        />
+      )}
     </div>
   );
 };
@@ -62,11 +73,32 @@ const EdgeSpotlight: React.FC<Edge> = ({
   );
 };
 
+const Controls: React.VFC<{
+  isExpanded: boolean;
+  size: number;
+  onClose: () => void;
+  onExpand: () => void;
+  onCollapse: () => void;
+}> = ({ isExpanded, size, onClose, onExpand, onCollapse }) => {
+  return (
+    <div className="controls">
+      {isExpanded ? (
+        <IconButton Icon={Minimize2} size={size} onClick={() => onCollapse()} />
+      ) : (
+        <IconButton Icon={Maximize2} size={size} onClick={() => onExpand()} />
+      )}
+      <IconButton Icon={X} size={size} onClick={() => onClose()} />
+    </div>
+  );
+};
+
 const NodeSpotlight: React.FC<
   Node & {
+    selectedEdgeId: string | undefined;
+    onClose(edgeId: string): void;
     onSelectEdge(edgeId: string): void;
   }
-> = ({ id, description, fields, onSelectEdge }) => {
+> = ({ id, description, fields, selectedEdgeId, onClose, onSelectEdge }) => {
   const ids = fields.filter((f) => f.type.name === 'ID');
   const scalars = fields.filter(
     (f) =>
@@ -75,25 +107,46 @@ const NodeSpotlight: React.FC<
   );
   const edges = fields.filter((f) => f.edgeId);
 
+  const [isExpanded, setIsExpanded] = useState(true);
+
+  useEffect(() => {
+    setIsExpanded(!selectedEdgeId);
+  }, [id, selectedEdgeId]);
+
   return (
     <div className="node-spotlight">
+      <Controls
+        isExpanded={isExpanded}
+        size={12}
+        onClose={() => onClose(id)}
+        onExpand={() => setIsExpanded(true)}
+        onCollapse={() => setIsExpanded(false)}
+      />
       <h1>{id}</h1>
       {description && <div>{description}</div>}
-      <ul>
-        {ids.map((field) => (
-          <IdField key={field.name} {...field} />
-        ))}
-      </ul>
-      <ul>
-        {edges.map((field) => (
-          <EdgeField key={field.name} onSelectEdge={onSelectEdge} {...field} />
-        ))}
-      </ul>
-      <ul>
-        {scalars.map((field) => (
-          <ScalarField key={field.name} {...field} />
-        ))}
-      </ul>
+      {isExpanded && (
+        <>
+          <ul>
+            {ids.map((field) => (
+              <IdField key={field.name} {...field} />
+            ))}
+          </ul>
+          <ul>
+            {edges.map((field) => (
+              <EdgeField
+                key={field.name}
+                onSelectEdge={onSelectEdge}
+                {...field}
+              />
+            ))}
+          </ul>
+          <ul>
+            {scalars.map((field) => (
+              <ScalarField key={field.name} {...field} />
+            ))}
+          </ul>
+        </>
+      )}
     </div>
   );
 };
