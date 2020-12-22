@@ -93,8 +93,6 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
     () =>
       allEdges.filter(
         (edge) =>
-          // TODO: support self-reference
-          edge.source !== edge.target &&
           allNodes.find((node) => node.id === edge.source)?.isHidden ===
             false &&
           allNodes.find((node) => node.id === edge.target)?.isHidden === false,

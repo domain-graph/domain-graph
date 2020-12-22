@@ -44,22 +44,28 @@ export const DomainEdge: React.FC<DomainEdgeProps> = ({
   useEdgeMutation(edge.id, ({ x1, y1, x2, y2 }) => {
     if (g.current && paths.current?.length) {
       const count = paths.current.length;
-      const midpoints = getMidPoints(count, x1, y1, x2, y2);
-      const angle = (Math.atan2(x2 - x1, y1 - y2) * 180) / Math.PI;
 
-      midpoints.forEach(([xa, ya, x, y], i) => {
-        paths.current[i].setAttribute(
-          'd',
-          `M${x1} ${y1} Q${xa} ${ya} ${x2} ${y2}`,
-        );
+      if (x1 === x2 && y1 === y2) {
+        // TODO: render circular edge
+        console.log('same', edge.id);
+      } else {
+        const midpoints = getMidPoints(count, x1, y1, x2, y2);
+        const angle = (Math.atan2(x2 - x1, y1 - y2) * 180) / Math.PI;
 
-        handles.current[i].setAttribute(
-          'transform',
-          `translate(${x} ${y})rotate(${angle})translate(${-handleSize / 2} ${
-            -handleSize / 2
-          })`,
-        );
-      });
+        midpoints.forEach(([xa, ya, x, y], i) => {
+          paths.current[i].setAttribute(
+            'd',
+            `M${x1} ${y1} Q${xa} ${ya} ${x2} ${y2}`,
+          );
+
+          handles.current[i].setAttribute(
+            'transform',
+            `translate(${x} ${y})rotate(${angle})translate(${-handleSize / 2} ${
+              -handleSize / 2
+            })`,
+          );
+        });
+      }
     }
   });
 
