@@ -11,6 +11,8 @@ export { Folder } from './folder';
 export { Graph } from './graph';
 export { Info } from './info';
 export { Lock } from './lock';
+export { Maximize2 } from './maximize-2';
+export { Minimize2 } from './minimize-2';
 export { Unlock } from './unlock';
 export { UploadCloud } from './upload-cloud';
 export { X } from './x';
