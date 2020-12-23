@@ -46,8 +46,31 @@ export const DomainEdge: React.FC<DomainEdgeProps> = ({
       const count = paths.current.length;
 
       if (x1 === x2 && y1 === y2) {
-        // TODO: render circular edge
-        console.log('same', edge.id);
+        const midpoints = Array.from(Array(count)).map((_, i) => [
+          x1,
+          y1 + 60 + i * (handleSize + 5),
+        ]);
+
+        let w = 30;
+        const widthMultiplier = 1.2;
+
+        midpoints.forEach(([xa, ya], i) => {
+          paths.current[i].setAttribute(
+            'd',
+            `M${x1} ${y1} C${x1 + w} ${y1} ${x1 + w} ${ya} ${xa} ${ya} S${
+              x1 - w
+            } ${y1} ${x1} ${y1}`,
+          );
+
+          handles.current[i].setAttribute(
+            'transform',
+            `translate(${xa} ${ya})rotate(90)translate(${-handleSize / 2 - 2} ${
+              -handleSize / 2
+            })`,
+          );
+
+          w *= widthMultiplier;
+        });
       } else {
         const midpoints = getMidPoints(count, x1, y1, x2, y2);
         const angle = (Math.atan2(x2 - x1, y1 - y2) * 180) / Math.PI;
@@ -84,12 +107,12 @@ export const DomainEdge: React.FC<DomainEdgeProps> = ({
           >
             <rect width={handleSize} height={handleSize} />
             {e.plurality === 'array' ? (
-              e.reverse ? (
+              e.reverse && edge.source !== edge.target ? (
                 <ChevronsDown size={handleSize} />
               ) : (
                 <ChevronsUp size={handleSize} />
               )
-            ) : e.reverse ? (
+            ) : e.reverse && edge.source !== edge.target ? (
               <ChevronDown size={handleSize} />
             ) : (
               <ChevronUp size={handleSize} />
