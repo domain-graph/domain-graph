@@ -13,6 +13,7 @@ import { useStableClone } from '../use-stable-clone';
 import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
+import { GraphState, NodeState } from '../graph-state';
 
 type SimulationNode = Node & d3.SimulationNodeDatum;
 
@@ -20,16 +21,30 @@ function isNotNull<T>(obj: T | null | undefined): obj is T {
   return obj !== null && typeof obj !== 'undefined';
 }
 
-export interface SimulationState {
-  nodes: {
-    id: string;
-    fixed?: boolean;
-    x: number;
-    y: number;
-  }[];
+function useInitialNodes(
+  graphId: string,
+  initialState: SimulationState,
+): React.MutableRefObject<Map<string, NodeState>> {
+  const initialNodes = useRef(
+    new Map(initialState.nodes.map((node) => [node.id, node])),
+  );
+  const initialStateRef = useRef(initialState);
+  useEffect(() => {
+    initialStateRef.current = initialState;
+  }, [initialState]);
+  useEffect(() => {
+    initialNodes.current = new Map(
+      initialStateRef.current.nodes.map((node) => [node.id, node]),
+    );
+  }, [graphId]);
+
+  return initialNodes;
 }
 
+export type SimulationState = Pick<GraphState, 'nodes'>;
+
 export interface SimulationProps {
+  graphId: string;
   nodes: Node[];
   edges: EdgeGroup[];
   initialState: SimulationState;
@@ -37,6 +52,7 @@ export interface SimulationProps {
 }
 
 export const Simulation: React.FC<SimulationProps> = ({
+  graphId,
   nodes,
   edges,
   initialState,
@@ -45,9 +61,7 @@ export const Simulation: React.FC<SimulationProps> = ({
 }) => {
   const [svg, setSvg] = useState(d3.select('svg'));
 
-  const initialNodes = useRef(
-    new Map(initialState.nodes.map((node) => [node.id, node])),
-  );
+  const initialNodes = useInitialNodes(graphId, initialState);
 
   const customMapping = useRef(
     (node: Node, simNode: SimulationNode): Partial<SimulationNode> => {
@@ -164,7 +178,7 @@ export const Simulation: React.FC<SimulationProps> = ({
               if (typeof n.x === 'number' && typeof n.y === 'number') {
                 return {
                   id: n.id,
-                  fixed: n.fixed,
+                  fixed: n.fixed === true,
                   x: n.x,
                   y: n.y,
                 };
