@@ -207,6 +207,7 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
     <Simulation
       nodes={visibleNodes}
       edges={visibleEdges}
+      initialState={{ nodes: [] }}
       onChange={handleChange}
     >
       <SvgCanvas>
