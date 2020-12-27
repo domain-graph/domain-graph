@@ -1,9 +1,9 @@
 import './domain-object.less';
 
-import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 
 import { Node } from './types';
-import { useNodeMutation } from './simulation';
+import { useNodeSubscriber } from '../simulation';
 import { EyeOff, Graph, Lock, Unlock } from '../icons';
 import { CircleButton, RectButton } from '../svg-button';
 import { RadialMenu } from './radial-menu';
@@ -33,7 +33,7 @@ export const DomainObject: React.FC<DomainObjectProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [isPinned, setIsPinned] = useState(false);
 
-  useNodeMutation(node.id, (event, { x, y }) => {
+  useNodeSubscriber(node.id, (event, { x, y }) => {
     if (event === 'dragstart') {
       setIsDragging(true);
       onPin(node.id);
