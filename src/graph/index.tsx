@@ -9,14 +9,31 @@ import { DomainEdge } from './domain-edge';
 import { Simulation, SimulationState } from '../simulation';
 import { NodePicker } from './node-picker';
 import { Spotlight } from './spotlight';
+import { GraphState, useStateRepository } from '../graph-state';
+
+function initializeNode(node: Node, initialState: GraphState): Node {
+  const nodeState = initialState.nodes.find((n) => n.id === node.id);
+  return !!nodeState
+    ? { ...node, isHidden: false, fixed: nodeState.fixed }
+    : { ...node, isHidden: true, fixed: false };
+}
 
 export interface GraphProps {
+  id: string;
+  initialState: GraphState;
   nodes: Node[];
   edges: Edge[];
   className?: string;
 }
 
-export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
+export const Graph: React.VFC<GraphProps> = ({
+  id,
+  initialState,
+  nodes,
+  edges,
+}) => {
+  const stateRepository = useStateRepository();
+
   const [selection, setSelection] = useState<{
     source?: Node;
     edge?: Edge;
@@ -24,7 +41,7 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
   }>({});
 
   const [allNodes, setAllNodes] = useState<Node[]>(
-    nodes.map((node) => ({ ...node, isHidden: true })),
+    nodes.map((n) => initializeNode(n, initialState)),
   );
 
   const handleHideAll = useCallback(() => {
@@ -199,15 +216,26 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
     });
   }, []);
 
-  const handleChange = useCallback((state: SimulationState) => {
-    // TODO
-  }, []);
+  const handleChange = useCallback(
+    async (state: SimulationState) => {
+      const graphState: GraphState = (await stateRepository.get(id)) || {
+        canvas: { x: 0, y: 0, scale: 1 },
+        nodes: [],
+      };
+
+      graphState.nodes = state.nodes;
+
+      await stateRepository.set(id, graphState);
+    },
+    [stateRepository, id],
+  );
 
   return (
     <Simulation
+      graphId={id}
       nodes={visibleNodes}
       edges={visibleEdges}
-      initialState={{ nodes: [] }}
+      initialState={{ nodes: initialState.nodes }}
       onChange={handleChange}
     >
       <SvgCanvas>
@@ -229,11 +257,11 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
                 selection.source?.id === node.id ||
                 selection.target?.id === node.id
               }
-              onPin={(id) => setIsPinned(id, true)}
-              onUnpin={(id) => setIsPinned(id, false)}
-              onHide={(id) => {
-                setIsHidden(id, true);
-                setIsPinned(id, false);
+              onPin={(nodeId) => setIsPinned(nodeId, true)}
+              onUnpin={(nodeId) => setIsPinned(nodeId, false)}
+              onHide={(nodeId) => {
+                setIsHidden(nodeId, true);
+                setIsPinned(nodeId, false);
               }}
               onExpand={handleExpand}
               onSelect={handleSelectNode}
@@ -244,12 +272,12 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
       </SvgCanvas>
       <NodePicker
         nodes={allNodes}
-        onShow={(id) => {
-          setIsHidden(id, false);
+        onShow={(nodeId) => {
+          setIsHidden(nodeId, false);
         }}
-        onHide={(id) => {
-          setIsHidden(id, true);
-          setIsPinned(id, false);
+        onHide={(nodeId) => {
+          setIsHidden(nodeId, true);
+          setIsPinned(nodeId, false);
         }}
         onHideAll={handleHideAll}
         onHideUnpinned={handleHideUnpinned}
