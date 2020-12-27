@@ -1,7 +1,5 @@
 import React, {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -10,71 +8,11 @@ import React, {
 } from 'react';
 import * as d3 from 'd3';
 
-import { Edge, EdgeGroup, Node } from '../types';
-import { useStableClone } from '../../use-stable-clone';
-
-const noop = () => {
-  // NO-OP
-};
-
-const context = createContext<{
-  nodeSubscriber: NodeMutationSubscriber;
-  edgeSubscriber: EdgeMutationSubscriber;
-}>({
-  nodeSubscriber: noop,
-  edgeSubscriber: noop,
-});
-
-export function useNodeMutation(nodeId: string, onChange: NodeMutation): void {
-  const onChangeRef = useRef(onChange);
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
-
-  const subscribe = useContext(context)?.nodeSubscriber;
-
-  useEffect(() => {
-    subscribe?.(nodeId, (event, location) => {
-      requestAnimationFrame(() => {
-        onChangeRef.current?.(event, location);
-      });
-    });
-  }, [subscribe, nodeId]);
-}
-
-export interface NodeMutationSubscriber {
-  (nodeId: string, mutation: NodeMutation): void;
-}
-export interface NodeMutation {
-  (
-    event: 'dragstart' | 'dragend' | 'drag' | 'tick',
-    location: { x: number; y: number },
-  ): void;
-}
-
-export function useEdgeMutation(edgeId: string, onChange: EdgeMutation): void {
-  const onChangeRef = useRef(onChange);
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
-
-  const subscribe = useContext(context)?.edgeSubscriber;
-
-  useEffect(() => {
-    subscribe?.(edgeId, (change) => {
-      requestAnimationFrame(() => {
-        onChangeRef.current?.(change);
-      });
-    });
-  }, [subscribe, edgeId]);
-}
-
-export interface EdgeMutationSubscriber {
-  (edgeId: string, mutation: EdgeMutation): void;
-}
-export interface EdgeMutation {
-  (change: { x1: number; y1: number; x2: number; y2: number }): void;
-}
+import { Edge, EdgeGroup, Node } from '../graph/types'; // This seems wrong
+import { useStableClone } from '../use-stable-clone';
+import { NodeEvent, NodeSubscriber } from './node-subscriber';
+import { context } from './context';
+import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
 
 type SimulationNode = Node & d3.SimulationNodeDatum;
 
@@ -112,12 +50,19 @@ export interface SimulationState {
   }[];
 }
 
-export const Simulation: React.FC<{
+export interface SimulationProps {
   nodes: Node[];
   edges: EdgeGroup[];
   // initialState: SimulationState;
   onChange: (state: SimulationState) => void;
-}> = ({ nodes, edges, onChange, children }) => {
+}
+
+export const Simulation: React.FC<SimulationProps> = ({
+  nodes,
+  edges,
+  onChange,
+  children,
+}) => {
   const [svg, setSvg] = useState(d3.select('svg'));
 
   useEffect(() => {
@@ -150,17 +95,17 @@ export const Simulation: React.FC<{
   });
   const clonedEdges = useStableClone({ items: filteredEdges, keyProp: 'id' });
 
-  const nodeMutations = useRef<{ [id: string]: NodeMutation }>({});
-  const nodeSubscriber: NodeMutationSubscriber = useCallback(
-    (id: string, dataFn: NodeMutation) => {
-      nodeMutations.current[id] = dataFn;
+  const nodeEventsByNodeId = useRef<Record<string, NodeEvent>>({});
+  const nodeSubscriber: NodeSubscriber = useCallback(
+    (id: string, onNodeChange: NodeEvent) => {
+      nodeEventsByNodeId.current[id] = onNodeChange;
     },
     [],
   );
-  const edgeMutations = useRef<{ [id: string]: EdgeMutation }>({});
-  const edgeSubscriber: EdgeMutationSubscriber = useCallback(
-    (id: string, dataFn: EdgeMutation) => {
-      edgeMutations.current[id] = dataFn;
+  const edgeEventsByEdgeId = useRef<Record<string, EdgeEvent>>({});
+  const edgeSubscriber: EdgeSubscriber = useCallback(
+    (id: string, dataFn: EdgeEvent) => {
+      edgeEventsByEdgeId.current[id] = dataFn;
     },
     [],
   );
@@ -196,7 +141,7 @@ export const Simulation: React.FC<{
         d3.select((this as any).parentNode).raise();
       });
 
-      node.call(drag(simulation, nodeMutations.current));
+      node.call(drag(simulation, nodeEventsByNodeId.current));
 
       simulation.on('end', () => {
         onChange({
@@ -219,7 +164,7 @@ export const Simulation: React.FC<{
 
       simulation.on('tick', () => {
         link.each((d: any) => {
-          edgeMutations.current[d.id]?.({
+          edgeEventsByEdgeId.current[d.id]?.({
             x1: d.source.x,
             y1: d.source.y,
             x2: d.target.x,
@@ -229,13 +174,16 @@ export const Simulation: React.FC<{
 
         node.each((d) => {
           if (typeof d.x === 'number' && typeof d.y === 'number') {
-            nodeMutations.current[d.id]?.('tick', { x: d.x, y: d.y });
+            nodeEventsByNodeId.current[d.id]?.('tick', {
+              x: d.x,
+              y: d.y,
+            });
 
             const edgeIds = circularEdgeIdsByNode[d.id];
 
             if (edgeIds?.length) {
               for (const edgeId of edgeIds) {
-                edgeMutations.current[edgeId]?.({
+                edgeEventsByEdgeId.current[edgeId]?.({
                   x1: d.x,
                   y1: d.y,
                   x2: d.x,
@@ -264,7 +212,7 @@ export const Simulation: React.FC<{
 
 function drag(
   simulation: d3.Simulation<SimulationNode, Edge>,
-  subscribers: { [id: string]: NodeMutation },
+  subscribers: { [id: string]: NodeEvent },
 ): any {
   function dragstarted(event) {
     if (!event.active) simulation.alphaTarget(0.3).restart();

@@ -6,7 +6,7 @@ import { SvgCanvas } from '../svg-canvas';
 import { Edge, EdgeGroup, Node } from './types';
 import { DomainObject } from './domain-object';
 import { DomainEdge } from './domain-edge';
-import { Simulation, SimulationState } from './simulation';
+import { Simulation, SimulationState } from '../simulation';
 import { NodePicker } from './node-picker';
 import { Spotlight } from './spotlight';
 

@@ -3,7 +3,7 @@ import './domain-edge.less';
 import React, { useLayoutEffect, useRef } from 'react';
 
 import { EdgeGroup } from './types';
-import { useEdgeMutation } from './simulation';
+import { useEdgeSubscriber } from '../simulation';
 
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
 
@@ -41,7 +41,7 @@ export const DomainEdge: React.FC<DomainEdgeProps> = ({
     }
   }, [edge]);
 
-  useEdgeMutation(edge.id, ({ x1, y1, x2, y2 }) => {
+  useEdgeSubscriber(edge.id, ({ x1, y1, x2, y2 }) => {
     if (g.current && paths.current?.length) {
       const count = paths.current.length;
 
