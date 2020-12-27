@@ -6,7 +6,7 @@ import { SvgCanvas } from '../svg-canvas';
 import { Edge, EdgeGroup, Node } from './types';
 import { DomainObject } from './domain-object';
 import { DomainEdge } from './domain-edge';
-import { Simulation } from './simulation';
+import { Simulation, SimulationState } from './simulation';
 import { NodePicker } from './node-picker';
 import { Spotlight } from './spotlight';
 
@@ -199,8 +199,16 @@ export const Graph: React.VFC<GraphProps> = ({ nodes, edges }) => {
     });
   }, []);
 
+  const handleChange = useCallback((state: SimulationState) => {
+    // TODO
+  }, []);
+
   return (
-    <Simulation nodes={visibleNodes} edges={visibleEdges}>
+    <Simulation
+      nodes={visibleNodes}
+      edges={visibleEdges}
+      onChange={handleChange}
+    >
       <SvgCanvas>
         <g>
           {visibleEdges.map((edge) => (
