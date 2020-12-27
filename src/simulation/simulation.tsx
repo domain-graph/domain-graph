@@ -20,27 +20,6 @@ function isNotNull<T>(obj: T | null | undefined): obj is T {
   return obj !== null && typeof obj !== 'undefined';
 }
 
-function customMapping(
-  node: Node,
-  simNode: SimulationNode,
-): Partial<SimulationNode> {
-  if (node?.fixed === true) {
-    return {
-      fx: simNode.x,
-      fy: simNode.y,
-      vx: 0,
-      vy: 0,
-    };
-  } else if (node?.fixed === false) {
-    return {
-      fx: null,
-      fy: null,
-    };
-  } else {
-    return {};
-  }
-}
-
 export interface SimulationState {
   nodes: {
     id: string;
@@ -53,17 +32,52 @@ export interface SimulationState {
 export interface SimulationProps {
   nodes: Node[];
   edges: EdgeGroup[];
-  // initialState: SimulationState;
+  initialState: SimulationState;
   onChange: (state: SimulationState) => void;
 }
 
 export const Simulation: React.FC<SimulationProps> = ({
   nodes,
   edges,
+  initialState,
   onChange,
   children,
 }) => {
   const [svg, setSvg] = useState(d3.select('svg'));
+
+  const initialNodes = useRef(
+    new Map(initialState.nodes.map((node) => [node.id, node])),
+  );
+
+  const customMapping = useRef(
+    (node: Node, simNode: SimulationNode): Partial<SimulationNode> => {
+      const initialNode = initialNodes.current.get(node.id);
+
+      if (initialNode) {
+        initialNodes.current.delete(initialNode.id);
+        return {
+          x: initialNode.x,
+          y: initialNode.y,
+          fx: initialNode.fixed ? initialNode.x : null,
+          fy: initialNode.fixed ? initialNode.y : null,
+        };
+      } else if (node?.fixed === true) {
+        return {
+          fx: simNode.x,
+          fy: simNode.y,
+          vx: 0,
+          vy: 0,
+        };
+      } else if (node?.fixed === false) {
+        return {
+          fx: null,
+          fy: null,
+        };
+      } else {
+        return {};
+      }
+    },
+  );
 
   useEffect(() => {
     setSvg(d3.select('svg'));
@@ -91,7 +105,7 @@ export const Simulation: React.FC<SimulationProps> = ({
   const clonedNodes = useStableClone<Node, SimulationNode>({
     items: nodes,
     keyProp: 'id',
-    customMapping,
+    customMapping: customMapping.current,
   });
   const clonedEdges = useStableClone({ items: filteredEdges, keyProp: 'id' });
 
