@@ -78,11 +78,46 @@ export interface EdgeMutation {
 
 type SimulationNode = Node & d3.SimulationNodeDatum;
 
-export const Simulation: React.FC<{ nodes: Node[]; edges: EdgeGroup[] }> = ({
-  nodes,
-  edges,
-  children,
-}) => {
+function isNotNull<T>(obj: T | null | undefined): obj is T {
+  return obj !== null && typeof obj !== 'undefined';
+}
+
+function customMapping(
+  node: Node,
+  simNode: SimulationNode,
+): Partial<SimulationNode> {
+  if (node?.fixed === true) {
+    return {
+      fx: simNode.x,
+      fy: simNode.y,
+      vx: 0,
+      vy: 0,
+    };
+  } else if (node?.fixed === false) {
+    return {
+      fx: null,
+      fy: null,
+    };
+  } else {
+    return {};
+  }
+}
+
+export interface SimulationState {
+  nodes: {
+    id: string;
+    fixed?: boolean;
+    x: number;
+    y: number;
+  }[];
+}
+
+export const Simulation: React.FC<{
+  nodes: Node[];
+  edges: EdgeGroup[];
+  // initialState: SimulationState;
+  onChange: (state: SimulationState) => void;
+}> = ({ nodes, edges, onChange, children }) => {
   const [svg, setSvg] = useState(d3.select('svg'));
 
   useEffect(() => {
@@ -108,11 +143,12 @@ export const Simulation: React.FC<{ nodes: Node[]; edges: EdgeGroup[] }> = ({
     [edges],
   );
 
-  const clonedNodes = useStableClone<Node, SimulationNode>(
-    nodes,
-    (a, b) => a.id === b.id,
-  );
-  const clonedEdges = useStableClone(filteredEdges, (a, b) => a.id === b.id);
+  const clonedNodes = useStableClone<Node, SimulationNode>({
+    items: nodes,
+    keyProp: 'id',
+    customMapping,
+  });
+  const clonedEdges = useStableClone({ items: filteredEdges, keyProp: 'id' });
 
   const nodeMutations = useRef<{ [id: string]: NodeMutation }>({});
   const nodeSubscriber: NodeMutationSubscriber = useCallback(
@@ -162,6 +198,25 @@ export const Simulation: React.FC<{ nodes: Node[]; edges: EdgeGroup[] }> = ({
 
       node.call(drag(simulation, nodeMutations.current));
 
+      simulation.on('end', () => {
+        onChange({
+          nodes: clonedNodes
+            .map((n) => {
+              if (typeof n.x === 'number' && typeof n.y === 'number') {
+                return {
+                  id: n.id,
+                  fixed: n.fixed,
+                  x: n.x,
+                  y: n.y,
+                };
+              } else {
+                return null;
+              }
+            })
+            .filter(isNotNull),
+        });
+      });
+
       simulation.on('tick', () => {
         link.each((d: any) => {
           edgeMutations.current[d.id]?.({
@@ -198,7 +253,7 @@ export const Simulation: React.FC<{ nodes: Node[]; edges: EdgeGroup[] }> = ({
     } else {
       return undefined;
     }
-  }, [clonedNodes, clonedEdges, circularEdgeIdsByNode, svg]);
+  }, [clonedNodes, clonedEdges, circularEdgeIdsByNode, svg, onChange]);
 
   return (
     <context.Provider value={{ nodeSubscriber, edgeSubscriber }}>

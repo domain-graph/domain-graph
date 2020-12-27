@@ -1,51 +1,55 @@
 import { useState, useRef, useEffect } from 'react';
 
-export function useStableClone<TItem, TClone extends TItem>(
-  items: TItem[],
-  compare: (a: TItem, b: TItem & Partial<Omit<TClone, keyof TItem>>) => boolean,
-): (TItem & Partial<Omit<TClone, keyof TItem>>)[] {
-  type C = TItem & Partial<Omit<TClone, keyof TItem>>;
+export type Clone<TItem, TClone extends TItem> = TItem & Partial<TClone>;
+
+export interface StableCloneProps<TItem, TClone extends TItem> {
+  items: TItem[];
+  keyProp: keyof TItem;
+  // initialValues?: Clone<TItem, TClone>[];
+  customMapping?: (
+    a: TItem,
+    b: Clone<TItem, TClone>,
+  ) => Partial<Clone<TItem, TClone>>;
+}
+
+export function useStableClone<TItem, TClone extends TItem>({
+  items,
+  keyProp,
+  // initialValues,
+  customMapping,
+}: StableCloneProps<TItem, TClone>): Clone<TItem, TClone>[] {
+  type C = Clone<TItem, TClone>;
 
   const [clonedNodes, setClonedNodes] = useState<C[]>(
     items.map((item) => ({ ...item })),
   );
 
-  const compareFn = useRef(compare);
   useEffect(() => {
-    compareFn.current = compare;
-  }, [compare]);
+    setClonedNodes((prevClones) =>
+      items.map((nextItem) => {
+        const prevClone = prevClones.find(
+          (n) => nextItem[keyProp] === n[keyProp],
+        );
 
-  useEffect(() => {
-    setClonedNodes((prev) =>
-      items.map((nextNode) => {
-        const prevNode = prev.find((n) => compareFn.current(nextNode, n));
-
-        if (prevNode) {
-          for (const key of Object.keys(nextNode)) {
-            prevNode[key] = nextNode[key];
+        if (prevClone) {
+          for (const key of Object.keys(nextItem)) {
+            prevClone[key] = nextItem[key];
           }
 
-          // TODO: move to a better place
-          // This assumes knowledge of the node type
-          if (prevNode) {
-            if (nextNode?.['fixed'] === true) {
-              prevNode['fx'] = prevNode['x'];
-              prevNode['fy'] = prevNode['y'];
-              prevNode['vx'] = 0;
-              prevNode['vy'] = 0;
-            } else if (nextNode?.['fixed'] === false) {
-              prevNode['fx'] = null;
-              prevNode['fy'] = null;
+          if (customMapping) {
+            const customMap = customMapping(nextItem, prevClone);
+            for (const key of Object.keys(customMapping(nextItem, prevClone))) {
+              prevClone[key] = customMap[key];
             }
           }
 
-          return prevNode;
+          return prevClone;
         } else {
-          return { ...nextNode };
+          return { ...nextItem };
         }
       }),
     );
-  }, [items]);
+  }, [items, customMapping, keyProp]);
 
   return clonedNodes;
 }
