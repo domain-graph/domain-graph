@@ -20,8 +20,10 @@ export type Edge = {
   args: Argument[];
 };
 
+export type Resolver = Omit<Edge, 'source' | 'target'> & { reverse?: true };
+
 export interface EdgeGroup extends Pick<Edge, 'id' | 'source' | 'target'> {
-  edges: (Omit<Edge, 'source' | 'target'> & { reverse?: true })[];
+  resolvers: Resolver[];
 }
 
 export interface Argument extends NormalizedFieldType {
