@@ -1,6 +1,8 @@
 import { combineReducers } from 'redux';
 import { Registry } from '../registry';
-import { nodeReducer, NodeReducerState } from './nodes/reducer';
+import { nodes } from './nodes';
+import { edges } from './edges';
+import { OmitByType } from '../utils';
 
 export type FluxStandardAction<
   TType extends string = string,
@@ -19,10 +21,12 @@ export type Thunk<T = void> = (
   registry: Registry,
 ) => Promise<T>;
 
-export type ApplicationState = {
-  nodes: NodeReducerState;
-};
-
 export const reducers = combineReducers({
-  nodes: nodeReducer,
+  edges: edges.reducer,
+  nodes: nodes.reducer,
 });
+
+export type ApplicationState = OmitByType<
+  ReturnType<typeof reducers>,
+  undefined
+>;
