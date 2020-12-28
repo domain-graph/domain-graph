@@ -94,25 +94,25 @@ export const DomainEdge: React.FC<DomainEdgeProps> = ({
 
   return (
     <g id={edge.id} className="c-domain-edge edge" ref={g}>
-      {edge.edges.map((e) => (
-        <React.Fragment key={e.name}>
+      {edge.resolvers.map((r) => (
+        <React.Fragment key={r.name}>
           <path
-            className={`${e.optional ? 'optional' : 'required'}${
-              selectedEdgeId === e.id ? ' selected' : ''
+            className={`${r.optional ? 'optional' : 'required'}${
+              selectedEdgeId === r.id ? ' selected' : ''
             }`}
           />
           <g
-            className={`handle${selectedEdgeId === e.id ? ' selected' : ''}`}
-            onClick={() => onSelect(e.id)}
+            className={`handle${selectedEdgeId === r.id ? ' selected' : ''}`}
+            onClick={() => onSelect(r.id)}
           >
             <rect width={handleSize} height={handleSize} />
-            {e.plurality === 'array' ? (
-              e.reverse && edge.source !== edge.target ? (
+            {r.plurality === 'array' ? (
+              r.reverse && edge.source !== edge.target ? (
                 <ChevronsDown size={handleSize} />
               ) : (
                 <ChevronsUp size={handleSize} />
               )
-            ) : e.reverse && edge.source !== edge.target ? (
+            ) : r.reverse && edge.source !== edge.target ? (
               <ChevronDown size={handleSize} />
             ) : (
               <ChevronUp size={handleSize} />

@@ -3,7 +3,7 @@ import './index.less';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { SvgCanvas } from '../svg-canvas';
-import { Edge, EdgeGroup, Node } from '../types';
+import { Edge, EdgeGroup, Node, Resolver } from '../types';
 import { DomainObject } from './domain-object';
 import { DomainEdge } from './domain-edge';
 import { Simulation, SimulationState } from '../simulation';
@@ -71,16 +71,19 @@ export const Graph: React.VFC<GraphProps> = ({ id, nodes, edges }) => {
       const group = acc[forwardId] || acc[reverseId];
 
       if (group) {
-        const e: EdgeGroup['edges'][number] = rest;
+        const e: Resolver = rest;
         if (group.id === reverseId) e.reverse = true;
-        return { ...acc, [group.id]: { ...group, edges: [...group.edges, e] } };
+        return {
+          ...acc,
+          [group.id]: { ...group, resolvers: [...group.resolvers, e] },
+        };
       } else {
-        const e: EdgeGroup['edges'][number] = rest;
+        const r: Resolver = rest;
         const g: EdgeGroup = {
           id: forwardId,
           source,
           target,
-          edges: [e],
+          resolvers: [r],
         };
         return {
           ...acc,
