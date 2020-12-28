@@ -1,16 +1,15 @@
-import React, { createContext, useContext } from 'react';
-import { StateRepository, NullStateRepository } from '.';
+import React, { createContext, useContext, useMemo } from 'react';
+import { StateService } from './state-service';
+import { StateRepository } from './types';
 
-const context = createContext<StateRepository>(new NullStateRepository());
+const context = createContext<StateService | null>(null);
 
-export function useStateRepository(): StateRepository {
+export function useStateService(): StateService | null {
   return useContext(context);
 }
 
-export const StateRepositoryProvider: React.FC<{
-  stateRepository: StateRepository;
-}> = ({ stateRepository, children }) => {
-  return (
-    <context.Provider value={stateRepository}>{children}</context.Provider>
-  );
+export const StateProvider: React.FC<{
+  stateService: StateService;
+}> = ({ stateService, children }) => {
+  return <context.Provider value={stateService}>{children}</context.Provider>;
 };

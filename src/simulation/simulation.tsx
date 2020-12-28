@@ -8,12 +8,12 @@ import React, {
 } from 'react';
 import * as d3 from 'd3';
 
-import { Edge, EdgeGroup, Node } from '../graph/types'; // This seems wrong
+import { Edge, EdgeGroup, Node } from '../types';
 import { useStableClone } from '../use-stable-clone';
 import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
-import { GraphState, NodeState } from '../graph-state';
+import { GraphState, NodeState, useStateService } from '../graph-state';
 
 type SimulationNode = Node & d3.SimulationNodeDatum;
 
@@ -23,20 +23,19 @@ function isNotNull<T>(obj: T | null | undefined): obj is T {
 
 function useInitialNodes(
   graphId: string,
-  initialState: SimulationState,
 ): React.MutableRefObject<Map<string, NodeState>> {
+  const stateService = useStateService();
   const initialNodes = useRef(
-    new Map(initialState.nodes.map((node) => [node.id, node])),
+    new Map(
+      (stateService?.currentState?.nodes || []).map((node) => [node.id, node]),
+    ),
   );
-  const initialStateRef = useRef(initialState);
-  useEffect(() => {
-    initialStateRef.current = initialState;
-  }, [initialState]);
   useEffect(() => {
     initialNodes.current = new Map(
-      initialStateRef.current.nodes.map((node) => [node.id, node]),
+      (stateService?.currentState?.nodes || [])?.map((node) => [node.id, node]),
     );
-  }, [graphId]);
+    console.log(initialNodes.current);
+  }, [graphId, stateService]);
 
   return initialNodes;
 }
@@ -47,7 +46,6 @@ export interface SimulationProps {
   graphId: string;
   nodes: Node[];
   edges: EdgeGroup[];
-  initialState: SimulationState;
   onChange: (state: SimulationState) => void;
 }
 
@@ -55,13 +53,12 @@ export const Simulation: React.FC<SimulationProps> = ({
   graphId,
   nodes,
   edges,
-  initialState,
   onChange,
   children,
 }) => {
   const [svg, setSvg] = useState(d3.select('svg'));
 
-  const initialNodes = useInitialNodes(graphId, initialState);
+  const initialNodes = useInitialNodes(graphId);
 
   const customMapping = useRef(
     (node: Node, simNode: SimulationNode): Partial<SimulationNode> => {

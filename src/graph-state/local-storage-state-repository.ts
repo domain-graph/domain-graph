@@ -1,4 +1,4 @@
-import { StateRepository, GraphState } from '.';
+import { StateRepository, GraphState } from './types';
 
 export class LocalStorageStateRepository implements StateRepository {
   private readonly prefix = 'domain-graph-state-object';

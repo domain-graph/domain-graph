@@ -2,7 +2,7 @@ import './domain-edge.less';
 
 import React, { useLayoutEffect, useRef } from 'react';
 
-import { EdgeGroup } from './types';
+import { EdgeGroup } from '../types';
 import { useEdgeSubscriber } from '../simulation';
 
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';

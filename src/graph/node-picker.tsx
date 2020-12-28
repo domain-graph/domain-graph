@@ -3,7 +3,7 @@ import './node-picker.less';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Eye, EyeOff } from '../icons';
 
-import { Node } from './types';
+import { Node } from '../types';
 
 export interface NodePickerProps {
   nodes: Node[];
