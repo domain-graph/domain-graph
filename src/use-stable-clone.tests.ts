@@ -1,6 +1,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 
 import { Clone, StableCloneProps, useStableClone } from './use-stable-clone';
+import { PickByType } from './utils';
 
 type Item = {
   id: string;
@@ -135,7 +136,7 @@ describe('useStableClone', () => {
 });
 
 const sort = <T>(array: T[]) => ({
-  by(key: keyof PickType<T, string | number>): T[] {
+  by(key: keyof PickByType<T, string | number>): T[] {
     return [...array].sort((a, b) => {
       const aa = a[key];
       const bb = b[key];
@@ -156,9 +157,3 @@ function isString(value: any): value is string {
 function isNumber(value: any): value is number {
   return typeof value === 'number';
 }
-
-type KeysOfType<Base, Condition> = {
-  [Key in keyof Base]: Base[Key] extends Condition ? Key : never;
-}[keyof Base];
-
-type PickType<Base, Condition> = Pick<Base, KeysOfType<Base, Condition>>;
