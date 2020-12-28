@@ -6,11 +6,8 @@ import { connectionHeuristic } from './tools/factory/heuristics/relay-connection
 import { interospectionHeuristic } from './tools/factory/heuristics/introspection';
 
 import { Graph } from './graph';
-import {
-  GraphState,
-  StateRepository,
-  StateRepositoryProvider,
-} from './graph-state';
+import { GraphState, StateRepository, StateProvider } from './graph-state';
+import { StateService } from './graph-state/state-service';
 
 export interface DomainGraphProps {
   graphId: string;
@@ -23,37 +20,37 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
   introspection,
   stateRepository,
 }) => {
+  // NOTE: This must be a singleton service!
+  const stateService = useMemo(() => new StateService(stateRepository), [
+    stateRepository,
+  ]);
+  const [initialState, setInitialState] = useState<GraphState>();
+
+  useEffect(() => {
+    stateService
+      .load(graphId)
+      .then((state) => {
+        if (state) {
+          return Promise.resolve(state);
+        } else {
+          return stateService.init(graphId);
+        }
+      })
+      .then(setInitialState);
+  }, [graphId, stateService]);
+
   const { nodes, edges } = useMemo(
     () =>
       new GraphFactory(connectionHeuristic, interospectionHeuristic).build(
         introspection,
+        initialState?.nodes || [],
       ),
-    [introspection],
+    [introspection, initialState],
   );
 
-  const [initialState, setInitialState] = useState<GraphState>();
-
-  useEffect(() => {
-    stateRepository.get(graphId).then((state) => {
-      setInitialState(
-        state || {
-          canvas: { x: 0, y: 0, scale: 1 },
-          nodes: [],
-        },
-      );
-    });
-  }, [graphId, stateRepository]);
-
   return (
-    <StateRepositoryProvider stateRepository={stateRepository}>
-      {initialState && (
-        <Graph
-          id={graphId}
-          initialState={initialState}
-          nodes={nodes}
-          edges={edges}
-        />
-      )}
-    </StateRepositoryProvider>
+    <StateProvider stateService={stateService}>
+      {initialState && <Graph id={graphId} nodes={nodes} edges={edges} />}
+    </StateProvider>
   );
 };

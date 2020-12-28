@@ -2,7 +2,7 @@ import './domain-object.less';
 
 import React, { useCallback, useRef, useState } from 'react';
 
-import { Node } from './types';
+import { Node } from '../types';
 import { useNodeSubscriber } from '../simulation';
 import { EyeOff, Graph, Lock, Unlock } from '../icons';
 import { CircleButton, RectButton } from '../svg-button';

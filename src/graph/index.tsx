@@ -3,36 +3,23 @@ import './index.less';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { SvgCanvas } from '../svg-canvas';
-import { Edge, EdgeGroup, Node } from './types';
+import { Edge, EdgeGroup, Node } from '../types';
 import { DomainObject } from './domain-object';
 import { DomainEdge } from './domain-edge';
 import { Simulation, SimulationState } from '../simulation';
 import { NodePicker } from './node-picker';
 import { Spotlight } from './spotlight';
-import { GraphState, useStateRepository } from '../graph-state';
-
-function initializeNode(node: Node, initialState: GraphState): Node {
-  const nodeState = initialState.nodes.find((n) => n.id === node.id);
-  return !!nodeState
-    ? { ...node, isHidden: false, fixed: nodeState.fixed }
-    : { ...node, isHidden: true, fixed: false };
-}
+import { useStateService } from '../graph-state';
 
 export interface GraphProps {
   id: string;
-  initialState: GraphState;
   nodes: Node[];
   edges: Edge[];
   className?: string;
 }
 
-export const Graph: React.VFC<GraphProps> = ({
-  id,
-  initialState,
-  nodes,
-  edges,
-}) => {
-  const stateRepository = useStateRepository();
+export const Graph: React.VFC<GraphProps> = ({ id, nodes, edges }) => {
+  const stateService = useStateService();
 
   const [selection, setSelection] = useState<{
     source?: Node;
@@ -40,18 +27,20 @@ export const Graph: React.VFC<GraphProps> = ({
     target?: Node;
   }>({});
 
-  const [allNodes, setAllNodes] = useState<Node[]>(
-    nodes.map((n) => initializeNode(n, initialState)),
-  );
+  const [allNodes, setAllNodes] = useState<Node[]>(nodes);
 
   const handleHideAll = useCallback(() => {
     setSelection({});
-    setAllNodes((prev) => prev.map((node) => ({ ...node, isHidden: true })));
-  }, []);
+    setAllNodes((prev) => {
+      stateService?.removeNodes(prev.map((n) => n.id));
+      return prev.map((node) => ({ ...node, isHidden: true }));
+    });
+  }, [stateService]);
 
   const handleHideUnpinned = useCallback(() => {
-    setAllNodes((prev) =>
-      prev.map((node) => {
+    setAllNodes((prev) => {
+      const nodeIds = new Set<string>();
+      const next = prev.map((node) => {
         if (node.fixed) return node;
 
         if (selection.source?.id === node.id) {
@@ -62,10 +51,16 @@ export const Graph: React.VFC<GraphProps> = ({
           }));
         }
 
-        return node.fixed ? node : { ...node, isHidden: true };
-      }),
-    );
-  }, [selection]);
+        nodeIds.add(node.id);
+
+        return { ...node, isHidden: true };
+      });
+
+      stateService?.removeNodes([...nodeIds.values()]);
+
+      return next;
+    });
+  }, [selection, stateService]);
 
   const allEdges: EdgeGroup[] = useMemo(() => {
     const index = edges.reduce<{ [id: string]: EdgeGroup }>((acc, edge) => {
@@ -102,10 +97,6 @@ export const Graph: React.VFC<GraphProps> = ({
     [allNodes],
   );
 
-  const hiddenNodes = useMemo(() => allNodes.filter((node) => node.isHidden), [
-    allNodes,
-  ]);
-
   const visibleEdges = useMemo(
     () =>
       allEdges.filter(
@@ -117,20 +108,24 @@ export const Graph: React.VFC<GraphProps> = ({
     [allNodes, allEdges],
   );
 
-  const setIsHidden = useCallback((nodeId: string, isHidden: boolean) => {
-    setSelection((prev) => {
-      if (nodeId === prev.source?.id) return {};
-      if (nodeId === prev.target?.id) return { source: prev.source };
-      return prev;
-    });
-    setAllNodes((prev) =>
-      prev.some((node) => node.id === nodeId)
-        ? prev.map((node) =>
-            node.id === nodeId ? { ...node, isHidden } : node,
-          )
-        : prev,
-    );
-  }, []);
+  const setIsHidden = useCallback(
+    (nodeId: string, isHidden: boolean) => {
+      if (isHidden) stateService?.removeNodes([nodeId]);
+      setSelection((prev) => {
+        if (nodeId === prev.source?.id) return {};
+        if (nodeId === prev.target?.id) return { source: prev.source };
+        return prev;
+      });
+      setAllNodes((prev) =>
+        prev.some((node) => node.id === nodeId)
+          ? prev.map((node) =>
+              node.id === nodeId ? { ...node, isHidden } : node,
+            )
+          : prev,
+      );
+    },
+    [stateService],
+  );
 
   const setIsPinned = useCallback((nodeId: string, isPinned: boolean) => {
     setAllNodes((prev) =>
@@ -218,16 +213,9 @@ export const Graph: React.VFC<GraphProps> = ({
 
   const handleChange = useCallback(
     async (state: SimulationState) => {
-      const graphState: GraphState = (await stateRepository.get(id)) || {
-        canvas: { x: 0, y: 0, scale: 1 },
-        nodes: [],
-      };
-
-      graphState.nodes = state.nodes;
-
-      await stateRepository.set(id, graphState);
+      await stateService?.updateNodes(state.nodes);
     },
-    [stateRepository, id],
+    [stateService],
   );
 
   return (
@@ -235,7 +223,6 @@ export const Graph: React.VFC<GraphProps> = ({
       graphId={id}
       nodes={visibleNodes}
       edges={visibleEdges}
-      initialState={{ nodes: initialState.nodes }}
       onChange={handleChange}
     >
       <SvgCanvas>

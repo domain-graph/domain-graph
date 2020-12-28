@@ -2,7 +2,7 @@ import './spotlight.less';
 
 import React, { useEffect, useState } from 'react';
 
-import { Edge, Node } from '../graph/types';
+import { Edge, Node } from '../types';
 import { isEnumFieldType, isScalarFieldType } from '../tools/types';
 import { IconButton } from '../components/icon-button';
 import { Maximize2, Minimize2, X } from '../icons';
