@@ -1,7 +1,7 @@
 import { combineReducers } from 'redux';
 import { Registry } from '../registry';
 import { edges } from './edges';
-import { fields } from './fields';
+import { reducer } from './fields';
 import { nodes } from './nodes';
 import { OmitByType } from '../utils';
 
@@ -23,9 +23,9 @@ export type Thunk<T = void> = (
 ) => Promise<T>;
 
 export const reducers = combineReducers({
-  edges: edges.reducer,
-  fields: fields.reducer,
-  nodes: nodes.reducer,
+  edges: edges.standardReducer,
+  fields: reducer,
+  nodes: nodes.standardReducer,
 });
 
 export type ApplicationState = OmitByType<

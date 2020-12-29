@@ -30,9 +30,11 @@ export class Entity<
     this.UNSET = `${PREFIX}_UNSET_ITEM` as const;
     this.UNSETEACH = `${PREFIX}_UNSETEACH_ITEM` as const;
 
-    this.reducer = this.createReducer(stateDef, itemDef, initialState).bind(
-      this,
-    );
+    this.standardReducer = this.createReducer(
+      stateDef,
+      itemDef,
+      initialState,
+    ).bind(this);
   }
   // private readonly prefix: Uppercase<Prefix>;
 
@@ -43,7 +45,7 @@ export class Entity<
   readonly UNSET: UnsetItem<Prefix>['type'];
   readonly UNSETEACH: UnsetEachItem<Prefix>['type'];
 
-  readonly reducer: Reducer<Prefix, Item, State>;
+  readonly standardReducer: Reducer<Prefix, Item, State>;
 
   patch(key: string, data: Patch<Item>): PatchItem<Prefix, Item> {
     return {
@@ -52,7 +54,7 @@ export class Entity<
     };
   }
 
-  patchEach(data: Index<Patch<Node>>): PatchEachItem<Prefix, Item> {
+  patchEach(data: Record<string, Patch<Node>>): PatchEachItem<Prefix, Item> {
     return {
       type: this.PATCHEACH,
       payload: data,
@@ -66,7 +68,7 @@ export class Entity<
     };
   }
 
-  setEach(items: Index<Item>): SetEachItem<Prefix, Item> {
+  setEach(items: Record<string, Item>): SetEachItem<Prefix, Item> {
     return {
       type: this.SETEACH,
       payload: items,
@@ -169,6 +171,15 @@ export type Reducer<
     never
   >,
 ) => State;
+
+export function chainReducers<
+  Prefix extends string,
+  Item,
+  State extends ReducerState<Item>
+>(...reducers: Reducer<Prefix, Item, State>[]): Reducer<Prefix, Item, State> {
+  return (state, action) =>
+    reducers.reduce((nextState, reducer) => reducer(nextState, action), state);
+}
 
 export type PatchItem<Prefix extends string, Item> = FluxStandardAction<
   `${Uppercase<Prefix>}_PATCH_ITEM`,

@@ -12,7 +12,7 @@ import { connectionHeuristic } from '../tools/factory/heuristics/relay-connectio
 
 import { Node, nodeDef, nodes } from './nodes';
 import { Edge, edgeDef, edges } from './edges';
-import { Field, fields } from './fields';
+import { Field, fieldDef, fields } from './fields';
 
 const composeEnhancers =
   window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
@@ -26,7 +26,7 @@ export async function getStore(
   stateRepository: StateRepository,
 ): Promise<ApplicationStore> {
   const state: ApplicationState = {
-    fields: { data: {} },
+    fields: { ix_nodeId: {}, data: {} },
     edges: { data: {} },
     nodes: { data: {} },
   };
@@ -78,31 +78,34 @@ export async function getStore(
   // Introspection Fields
   store.dispatch(
     fields.setEach(
-      data.nodes.reduce<Field[]>((acc, node) => {
-        const fs: Field[] = node.fields.map((f) => {
-          const edgeId = `${node.id}>${f.type.name}`;
-          const reverseEdgeId = `${f.type.name}>${node.id}`;
+      index(
+        data.nodes.reduce<Field[]>((acc, node) => {
+          const fs: Field[] = node.fields.map((f) => {
+            const edgeId = `${node.id}>${f.type.name}`;
+            const reverseEdgeId = `${f.type.name}>${node.id}`;
 
-          return {
-            id: `${node.id}.${f.name}`,
-            nodeId: node.id,
-            edgeId:
-              (edgeMap.has(edgeId) && edgeId) ||
-              (edgeMap.has(reverseEdgeId) && reverseEdgeId) ||
-              undefined,
-            isReverse: edgeMap.has(reverseEdgeId) || undefined,
-            name: f.name,
-            description: f.description || undefined,
-            typeKind: f.type.kind,
-            typeName: f.type.name,
-            isNotNull: f.isNotNull,
-            isList: f.isList,
-            isListElementNotNull: f.isListElementNotNull || undefined,
-          };
-        });
+            return {
+              id: `${node.id}.${f.name}`,
+              nodeId: node.id,
+              edgeId:
+                (edgeMap.has(edgeId) && edgeId) ||
+                (edgeMap.has(reverseEdgeId) && reverseEdgeId) ||
+                undefined,
+              isReverse: edgeMap.has(reverseEdgeId) || undefined,
+              name: f.name,
+              description: f.description || undefined,
+              typeKind: f.type.kind,
+              typeName: f.type.name,
+              isNotNull: f.isNotNull,
+              isList: f.isList,
+              isListElementNotNull: f.isListElementNotNull || undefined,
+            };
+          });
 
-        return [...acc, ...fs];
-      }, []),
+          return [...acc, ...fs];
+        }, []),
+        fieldDef,
+      ),
     ),
   );
 
