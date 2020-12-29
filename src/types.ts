@@ -5,8 +5,10 @@ export type Node = {
   description: string | null;
   fixed: boolean;
   isHidden: boolean;
-  fields: ({ edgeId: string | null } & Argument)[];
+  fields: Field[];
 };
+
+export type Field = { edgeId: string | null } & Argument;
 
 export type Edge = {
   id: string;

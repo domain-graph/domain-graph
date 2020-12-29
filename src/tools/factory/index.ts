@@ -34,7 +34,6 @@ function buildNode(
   type: SchemaType,
   schema: Schema,
   heuristics: TypeHeuristic[],
-  initialNodes: Map<string, NodeState>,
 ): { node: Node | null; edges: Edge[] } {
   const results = get(heuristics, schema);
 
@@ -93,8 +92,8 @@ function buildNode(
   const node: Node = {
     id: nodeId,
     description: type.description,
-    fixed: initialNodes.get(nodeId)?.fixed || false,
-    isHidden: !initialNodes.get(nodeId),
+    fixed: false,
+    isHidden: true,
     fields: fields.map((f) => ({
       edgeId:
         isScalarFieldType(f.normalizedType.type) ||
@@ -114,10 +113,7 @@ export class GraphFactory {
   }
   private readonly heuristics: TypeHeuristic[];
 
-  build(
-    introspection: IntrospectionQuery,
-    initialNodes: NodeState[],
-  ): { nodes: Node[]; edges: Edge[] } {
+  build(introspection: IntrospectionQuery): { nodes: Node[]; edges: Edge[] } {
     const nodeIndex: Record<string, Node> = {};
     const edgeIndex: Record<string, Edge> = {};
 
@@ -125,12 +121,8 @@ export class GraphFactory {
       data: (introspection as any) as Schema['data'],
     };
 
-    console.log({ initialNodes });
-
-    const map = new Map((initialNodes || []).map((n) => [n.id, n]));
-
     for (const type of schema.data.__schema.types) {
-      const { node, edges } = buildNode(type, schema, this.heuristics, map);
+      const { node, edges } = buildNode(type, schema, this.heuristics);
 
       if (node) {
         nodeIndex[node.id] = node;

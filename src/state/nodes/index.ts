@@ -18,7 +18,7 @@ export type Node = {
   y?: number;
 };
 
-const nodeDef = define<Node>({
+export const nodeDef = define<Node>({
   id: key(),
   description: optional(),
   isPinned: required(),
@@ -27,15 +27,11 @@ const nodeDef = define<Node>({
   y: optional(),
 });
 
-export interface ApplicationState {
-  nodes: NodeReducerState;
-}
-
-export type NodeReducerState = {
+export type NodesState = {
   data: Index<Node>;
 };
 
-const stateDef = define<NodeReducerState>({
+const stateDef = define<NodesState>({
   data: required(indexOf(nodeDef)),
 });
 
