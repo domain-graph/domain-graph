@@ -45,42 +45,42 @@ export class Entity<
 
   readonly reducer: Reducer<Prefix, Item, State>;
 
-  createPatch(key: string, data: Patch<Item>): PatchItem<Prefix, Item> {
+  patch(key: string, data: Patch<Item>): PatchItem<Prefix, Item> {
     return {
       type: this.PATCH,
       payload: { key, data },
     };
   }
 
-  createPatchEach(data: Index<Patch<Node>>): PatchEachItem<Prefix, Item> {
+  patchEach(data: Index<Patch<Node>>): PatchEachItem<Prefix, Item> {
     return {
       type: this.PATCHEACH,
       payload: data,
     };
   }
 
-  createSet(item: Item): SetItem<Prefix, Item> {
+  set(item: Item): SetItem<Prefix, Item> {
     return {
       type: this.SET,
       payload: item,
     };
   }
 
-  createSetEach(items: Index<Item>): SetEachItem<Prefix, Item> {
+  setEach(items: Index<Item>): SetEachItem<Prefix, Item> {
     return {
       type: this.SETEACH,
       payload: items,
     };
   }
 
-  createUnset(key: string): UnsetItem<Prefix> {
+  unset(key: string): UnsetItem<Prefix> {
     return {
       type: this.UNSET,
       payload: key,
     };
   }
 
-  createUnsetEach(keys: string[]): UnsetEachItem<Prefix> {
+  unsetEach(keys: string[]): UnsetEachItem<Prefix> {
     return {
       type: this.UNSETEACH,
       payload: keys,

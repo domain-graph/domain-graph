@@ -1,7 +1,8 @@
 import { combineReducers } from 'redux';
 import { Registry } from '../registry';
-import { nodes } from './nodes';
 import { edges } from './edges';
+import { fields } from './fields';
+import { nodes } from './nodes';
 import { OmitByType } from '../utils';
 
 export type FluxStandardAction<
@@ -23,6 +24,7 @@ export type Thunk<T = void> = (
 
 export const reducers = combineReducers({
   edges: edges.reducer,
+  fields: fields.reducer,
   nodes: nodes.reducer,
 });
 

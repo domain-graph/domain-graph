@@ -1,13 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { IntrospectionQuery } from 'graphql';
-
-import { GraphFactory } from './tools/factory';
-import { connectionHeuristic } from './tools/factory/heuristics/relay-connection';
-import { interospectionHeuristic } from './tools/factory/heuristics/introspection';
-
+import { Provider as StoreProvider } from 'react-redux';
 import { Graph } from './graph';
-import { GraphState, StateRepository, StateProvider } from './graph-state';
-import { StateService } from './graph-state/state-service';
+import { StateRepository } from './graph-state';
+import { ApplicationStore, getStore } from './state/store';
 
 export interface DomainGraphProps {
   graphId: string;
@@ -20,37 +16,17 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
   introspection,
   stateRepository,
 }) => {
-  // NOTE: This must be a singleton service!
-  const stateService = useMemo(() => new StateService(stateRepository), [
-    stateRepository,
-  ]);
-  const [initialState, setInitialState] = useState<GraphState>();
+  const [store, setStore] = useState<ApplicationStore>();
 
   useEffect(() => {
-    stateService
-      .load(graphId)
-      .then((state) => {
-        if (state) {
-          return Promise.resolve(state);
-        } else {
-          return stateService.init(graphId);
-        }
-      })
-      .then(setInitialState);
-  }, [graphId, stateService]);
+    getStore(graphId, introspection, stateRepository).then(setStore);
+  }, [graphId, introspection, stateRepository]);
 
-  const { nodes, edges } = useMemo(
-    () =>
-      new GraphFactory(connectionHeuristic, interospectionHeuristic).build(
-        introspection,
-        initialState?.nodes || [],
-      ),
-    [introspection, initialState],
-  );
+  if (!store) return null;
 
   return (
-    <StateProvider stateService={stateService}>
-      {initialState && <Graph id={graphId} nodes={nodes} edges={edges} />}
-    </StateProvider>
+    <StoreProvider store={store}>
+      <Graph id={graphId} nodes={[]} edges={[]} />
+    </StoreProvider>
   );
 };
