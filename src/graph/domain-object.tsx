@@ -2,42 +2,51 @@ import './domain-object.less';
 
 import React, { useCallback, useRef, useState } from 'react';
 
-import { Node } from '../types';
+import { nodes as nodesEntity } from '../state/nodes';
+import * as customNodeActions from '../state/nodes/custom-actions';
 import { useNodeSubscriber } from '../simulation';
 import { EyeOff, Graph, Lock, Unlock } from '../icons';
-import { CircleButton, RectButton } from '../svg-button';
+import { CircleButton } from '../svg-button';
 import { RadialMenu } from './radial-menu';
+import { useDispatch, useSelector } from '../state';
 
-export interface DomainObjectProps {
-  node: Node;
-  isSelected: boolean;
-  onPin: (id: string) => void;
-  onUnpin: (id: string) => void;
-  onHide: (id: string) => void;
-  onExpand: (id: string) => void;
-  onSelect: (id: string) => void;
-}
+export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
+  const dispatch = useDispatch();
+  const { isPinned } = useSelector((state) => state.nodes.data[nodeId]);
+  const sourceId = useSelector((state) => state.nodes.selectedSourceNodeId);
+  const targetId = useSelector((state) => state.nodes.selectedTargetNodeId);
 
-export const DomainObject: React.FC<DomainObjectProps> = ({
-  node,
-  isSelected,
-  onPin,
-  onUnpin,
-  onHide,
-  onExpand,
-  onSelect,
-}) => {
+  const handleClickHide = useCallback(
+    () => dispatch(nodesEntity.patch(nodeId, { isVisible: false })),
+    [nodeId, dispatch],
+  );
+
+  const handleClickPin = useCallback(
+    () => dispatch(nodesEntity.patch(nodeId, { isPinned: !isPinned })),
+    [nodeId, isPinned, dispatch],
+  );
+
+  const handleClickExpand = useCallback(
+    () => dispatch(customNodeActions.expandNode(nodeId)),
+    [nodeId, dispatch],
+  );
+
+  const handleClickSelect = useCallback(
+    () => dispatch(customNodeActions.selectNode(nodeId)),
+    [nodeId, dispatch],
+  );
+
+  const isSelected = nodeId === sourceId || nodeId === targetId;
+
   const handle = useRef<SVGGElement>(null);
   const controls = useRef<SVGGElement>(null);
 
   const [isDragging, setIsDragging] = useState(false);
-  const [isPinned, setIsPinned] = useState(false);
 
-  useNodeSubscriber(node.id, (event, { x, y }) => {
+  useNodeSubscriber(nodeId, (event, { x, y }) => {
     if (event === 'dragstart') {
       setIsDragging(true);
-      onPin(node.id);
-      setIsPinned(true);
+      if (!isPinned) dispatch(nodesEntity.patch(nodeId, { isPinned: true }));
     } else if (event === 'dragend') {
       setIsDragging(false);
     }
@@ -47,15 +56,6 @@ export const DomainObject: React.FC<DomainObjectProps> = ({
       controls.current.setAttribute('transform', `translate(${x} ${y})`);
     }
   });
-
-  const handleClickHide = useCallback(() => {
-    onHide(node.id);
-  }, [node, onHide]);
-
-  const handleClickPin = useCallback(() => {
-    node.fixed ? onUnpin(node.id) : onPin(node.id);
-    setIsPinned(!node.fixed);
-  }, [node, onPin, onUnpin]);
 
   const [showControls, setShowControls] = useState<boolean | null>(null);
 
@@ -86,13 +86,13 @@ export const DomainObject: React.FC<DomainObjectProps> = ({
               <EyeOff size={16} x={-8} y={-8} />
             </CircleButton>
             <CircleButton r={14} onClick={handleClickPin}>
-              {node.fixed ? (
+              {isPinned ? (
                 <Lock size={16} x={-8} y={-8} />
               ) : (
                 <Unlock size={16} x={-8} y={-8} />
               )}
             </CircleButton>
-            <CircleButton r={14} onClick={() => onExpand(node.id)}>
+            <CircleButton r={14} onClick={handleClickExpand}>
               <Graph size={16} x={-8} y={-8} />
             </CircleButton>
           </RadialMenu>
@@ -101,11 +101,11 @@ export const DomainObject: React.FC<DomainObjectProps> = ({
       <g
         ref={handle}
         className="handle"
-        id={node.id}
-        onClick={() => onSelect(node.id)}
+        id={nodeId}
+        onClick={handleClickSelect}
       >
         <circle r="30" />
-        <text>{node.id}</text>
+        <text>{nodeId}</text>
       </g>
     </g>
   );

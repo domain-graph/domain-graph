@@ -4,10 +4,10 @@ import {
   required,
   optional,
   indexOf,
-  Index,
 } from 'flux-standard-functions';
 
-import { Entity } from '../entity';
+import { Entity, StandardReducer } from '../entity';
+import { handleNodeVisibility, handleSelectNodes } from './side-effects';
 
 export type Node = {
   id: string;
@@ -28,11 +28,31 @@ export const nodeDef = define<Node>({
 });
 
 export type NodesState = {
-  data: Index<Node>;
+  data: Record<string, Node>;
+  selectedSourceNodeId?: string;
+  selectedTargetNodeId?: string;
+  visibleNodeIds: string[];
 };
 
-const stateDef = define<NodesState>({
+export const stateDef = define<NodesState>({
   data: required(indexOf(nodeDef)),
+  selectedSourceNodeId: optional(),
+  selectedTargetNodeId: optional(),
+  visibleNodeIds: required(),
 });
 
-export const nodes = new Entity('NODES', stateDef, nodeDef, { data: {} });
+export const nodes = new Entity('NODES', stateDef, nodeDef, {
+  data: {},
+  visibleNodeIds: [],
+});
+
+export const reducer: StandardReducer<'NODES', Node, NodesState> = (
+  originalState,
+  action,
+) => {
+  let currentState = nodes.standardReducer(originalState, action);
+  currentState = handleNodeVisibility(originalState, currentState, action);
+  currentState = handleSelectNodes(originalState, currentState, action);
+
+  return currentState;
+};

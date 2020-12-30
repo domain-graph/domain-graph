@@ -1,9 +1,13 @@
 import { combineReducers } from 'redux';
 import { Registry } from '../registry';
-import { edges } from './edges';
-import { reducer } from './fields';
-import { nodes } from './nodes';
+import { reducer as edgesReducer } from './edges';
+import { reducer as fieldsReducer } from './fields';
+import { reducer as nodesReducer } from './nodes';
 import { OmitByType } from '../utils';
+import {
+  useSelector as useOriginalSelector,
+  useDispatch as useOriginalDispatch,
+} from 'react-redux';
 
 export type FluxStandardAction<
   TType extends string = string,
@@ -16,16 +20,35 @@ export type FluxStandardAction<
   meta?: TMeta;
 };
 
-export type Thunk<T = void> = (
-  dispatch: (action: FluxStandardAction<any, any, any> | Thunk<any>) => any,
+export function useSelector<T>(
+  selector: (state: ApplicationState) => T,
+  equalityFn?: ((left: T, right: T) => boolean) | undefined,
+): T {
+  return useOriginalSelector(selector, equalityFn);
+}
+
+export function useDispatch<ThunkResult>(): Dispatch<ThunkResult> {
+  return useOriginalDispatch();
+}
+
+export type Dispatch<ThunkResult> = <
+  Action extends FluxStandardAction<any, any, any> | Thunk<ThunkResult>
+>(
+  action: Action,
+) => Action extends FluxStandardAction<any, any, any>
+  ? void
+  : Promise<ThunkResult>;
+
+export type Thunk<ThunkResult = void> = (
+  dispatch: Dispatch<ThunkResult>,
   getState: () => ApplicationState,
   registry: Registry,
-) => Promise<T>;
+) => Promise<ThunkResult>;
 
 export const reducers = combineReducers({
-  edges: edges.standardReducer,
-  fields: reducer,
-  nodes: nodes.standardReducer,
+  edges: edgesReducer,
+  fields: fieldsReducer,
+  nodes: nodesReducer,
 });
 
 export type ApplicationState = OmitByType<

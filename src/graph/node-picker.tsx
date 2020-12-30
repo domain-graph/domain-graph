@@ -1,25 +1,26 @@
 import './node-picker.less';
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { deindex } from 'flux-standard-functions';
 import { Eye, EyeOff } from '../icons';
 
-import { Node } from '../types';
+import { Node, nodes as nodesEntity } from '../state/nodes';
+import { useDispatch, useSelector } from '../state';
 
-export interface NodePickerProps {
-  nodes: Node[];
-  onShow: (nodeId: string) => void;
-  onHide: (nodeId: string) => void;
-  onHideAll: () => void;
-  onHideUnpinned: () => void;
-}
+import { hideAllNodes, hideUnpinnedNodes } from '../state/nodes/custom-actions';
 
-export const NodePicker: React.FC<NodePickerProps> = ({
-  nodes,
-  onShow,
-  onHide,
-  onHideAll,
-  onHideUnpinned,
-}) => {
+export const NodePicker: React.VFC = () => {
+  const dispatch = useDispatch();
+
+  const handleHideAll = useCallback(() => {
+    dispatch(hideAllNodes());
+  }, [dispatch]);
+
+  const handleHideUnpinned = useCallback(() => {
+    dispatch(hideUnpinnedNodes());
+  }, [dispatch]);
+
+  const nodes = useSelector((state) => deindex(state.nodes.data));
   const [filter, setFilter] = useState<string>('');
   const sortedNodes = useMemo(
     () =>
@@ -43,30 +44,34 @@ export const NodePicker: React.FC<NodePickerProps> = ({
   return (
     <div className="c-node-picker">
       <input onChange={handleFilter} />
-      <button onClick={onHideAll}>Hide all</button>
-      <button onClick={onHideUnpinned}>Hide unpinned</button>
+      <button onClick={handleHideAll}>Hide all</button>
+      <button onClick={handleHideUnpinned}>Hide unpinned</button>
       <ul>
         {sortedNodes.map((node) => (
-          <Item key={node.id} node={node} onShow={onShow} onHide={onHide} />
+          <Item key={node.id} node={node} />
         ))}
       </ul>
     </div>
   );
 };
 
-interface ItemProps {
-  node: Node;
-  onShow: (nodeId: string) => void;
-  onHide: (nodeId: string) => void;
-}
+const Item: React.VFC<{ node: Node }> = ({ node }) => {
+  const dispatch = useDispatch();
 
-const Item: React.FC<ItemProps> = ({ node, onShow, onHide }) => {
+  const handleShow = useCallback(() => {
+    dispatch(nodesEntity.patch(node.id, { isVisible: true }));
+  }, [node.id, dispatch]);
+
+  const { id, isVisible } = node;
+
+  const handleClick = useCallback(() => {
+    dispatch(nodesEntity.patch(id, { isVisible: !isVisible }));
+  }, [id, isVisible, dispatch]);
+
   return (
-    <li className={node.isHidden ? 'hidden' : 'visible'}>
-      <button
-        onClick={() => (node.isHidden ? onShow(node.id) : onHide(node.id))}
-      >
-        {node.isHidden ? <EyeOff size={16} /> : <Eye size={16} />}
+    <li className={node.isVisible ? 'visible' : 'hidden'}>
+      <button onClick={handleClick}>
+        {node.isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
       </button>
       {node.id}
     </li>

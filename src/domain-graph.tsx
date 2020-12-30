@@ -26,7 +26,7 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
 
   return (
     <StoreProvider store={store}>
-      <Graph id={graphId} nodes={[]} edges={[]} />
+      <Graph id={graphId} />
     </StoreProvider>
   );
 };
