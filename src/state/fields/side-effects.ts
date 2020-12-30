@@ -1,15 +1,46 @@
 import { unset, set } from 'flux-standard-functions';
 
-import { byNodeIdDef, Field, fieldDef, fields, FieldsState } from '.';
+import { byNodeIdDef, Field, fieldDef, fields, FieldsState, stateDef } from '.';
 import {
   PatchEachItem,
   PatchItem,
   SetEachItem,
   SetItem,
+  SideEffect,
   StandardSideEffect,
   UnsetEachItem,
   UnsetItem,
 } from '../entity';
+import * as customActions from './custom-actions';
+import * as customNodeActions from '../nodes/custom-actions';
+
+export const handleSelectFields: SideEffect<Field, FieldsState> = (
+  _,
+  currentState,
+  action,
+) => {
+  // TODO: handle node events that hide nodes
+  switch (action.type) {
+    case customActions.FIELDS_SET_SELECTED_FIELD: {
+      const { payload } = action as ReturnType<
+        typeof customActions['setSelectedField']
+      >;
+      const field = currentState.data[payload.fieldId];
+      if (!field) return currentState;
+
+      return set(currentState, 'selectedFieldId', payload.fieldId, stateDef);
+    }
+    case customActions.FIELDS_UNSET_SELECTED_FIELD: {
+      return unset(currentState, 'selectedFieldId', stateDef);
+    }
+    case customNodeActions.NODES_SELECT_NODE:
+    case customNodeActions.NODES_DESELECT_NODE: {
+      return unset(currentState, 'selectedFieldId', stateDef);
+    }
+    default:
+      return currentState;
+  }
+};
 
 export const buildIndexSideEffect: StandardSideEffect<
   'FIELDS',

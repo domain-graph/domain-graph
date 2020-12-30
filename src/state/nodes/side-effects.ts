@@ -10,7 +10,7 @@ import {
 import { Node, NodesState, nodes, stateDef } from '.';
 import { SideEffect } from '../entity';
 import * as customActions from './custom-actions';
-import * as customEdgeActions from '../edges/custom-actions';
+import * as customFieldActions from '../fields/custom-actions';
 
 export const handleNodeVisibility: SideEffect<Node, NodesState> = (
   originalState,
@@ -138,13 +138,13 @@ export const handleSelectNodes: SideEffect<Node, NodesState> = (
 
       return currentState;
     }
-    case customEdgeActions.EDGES_UNSET_SELECTED_EDGE: {
+    case customFieldActions.FIELDS_UNSET_SELECTED_FIELD: {
       return unset(currentState, 'selectedTargetNodeId', stateDef);
     }
-    case customEdgeActions.EDGES_SET_SELECTED_EDGE: {
+    case customFieldActions.FIELDS_SET_SELECTED_FIELD: {
       const {
         payload: { sourceNodeId, targetNodeId },
-      } = action as ReturnType<typeof customEdgeActions['setSelectedEdge']>;
+      } = action as ReturnType<typeof customFieldActions['setSelectedField']>;
       const sourceNode = currentState.data[sourceNodeId];
       if (!sourceNode) return currentState;
 
