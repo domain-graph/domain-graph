@@ -61,7 +61,7 @@ export async function getStore(
   // Introspection Edges
   const edgeMap = data.edges.reduce((map, edge) => {
     const id = `${edge.source}>${edge.target}`;
-    const reverseId = `${edge.source}>${edge.target}`;
+    const reverseId = `${edge.target}>${edge.source}`;
 
     if (!map.has(reverseId)) {
       map.set(id, {
