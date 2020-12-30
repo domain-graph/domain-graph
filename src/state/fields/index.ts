@@ -9,7 +9,7 @@ import {
 import { SpecificFieldType } from '../../tools/types';
 
 import { Entity, StandardReducer } from '../entity';
-import { buildIndexSideEffect } from './side-effects';
+import { buildIndexSideEffect, handleSelectFields } from './side-effects';
 
 export type Field = {
   id: string;
@@ -52,11 +52,13 @@ export const byNodeIdDef = define<ByNodeId>({
 export type FieldsState = {
   ix_nodeId: Record<string, ByNodeId>;
   data: Record<string, Field>;
+  selectedFieldId?: string;
 };
 
-const stateDef = define<FieldsState>({
+export const stateDef = define<FieldsState>({
   ix_nodeId: required(array()),
   data: required(indexOf(fieldDef)),
+  selectedFieldId: optional(),
 });
 
 export const fields = new Entity('FIELDS', stateDef, fieldDef, {
@@ -70,6 +72,7 @@ export const reducer: StandardReducer<'FIELDS', Field, FieldsState> = (
 ) => {
   let currentState = fields.standardReducer(originalState, action);
   currentState = buildIndexSideEffect(originalState, currentState, action);
+  currentState = handleSelectFields(originalState, currentState, action);
 
   return currentState;
 };

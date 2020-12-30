@@ -5,14 +5,16 @@ import React, { useLayoutEffect, useMemo, useRef } from 'react';
 import { useEdgeSubscriber } from '../simulation';
 
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
-import { useSelector } from '../state';
+import { useDispatch, useSelector } from '../state';
 import { useFieldIds } from '../state/nodes/hooks';
+import * as customFieldActions from '../state/fields/custom-actions';
 
 const handleSize = 20;
 
 export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
+  const dispatch = useDispatch();
   const edge = useSelector((state) => state.edges.data[edgeId]);
-  const { selectedEdgeId } = useSelector((state) => state.edges);
+  const { selectedFieldId } = useSelector((state) => state.fields);
   const sourceFieldIds = useFieldIds(edge.sourceNodeId);
   const targetFieldIds = useFieldIds(edge.targetNodeId);
   const allFields = useSelector((state) => state.fields.data);
@@ -103,15 +105,17 @@ export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
         <React.Fragment key={field.id + i}>
           <path
             className={`${field.isNotNull ? 'required' : 'optional'}${
-              selectedEdgeId === field.id ? ' selected' : ''
+              selectedFieldId === field.id ? ' selected' : ''
             }`}
           />
           <g
             className={`handle${
-              selectedEdgeId === field.id ? ' selected' : ''
+              selectedFieldId === field.id ? ' selected' : ''
             }`}
             onClick={() => {
-              console.log('TODO: implement selecting fields instead of edges');
+              if (selectedFieldId !== field.id) {
+                dispatch(customFieldActions.selectField(field.id));
+              }
             }}
           >
             <rect width={handleSize} height={handleSize} />
