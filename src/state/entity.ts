@@ -45,7 +45,43 @@ export class Entity<
   readonly UNSET: UnsetItem<Prefix>['type'];
   readonly UNSETEACH: UnsetEachItem<Prefix>['type'];
 
-  readonly standardReducer: Reducer<Prefix, Item, State>;
+  readonly standardReducer: StandardReducer<Prefix, Item, State>;
+
+  isPatch(
+    action: StandardAction<Prefix, Item>,
+  ): action is PatchItem<Prefix, Item> {
+    return action.type === this.PATCH && typeof action.payload !== undefined;
+  }
+
+  isPatchEach(
+    action: StandardAction<Prefix, Item>,
+  ): action is PatchEachItem<Prefix, Item> {
+    return (
+      action.type === this.PATCHEACH && typeof action.payload !== undefined
+    );
+  }
+
+  isSet(action: StandardAction<Prefix, Item>): action is SetItem<Prefix, Item> {
+    return action.type === this.SET && typeof action.payload !== undefined;
+  }
+
+  isSetEach(
+    action: StandardAction<Prefix, Item>,
+  ): action is SetEachItem<Prefix, Item> {
+    return action.type === this.SETEACH && typeof action.payload !== undefined;
+  }
+
+  isUnset(action: StandardAction<Prefix, Item>): action is UnsetItem<Prefix> {
+    return action.type === this.UNSET && typeof action.payload !== undefined;
+  }
+
+  isUnsetEach(
+    action: StandardAction<Prefix, Item>,
+  ): action is UnsetEachItem<Prefix> {
+    return (
+      action.type === this.UNSETEACH && typeof action.payload !== undefined
+    );
+  }
 
   patch(key: string, data: Patch<Item>): PatchItem<Prefix, Item> {
     return {
@@ -54,7 +90,7 @@ export class Entity<
     };
   }
 
-  patchEach(data: Record<string, Patch<Node>>): PatchEachItem<Prefix, Item> {
+  patchEach(data: Record<string, Patch<Item>>): PatchEachItem<Prefix, Item> {
     return {
       type: this.PATCHEACH,
       payload: data,
@@ -93,7 +129,7 @@ export class Entity<
     stateDef: Definition<State>,
     itemDef: Definition<Item>,
     initialState: State,
-  ): Reducer<Prefix, Item, State> {
+  ): StandardReducer<Prefix, Item, State> {
     return (state = initialState, action) => {
       switch (action.type) {
         case this.PATCH: {
@@ -154,29 +190,53 @@ export type ReducerState<Item> = {
   data: Index<Item>;
 };
 
-export type Reducer<
+export type StandardAction<Prefix extends string, Item> =
+  | PatchItem<Prefix, Item>
+  | PatchEachItem<Prefix, Item>
+  | SetItem<Prefix, Item>
+  | SetEachItem<Prefix, Item>
+  | UnsetItem<Prefix>
+  | UnsetEachItem<Prefix>;
+
+export type StandardType<Prefix extends string, Item> = StandardAction<
+  Prefix,
+  Item
+>['type'];
+
+export type SideEffect<Item, State extends ReducerState<Item>> = (
+  originalState: State,
+  cuurentState: State,
+  action: FluxStandardAction<any, any, any>,
+) => State;
+
+export type StandardSideEffect<
   Prefix extends string,
   Item,
   State extends ReducerState<Item>
 > = (
-  state: State,
-  action: FluxStandardAction<
-    | PatchItem<Prefix, Item>['type']
-    | PatchEachItem<Prefix, Item>['type']
-    | SetItem<Prefix, Item>['type']
-    | SetEachItem<Prefix, Item>['type']
-    | UnsetItem<Prefix>['type']
-    | UnsetEachItem<Prefix>['type'],
-    any,
-    never
-  >,
+  originalState: State,
+  cuurentState: State,
+  action: StandardAction<Prefix, Item>,
 ) => State;
+
+export type Reducer<Item, State extends ReducerState<Item>> = (
+  state: State,
+  action: FluxStandardAction<any, any, any>,
+) => State;
+
+export type StandardReducer<
+  Prefix extends string,
+  Item,
+  State extends ReducerState<Item>
+> = (state: State, action: StandardAction<Prefix, Item>) => State;
 
 export function chainReducers<
   Prefix extends string,
   Item,
   State extends ReducerState<Item>
->(...reducers: Reducer<Prefix, Item, State>[]): Reducer<Prefix, Item, State> {
+>(
+  ...reducers: StandardReducer<Prefix, Item, State>[]
+): StandardReducer<Prefix, Item, State> {
   return (state, action) =>
     reducers.reduce((nextState, reducer) => reducer(nextState, action), state);
 }

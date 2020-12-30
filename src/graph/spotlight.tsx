@@ -1,76 +1,52 @@
 import './spotlight.less';
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
-import { Edge, Node } from '../types';
-import { isEnumFieldType, isScalarFieldType } from '../tools/types';
 import { IconButton } from '../components/icon-button';
 import { Maximize2, Minimize2, X } from '../icons';
+import { useSelector, useDispatch } from '../state';
+import * as customEdgeActions from '../state/edges/custom-actions';
+import * as customNodeActions from '../state/nodes/custom-actions';
 
-export interface SpotlightProps {
-  source: Node | undefined;
-  edge: Edge | undefined;
-  target: Node | undefined;
-  onCloseNode(nodeId: string): void;
-  onSelectEdge(edgeId: string): void;
-}
+export const Spotlight: React.VFC = () => {
+  const sourceId = useSelector((state) => state.nodes.selectedSourceNodeId);
+  const edgeId = useSelector((state) => state.edges.selectedEdgeId);
+  const targetId = useSelector((state) => state.nodes.selectedTargetNodeId);
 
-export const Spotlight: React.FC<SpotlightProps> = ({
-  source,
-  edge,
-  target,
-  onCloseNode,
-  onSelectEdge,
-}) => {
-  if (!source) return null;
+  if (!sourceId) return null;
 
   return (
     <div className="c-spotlight">
-      <NodeSpotlight
-        {...source}
-        selectedEdgeId={edge?.id}
-        onClose={onCloseNode}
-        onSelectEdge={onSelectEdge}
-      />
-      {edge && <EdgeSpotlight {...edge} />}
-      {target && (
-        <NodeSpotlight
-          {...target}
-          selectedEdgeId={edge?.id}
-          onClose={onCloseNode}
-          onSelectEdge={onSelectEdge}
-        />
-      )}
+      <NodeSpotlight nodeId={sourceId} />
+      {edgeId && <EdgeSpotlight edgeId={edgeId} />}
+      {targetId && <NodeSpotlight nodeId={targetId} />}
     </div>
   );
 };
 
-const EdgeSpotlight: React.FC<Edge> = ({
-  name,
-  description,
-  args,
-  heuristic,
-}) => {
-  return (
-    <div className="edge-spotlight">
-      <h1>{name}</h1>
-      {heuristic && <div>({heuristic})</div>}
-      {description && <div>{description}</div>}
-      {!!args.length && (
-        <ul>
-          {args.map((arg) => (
-            <li key={arg.name} className="scalar field">
-              <span>{arg.name}</span>: {arg.isList && '['}
-              <span>{arg.type.name}</span>
-              {arg.isListElementNotNull && '!'}
-              {arg.isList && ']'}
-              {arg.isNotNull && '!'}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
+const EdgeSpotlight: React.FC<{ edgeId: string }> = ({ edgeId }) => {
+  return <div className="edge-spotlight">{edgeId}</div>;
+  // const { name } = useSelector((state) => state.edges.data[edgeId]);
+  // return (
+  //   <div className="edge-spotlight">
+  //     <h1>{name}</h1>
+  //     {heuristic && <div>({heuristic})</div>}
+  //     {description && <div>{description}</div>}
+  //     {!!args.length && (
+  //       <ul>
+  //         {args.map((arg) => (
+  //           <li key={arg.name} className="scalar field">
+  //             <span>{arg.name}</span>: {arg.isList && '['}
+  //             <span>{arg.type.name}</span>
+  //             {arg.isListElementNotNull && '!'}
+  //             {arg.isList && ']'}
+  //             {arg.isNotNull && '!'}
+  //           </li>
+  //         ))}
+  //       </ul>
+  //     )}
+  //   </div>
+  // );
 };
 
 const Controls: React.VFC<{
@@ -92,57 +68,52 @@ const Controls: React.VFC<{
   );
 };
 
-const NodeSpotlight: React.FC<
-  Node & {
-    selectedEdgeId: string | undefined;
-    onClose(edgeId: string): void;
-    onSelectEdge(edgeId: string): void;
-  }
-> = ({ id, description, fields, selectedEdgeId, onClose, onSelectEdge }) => {
-  const ids = fields.filter((f) => f.type.name === 'ID');
-  const scalars = fields.filter(
-    (f) =>
-      f.type.name !== 'ID' &&
-      (isScalarFieldType(f.type) || isEnumFieldType(f.type)),
+const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
+  const dispatch = useDispatch();
+  const node = useSelector((state) => state.nodes.data[nodeId]);
+  const fields = useSelector((state) =>
+    state.fields.ix_nodeId[nodeId].fieldIds.map(
+      (fieldId) => state.fields.data[fieldId],
+    ),
   );
+  const ids = fields.filter((f) => f.typeName === 'ID');
+  const scalars = fields.filter((f) => f.typeName !== 'ID' && !f.edgeId);
   const edges = fields.filter((f) => f.edgeId);
 
-  const [isExpanded, setIsExpanded] = useState(true);
+  const selectedEdgeId = useSelector((state) => state.edges.selectedEdgeId);
+
+  const [isExpanded, setIsExpanded] = useState(!selectedEdgeId); // NOTE: was `true`
 
   useEffect(() => {
     setIsExpanded(!selectedEdgeId);
-  }, [id, selectedEdgeId]);
+  }, [nodeId, selectedEdgeId]);
 
   return (
     <div className="node-spotlight">
       <Controls
         isExpanded={isExpanded}
         size={16}
-        onClose={() => onClose(id)}
+        onClose={() => dispatch(customNodeActions.deselectNode(nodeId))}
         onExpand={() => setIsExpanded(true)}
         onCollapse={() => setIsExpanded(false)}
       />
-      <h1>{id}</h1>
-      {description && <div>{description}</div>}
+      <h1>{nodeId}</h1>
+      {node.description && <div>{node.description}</div>}
       {isExpanded && (
         <>
           <ul>
             {ids.map((field) => (
-              <IdField key={field.name} {...field} />
+              <IdField key={field.id} fieldId={field.id} />
             ))}
           </ul>
           <ul>
             {edges.map((field) => (
-              <EdgeField
-                key={field.name}
-                onSelectEdge={onSelectEdge}
-                {...field}
-              />
+              <EdgeField key={field.id} fieldId={field.id} />
             ))}
           </ul>
           <ul>
             {scalars.map((field) => (
-              <ScalarField key={field.name} {...field} />
+              <ScalarField key={field.id} fieldId={field.id} />
             ))}
           </ul>
         </>
@@ -151,7 +122,8 @@ const NodeSpotlight: React.FC<
   );
 };
 
-const IdField: React.FC<Node['fields'][number]> = ({ name, type }) => {
+const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
+  const { name } = useSelector((state) => state.fields.data[fieldId]);
   return (
     <li className="id field">
       <span>{name}</span>
@@ -159,29 +131,35 @@ const IdField: React.FC<Node['fields'][number]> = ({ name, type }) => {
   );
 };
 
-const EdgeField: React.FC<
-  Node['fields'][number] & {
-    onSelectEdge(edgeId: string): void;
-  }
-> = ({ edgeId, name, type, onSelectEdge }) => {
+const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
+  const dispatch = useDispatch();
+  const { name, edgeId } = useSelector((state) => state.fields.data[fieldId]);
+
+  const handleClick = useCallback(() => {
+    if (edgeId) {
+      dispatch(customEdgeActions.selectEdge(edgeId));
+    }
+  }, [edgeId, dispatch]);
+
   return (
     <li className="edge field">
-      <button onClick={() => edgeId && onSelectEdge(edgeId)}>{name}</button>
+      <button onClick={handleClick}>{name}</button>
     </li>
   );
 };
 
-const ScalarField: React.FC<Node['fields'][number]> = ({
-  name,
-  type,
-  isNotNull,
-  isList,
-  isListElementNotNull,
-}) => {
+const ScalarField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
+  const {
+    name,
+    typeName,
+    isNotNull,
+    isList,
+    isListElementNotNull,
+  } = useSelector((state) => state.fields.data[fieldId]);
   return (
     <li className="scalar field">
       <span>{name}</span>: {isList && '['}
-      <span>{type.name}</span>
+      <span>{typeName}</span>
       {isListElementNotNull && '!'}
       {isList && ']'}
       {isNotNull && '!'}

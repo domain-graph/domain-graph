@@ -1,25 +1,30 @@
 import './domain-edge.less';
 
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useLayoutEffect, useMemo, useRef } from 'react';
 
-import { EdgeGroup } from '../types';
 import { useEdgeSubscriber } from '../simulation';
 
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
-
-export interface DomainEdgeProps {
-  edge: EdgeGroup;
-  selectedEdgeId?: string;
-  onSelect: (ids: string) => void;
-}
+import { useSelector } from '../state';
+import { useFieldIds } from '../state/nodes/hooks';
 
 const handleSize = 20;
 
-export const DomainEdge: React.FC<DomainEdgeProps> = ({
-  edge,
-  onSelect,
-  selectedEdgeId,
-}) => {
+export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
+  const edge = useSelector((state) => state.edges.data[edgeId]);
+  const { selectedEdgeId } = useSelector((state) => state.edges);
+  const sourceFieldIds = useFieldIds(edge.sourceNodeId);
+  const targetFieldIds = useFieldIds(edge.targetNodeId);
+  const allFields = useSelector((state) => state.fields.data);
+
+  const fields = useMemo(
+    () =>
+      [...sourceFieldIds, ...targetFieldIds]
+        .map((fieldId) => allFields[fieldId])
+        .filter((field) => field.edgeId === edgeId),
+    [edgeId, allFields, sourceFieldIds, targetFieldIds],
+  );
+
   const g = useRef<SVGGElement>(null);
   const paths = useRef<SVGPathElement[]>([]);
   const handles = useRef<SVGGElement[]>([]);
@@ -39,9 +44,9 @@ export const DomainEdge: React.FC<DomainEdgeProps> = ({
         }
       }
     }
-  }, [edge]);
+  }, [fields.length]);
 
-  useEdgeSubscriber(edge.id, ({ x1, y1, x2, y2 }) => {
+  useEdgeSubscriber(edgeId, ({ x1, y1, x2, y2 }) => {
     if (g.current && paths.current?.length) {
       const count = paths.current.length;
 
@@ -93,26 +98,30 @@ export const DomainEdge: React.FC<DomainEdgeProps> = ({
   });
 
   return (
-    <g id={edge.id} className="c-domain-edge edge" ref={g}>
-      {edge.resolvers.map((r) => (
-        <React.Fragment key={r.name}>
+    <g id={edgeId} className="c-domain-edge edge" ref={g}>
+      {fields.map((field, i) => (
+        <React.Fragment key={field.id + i}>
           <path
-            className={`${r.optional ? 'optional' : 'required'}${
-              selectedEdgeId === r.id ? ' selected' : ''
+            className={`${field.isNotNull ? 'required' : 'optional'}${
+              selectedEdgeId === field.id ? ' selected' : ''
             }`}
           />
           <g
-            className={`handle${selectedEdgeId === r.id ? ' selected' : ''}`}
-            onClick={() => onSelect(r.id)}
+            className={`handle${
+              selectedEdgeId === field.id ? ' selected' : ''
+            }`}
+            onClick={() => {
+              console.log('TODO: implement selecting fields instead of edges');
+            }}
           >
             <rect width={handleSize} height={handleSize} />
-            {r.plurality === 'array' ? (
-              r.reverse && edge.source !== edge.target ? (
+            {field.isList ? (
+              field.isReverse && edge.sourceNodeId !== edge.targetNodeId ? (
                 <ChevronsDown size={handleSize} />
               ) : (
                 <ChevronsUp size={handleSize} />
               )
-            ) : r.reverse && edge.source !== edge.target ? (
+            ) : field.isReverse && edge.sourceNodeId !== edge.targetNodeId ? (
               <ChevronDown size={handleSize} />
             ) : (
               <ChevronUp size={handleSize} />

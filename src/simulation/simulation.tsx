@@ -8,117 +8,120 @@ import React, {
 } from 'react';
 import * as d3 from 'd3';
 
-import { Edge, EdgeGroup, Node } from '../types';
-import { useStableClone } from '../use-stable-clone';
 import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
-import { GraphState, NodeState, useStateService } from '../graph-state';
+import { GraphState } from '../graph-state';
+import { Node } from '../state/nodes';
+import { Edge } from '../state/edges';
+import { useVisibleNodes } from '../state/nodes/hooks';
+import { useVisibleEdges } from '../state/edges/hooks';
 
-type SimulationNode = Node & d3.SimulationNodeDatum;
+/**
+ * Maps items using the provided mapping function. The resulting
+ * mapped items are "stable" meaning that the same (albeit mutated)
+ * instance of the object will be returned after each iteration.
+ * Not that this not idomatic React; however, D3 needs it to work.
+ * @param items This source items to map
+ * @param keyProp The prop on the incomming and mapped items used to establish equality
+ * @param map The mapping function
+ */
+function useStableMap<TIn, TOut, KeyProp extends keyof TIn & keyof TOut>(
+  items: TIn[],
+  keyProp: KeyProp,
+  map: (item: TIn, existing: TOut | undefined) => TOut,
+): TOut[] {
+  const existingMap = useRef(new Map<TIn[KeyProp], TOut>());
+
+  return useMemo(
+    () =>
+      items.map((item) => {
+        const key = item[keyProp];
+        const existing = existingMap.current.get(key);
+        const clonedExisting = existing ? ({ ...existing } as TOut) : undefined;
+        const mappedExisting = map(item, clonedExisting);
+
+        if (existing) {
+          for (const prop of Object.keys(mappedExisting)) {
+            existing[prop] = mappedExisting[prop];
+          }
+          existingMap.current.set(key, existing);
+          return existing;
+        } else {
+          existingMap.current.set(key, mappedExisting);
+          return mappedExisting;
+        }
+      }),
+    [items, keyProp, map],
+  );
+}
+
+type SimulationNode = Pick<Node, 'id' | 'isPinned'> & d3.SimulationNodeDatum;
+type SimulationEdge = Pick<Edge, 'id'> & d3.SimulationLinkDatum<SimulationNode>;
 
 function isNotNull<T>(obj: T | null | undefined): obj is T {
   return obj !== null && typeof obj !== 'undefined';
-}
-
-function useInitialNodes(
-  graphId: string,
-): React.MutableRefObject<Map<string, NodeState>> {
-  const stateService = useStateService();
-  const initialNodes = useRef(
-    new Map(
-      (stateService?.currentState?.nodes || []).map((node) => [node.id, node]),
-    ),
-  );
-  useEffect(() => {
-    initialNodes.current = new Map(
-      (stateService?.currentState?.nodes || [])?.map((node) => [node.id, node]),
-    );
-    console.log(initialNodes.current);
-  }, [graphId, stateService]);
-
-  return initialNodes;
 }
 
 export type SimulationState = Pick<GraphState, 'nodes'>;
 
 export interface SimulationProps {
   graphId: string;
-  nodes: Node[];
-  edges: EdgeGroup[];
   onChange: (state: SimulationState) => void;
 }
 
 export const Simulation: React.FC<SimulationProps> = ({
   graphId,
-  nodes,
-  edges,
   onChange,
   children,
 }) => {
   const [svg, setSvg] = useState(d3.select('svg'));
-
-  const initialNodes = useInitialNodes(graphId);
-
-  const customMapping = useRef(
-    (node: Node, simNode: SimulationNode): Partial<SimulationNode> => {
-      const initialNode = initialNodes.current.get(node.id);
-
-      if (initialNode) {
-        initialNodes.current.delete(initialNode.id);
-        return {
-          x: initialNode.x,
-          y: initialNode.y,
-          fx: initialNode.fixed ? initialNode.x : null,
-          fy: initialNode.fixed ? initialNode.y : null,
-        };
-      } else if (node?.fixed === true) {
-        return {
-          fx: simNode.x,
-          fy: simNode.y,
-          vx: 0,
-          vy: 0,
-        };
-      } else if (node?.fixed === false) {
-        return {
-          fx: null,
-          fy: null,
-        };
-      } else {
-        return {};
-      }
-    },
-  );
-
   useEffect(() => {
     setSvg(d3.select('svg'));
   }, []);
 
-  const filteredEdges = useMemo(
-    () => edges.filter((edge) => edge.source !== edge.target),
-    [edges],
-  );
+  const visibleNodes = useVisibleNodes();
+  const visibleEdges = useVisibleEdges();
 
   const circularEdgeIdsByNode: Record<string, string[]> = useMemo(
     () =>
-      edges
-        .filter((edge) => edge.source === edge.target)
+      visibleEdges
+        .filter((edge) => edge.sourceNodeId === edge.targetNodeId)
         .reduce<Record<string, string[]>>((acc, edge) => {
-          acc[edge.source] ||= [];
+          acc[edge.sourceNodeId] ||= [];
 
-          acc[edge.source].push(edge.id);
+          acc[edge.sourceNodeId].push(edge.id);
 
           return acc;
         }, {}),
-    [edges],
+    [visibleEdges],
   );
 
-  const clonedNodes = useStableClone<Node, SimulationNode>({
-    items: nodes,
-    keyProp: 'id',
-    customMapping: customMapping.current,
-  });
-  const clonedEdges = useStableClone({ items: filteredEdges, keyProp: 'id' });
+  const clonedNodes: SimulationNode[] = useStableMap(
+    visibleNodes,
+    'id',
+    (node, simNode) => ({
+      ...simNode,
+      id: node.id,
+      isPinned: node.isPinned,
+      fx: node.isPinned ? simNode?.x : undefined,
+      fy: node.isPinned ? simNode?.y : undefined,
+      vx: node.isPinned ? 0 : simNode?.vx,
+      vy: node.isPinned ? 0 : simNode?.vy,
+    }),
+  );
+
+  const clonedEdges: SimulationEdge[] = useStableMap(
+    visibleEdges,
+    'id',
+    (edge, simEdge) => {
+      return {
+        ...edge,
+        source: simEdge?.source || edge.sourceNodeId,
+        target: simEdge?.target || edge.targetNodeId,
+      };
+    },
+  );
 
   const nodeEventsByNodeId = useRef<Record<string, NodeEvent>>({});
   const nodeSubscriber: NodeSubscriber = useCallback(
@@ -139,11 +142,11 @@ export const Simulation: React.FC<SimulationProps> = ({
   useLayoutEffect(() => {
     if (svg && clonedNodes) {
       const simulation = d3
-        .forceSimulation<SimulationNode, EdgeGroup>(clonedNodes)
+        .forceSimulation<SimulationNode, SimulationEdge>(clonedNodes)
         .force(
           'link',
           d3
-            .forceLink<SimulationNode, EdgeGroup>(clonedEdges)
+            .forceLink<SimulationNode, SimulationEdge>(clonedEdges)
             .id((d) => d.id)
             .distance(120),
         )
@@ -175,7 +178,7 @@ export const Simulation: React.FC<SimulationProps> = ({
               if (typeof n.x === 'number' && typeof n.y === 'number') {
                 return {
                   id: n.id,
-                  fixed: n.fixed === true,
+                  fixed: typeof n.fx === 'number',
                   x: n.x,
                   y: n.y,
                 };
@@ -236,7 +239,7 @@ export const Simulation: React.FC<SimulationProps> = ({
 };
 
 function drag(
-  simulation: d3.Simulation<SimulationNode, Edge>,
+  simulation: d3.Simulation<SimulationNode, SimulationEdge>,
   subscribers: { [id: string]: NodeEvent },
 ): any {
   function dragstarted(event) {
@@ -264,7 +267,7 @@ function drag(
       x: event.subject.x,
       y: event.subject.y,
     });
-    if (!event.subject.fixed) {
+    if (!event.subject.isPinned) {
       event.subject.fx = null;
       event.subject.fy = null;
       event.subject.vx = null;

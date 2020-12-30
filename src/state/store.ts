@@ -28,7 +28,7 @@ export async function getStore(
   const state: ApplicationState = {
     fields: { ix_nodeId: {}, data: {} },
     edges: { data: {} },
-    nodes: { data: {} },
+    nodes: { data: {}, visibleNodeIds: [] },
   };
 
   const store = createStore(

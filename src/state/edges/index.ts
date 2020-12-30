@@ -1,6 +1,13 @@
-import { define, key, required, indexOf, Index } from 'flux-standard-functions';
+import {
+  define,
+  key,
+  required,
+  indexOf,
+  optional,
+} from 'flux-standard-functions';
 
-import { Entity } from '../entity';
+import { Entity, StandardReducer } from '../entity';
+import { handleSelectEdges } from './side-effects';
 
 export type Edge = {
   id: string;
@@ -15,11 +22,23 @@ export const edgeDef = define<Edge>({
 });
 
 export type EdgesState = {
-  data: Index<Edge>;
+  data: Record<string, Edge>;
+  selectedEdgeId?: string;
 };
 
-const stateDef = define<EdgesState>({
+export const stateDef = define<EdgesState>({
   data: required(indexOf(edgeDef)),
+  selectedEdgeId: optional(),
 });
 
 export const edges = new Entity('EDGES', stateDef, edgeDef, { data: {} });
+
+export const reducer: StandardReducer<'EDGES', Edge, EdgesState> = (
+  originalState,
+  action,
+) => {
+  let currentState = edges.standardReducer(originalState, action);
+  currentState = handleSelectEdges(originalState, currentState, action);
+
+  return currentState;
+};
