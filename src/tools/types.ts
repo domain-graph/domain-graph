@@ -101,6 +101,12 @@ export function isUnionType(
   return type?.kind === 'UNION';
 }
 
+export function isTypeWithFields(
+  type: SchemaType | undefined | null,
+): type is ObjectType | InterfaceType {
+  return isObjectType(type) || isInterfaceType(type);
+}
+
 export type FieldType = WrappedFieldType | SpecificFieldType;
 
 export type WrappedFieldType = NonNullFieldType | ListFieldType;

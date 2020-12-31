@@ -18,6 +18,7 @@ export type Field = {
   isReverse?: boolean;
   name: string;
   description?: string;
+  heuristic?: string;
   typeKind: SpecificFieldType['kind'];
   typeName: SpecificFieldType['name'];
   isNotNull: boolean;
@@ -32,6 +33,7 @@ export const fieldDef = define<Field>({
   isReverse: optional(),
   name: required(),
   description: optional(),
+  heuristic: optional(),
   typeKind: required(),
   typeName: required(),
   isNotNull: required(),
