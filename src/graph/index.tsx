@@ -11,17 +11,15 @@ import { Spotlight } from './spotlight';
 import { useVisibleEdgeIds, useVisibleNodeIds } from '../state/graph/hooks';
 
 export interface GraphProps {
-  id: string;
   className?: string;
 }
 
-export const Graph: React.VFC<GraphProps> = ({ id }) => {
+export const Graph: React.VFC<GraphProps> = () => {
   const nodeIds = useVisibleNodeIds();
   const edgeIds = useVisibleEdgeIds();
 
   return (
     <Simulation
-      graphId={id}
       onChange={() => {
         /* todo */
       }}
