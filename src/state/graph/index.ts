@@ -95,11 +95,15 @@ export const argDef = define<Arg>({
 export type VisibleNode = {
   id: string;
   isPinned: boolean;
+  x?: number;
+  y?: number;
 };
 
 export const visibleNodeDef = define<VisibleNode>({
   id: key(),
   isPinned: required(),
+  x: optional(),
+  y: optional(),
 });
 
 export type GraphState = {
