@@ -8,36 +8,31 @@ import { useEdgeSubscriber } from '../simulation';
 
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
 import { useDispatch, useSelector } from '../state';
-import * as customFieldActions from '../state/fields/custom-actions';
-import { Field } from '../state/fields';
+import { Field } from '../state/graph';
+import { selectField } from '../state/graph/actions';
 
 const handleSize = 20;
 
 function useFieldIdsByEdge(edgeId: string): string[] {
   return useSelector(
-    (state) =>
-      deindex(state.fields.data)
-        .filter((field) => field.edgeId === edgeId)
-        .map((field) => field.id),
+    (state) => state.graph.edges[edgeId]?.fieldIds || [],
     shallowEqual,
   );
 }
 
 function useFieldsByEdge(edgeId: string): Field[] {
   const fieldIds = useFieldIdsByEdge(edgeId);
-
-  const allFields = useSelector((state) => state.fields.data);
+  const { fields } = useSelector((state) => state.graph);
 
   return useMemo(() => {
-    const xx = fieldIds.map((fieldId) => allFields[fieldId]).filter((x) => x);
-    return xx;
-  }, [fieldIds, allFields]);
+    return fieldIds.map((x) => fields[x]);
+  }, [fieldIds, fields]);
 }
 
 export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
   const dispatch = useDispatch();
-  const edge = useSelector((state) => state.edges.data[edgeId]);
-  const { selectedFieldId } = useSelector((state) => state.fields);
+  const edge = useSelector((state) => state.graph.edges[edgeId]);
+  const { selectedFieldId } = useSelector((state) => state.graph);
 
   const fields = useFieldsByEdge(edgeId);
 
@@ -128,7 +123,7 @@ export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
             }`}
             onClick={() => {
               if (selectedFieldId !== field.id) {
-                dispatch(customFieldActions.selectField(field.id));
+                dispatch(selectField(field.id));
               }
             }}
           >

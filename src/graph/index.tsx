@@ -8,8 +8,7 @@ import { DomainEdge } from './domain-edge';
 import { Simulation } from '../simulation';
 import { NodePicker } from './node-picker';
 import { Spotlight } from './spotlight';
-import { useVisibleEdges } from '../state/edges/hooks';
-import { useVisibleNodeIds } from '../state/nodes/hooks';
+import { useVisibleEdgeIds, useVisibleNodeIds } from '../state/graph/hooks';
 
 export interface GraphProps {
   id: string;
@@ -18,7 +17,7 @@ export interface GraphProps {
 
 export const Graph: React.VFC<GraphProps> = ({ id }) => {
   const nodeIds = useVisibleNodeIds();
-  const edges = useVisibleEdges();
+  const edgeIds = useVisibleEdgeIds();
 
   return (
     <Simulation
@@ -29,8 +28,8 @@ export const Graph: React.VFC<GraphProps> = ({ id }) => {
     >
       <SvgCanvas>
         <g>
-          {edges.map((edge) => (
-            <DomainEdge key={edge.id} edgeId={edge.id} />
+          {edgeIds.map((edgeId) => (
+            <DomainEdge key={edgeId} edgeId={edgeId} />
           ))}
         </g>
         <g>

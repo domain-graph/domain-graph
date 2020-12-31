@@ -9,10 +9,9 @@ import { getRegistry } from '../registry';
 import { interospectionHeuristic } from '../tools/factory/heuristics/introspection';
 import { connectionHeuristic } from '../tools/factory/heuristics/relay-connection';
 
-import { nodeDef, nodes as nodesEntity } from './nodes';
-import { edgeDef, edges as edgesEntity } from './edges';
-import { fieldDef, fields as fieldsEntity } from './fields';
+import { importState } from './graph/actions';
 import { getInitialState } from '../tools/factory/factory-2.0';
+import { defaultState } from './graph';
 
 const composeEnhancers =
   window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
@@ -25,15 +24,9 @@ export async function getStore(
   introspection: IntrospectionQuery,
   stateRepository: StateRepository,
 ): Promise<ApplicationStore> {
-  const state: ApplicationState = {
-    fields: { ix_nodeId: {}, data: {} },
-    edges: { data: {} },
-    nodes: { data: {}, visibleNodeIds: [] },
-  };
-
   const store = createStore(
     reducers,
-    state,
+    { graph: defaultState },
     composeEnhancers(applyMiddleware(thunk.withExtraArgument(registry))),
   );
 
@@ -42,9 +35,7 @@ export async function getStore(
     interospectionHeuristic,
   ]);
 
-  store.dispatch(nodesEntity.setEach(index(nodes, nodeDef)));
-  store.dispatch(edgesEntity.setEach(index(edges, edgeDef)));
-  store.dispatch(fieldsEntity.setEach(index(fields, fieldDef)));
+  store.dispatch(importState(nodes, edges, fields, []));
 
   return store;
 }

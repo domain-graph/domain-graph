@@ -2,39 +2,46 @@ import './domain-object.less';
 
 import React, { useCallback, useRef, useState } from 'react';
 
-import { nodes as nodesEntity } from '../state/nodes';
-import * as customNodeActions from '../state/nodes/custom-actions';
 import { useNodeSubscriber } from '../simulation';
 import { EyeOff, Graph, Lock, Unlock } from '../icons';
 import { CircleButton } from '../svg-button';
 import { RadialMenu } from './radial-menu';
 import { useDispatch, useSelector } from '../state';
+import {
+  expandNode,
+  hideNode,
+  pinNode,
+  selectNode,
+  unpinNode,
+} from '../state/graph/actions';
 
 export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
   const dispatch = useDispatch();
-  const { isPinned } = useSelector((state) => state.nodes.data[nodeId]);
-  const sourceId = useSelector((state) => state.nodes.selectedSourceNodeId);
-  const targetId = useSelector((state) => state.nodes.selectedTargetNodeId);
-
-  const handleClickHide = useCallback(
-    () => dispatch(nodesEntity.patch(nodeId, { isVisible: false })),
-    [nodeId, dispatch],
+  const isPinned = useSelector(
+    (state) => state.graph.visibleNodes[nodeId]?.isPinned === true,
   );
+  const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
+  const targetId = useSelector((state) => state.graph.selectedTargetNodeId);
+
+  const handleClickHide = useCallback(() => dispatch(hideNode(nodeId)), [
+    nodeId,
+    dispatch,
+  ]);
 
   const handleClickPin = useCallback(
-    () => dispatch(nodesEntity.patch(nodeId, { isPinned: !isPinned })),
+    () => dispatch(isPinned ? unpinNode(nodeId) : pinNode(nodeId)),
     [nodeId, isPinned, dispatch],
   );
 
-  const handleClickExpand = useCallback(
-    () => dispatch(customNodeActions.expandNode(nodeId)),
-    [nodeId, dispatch],
-  );
+  const handleClickExpand = useCallback(() => dispatch(expandNode(nodeId)), [
+    nodeId,
+    dispatch,
+  ]);
 
-  const handleClickSelect = useCallback(
-    () => dispatch(customNodeActions.selectNode(nodeId)),
-    [nodeId, dispatch],
-  );
+  const handleClickSelect = useCallback(() => dispatch(selectNode(nodeId)), [
+    nodeId,
+    dispatch,
+  ]);
 
   const isSelected = nodeId === sourceId || nodeId === targetId;
 
@@ -46,7 +53,7 @@ export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
   useNodeSubscriber(nodeId, (event, { x, y }) => {
     if (event === 'dragstart') {
       setIsDragging(true);
-      if (!isPinned) dispatch(nodesEntity.patch(nodeId, { isPinned: true }));
+      if (!isPinned) dispatch(pinNode(nodeId));
     } else if (event === 'dragend') {
       setIsDragging(false);
     }

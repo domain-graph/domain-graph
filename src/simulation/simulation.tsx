@@ -12,10 +12,8 @@ import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
 import { GraphState } from '../graph-state';
-import { Node } from '../state/nodes';
-import { Edge } from '../state/edges';
-import { useVisibleNodes } from '../state/nodes/hooks';
-import { useVisibleEdges } from '../state/edges/hooks';
+import { Edge, VisibleNode } from '../state/graph';
+import { useVisibleEdges, useVisibleNodes } from '../state/graph/hooks';
 
 /**
  * Maps items using the provided mapping function. The resulting
@@ -56,7 +54,7 @@ function useStableMap<TIn, TOut, KeyProp extends keyof TIn & keyof TOut>(
   );
 }
 
-type SimulationNode = Pick<Node, 'id' | 'isPinned'> & d3.SimulationNodeDatum;
+type SimulationNode = VisibleNode & d3.SimulationNodeDatum;
 type SimulationEdge = Pick<Edge, 'id'> & d3.SimulationLinkDatum<SimulationNode>;
 
 function isNotNull<T>(obj: T | null | undefined): obj is T {

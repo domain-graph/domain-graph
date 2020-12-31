@@ -5,14 +5,13 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { IconButton } from '../components/icon-button';
 import { Maximize2, Minimize2, X } from '../icons';
 import { useSelector, useDispatch } from '../state';
-import * as customFieldActions from '../state/fields/custom-actions';
-import * as customNodeActions from '../state/nodes/custom-actions';
-import { useFields } from '../state/nodes/hooks';
+import { deselectNode, selectField } from '../state/graph/actions';
+import { useFields } from '../state/graph/hooks';
 
 export const Spotlight: React.VFC = () => {
-  const sourceId = useSelector((state) => state.nodes.selectedSourceNodeId);
-  const fieldId = useSelector((state) => state.fields.selectedFieldId);
-  const targetId = useSelector((state) => state.nodes.selectedTargetNodeId);
+  const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
+  const fieldId = useSelector((state) => state.graph.selectedFieldId);
+  const targetId = useSelector((state) => state.graph.selectedTargetNodeId);
 
   if (!sourceId) return null;
 
@@ -27,7 +26,7 @@ export const Spotlight: React.VFC = () => {
 
 const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
   const { name, description, heuristic } = useSelector(
-    (state) => state.fields.data[fieldId],
+    (state) => state.graph.fields[fieldId],
   );
   return (
     <div className="edge-spotlight">
@@ -72,13 +71,13 @@ const Controls: React.VFC<{
 
 const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
   const dispatch = useDispatch();
-  const node = useSelector((state) => state.nodes.data[nodeId]);
+  const node = useSelector((state) => state.graph.nodes[nodeId]);
   const fields = useFields(nodeId);
   const ids = fields.filter((f) => f.typeName === 'ID');
   const scalars = fields.filter((f) => f.typeName !== 'ID' && !f.edgeId);
   const edges = fields.filter((f) => f.edgeId);
 
-  const { selectedFieldId } = useSelector((state) => state.fields);
+  const { selectedFieldId } = useSelector((state) => state.graph);
 
   const [isExpanded, setIsExpanded] = useState(!selectedFieldId);
 
@@ -91,7 +90,7 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
       <Controls
         isExpanded={isExpanded}
         size={16}
-        onClose={() => dispatch(customNodeActions.deselectNode(nodeId))}
+        onClose={() => dispatch(deselectNode(nodeId))}
         onExpand={() => setIsExpanded(true)}
         onCollapse={() => setIsExpanded(false)}
       />
@@ -121,7 +120,7 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
 };
 
 const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
-  const { name } = useSelector((state) => state.fields.data[fieldId]);
+  const { name } = useSelector((state) => state.graph.fields[fieldId]);
   return (
     <li className="id field">
       <span>{name}</span>
@@ -131,10 +130,10 @@ const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
 
 const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
   const dispatch = useDispatch();
-  const { name } = useSelector((state) => state.fields.data[fieldId]);
+  const { name } = useSelector((state) => state.graph.fields[fieldId]);
 
   const handleClick = useCallback(() => {
-    dispatch(customFieldActions.selectField(fieldId));
+    dispatch(selectField(fieldId));
   }, [fieldId, dispatch]);
 
   return (
@@ -151,7 +150,7 @@ const ScalarField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
     isNotNull,
     isList,
     isListElementNotNull,
-  } = useSelector((state) => state.fields.data[fieldId]);
+  } = useSelector((state) => state.graph.fields[fieldId]);
   return (
     <li className="scalar field">
       <span>{name}</span>: {isList && '['}

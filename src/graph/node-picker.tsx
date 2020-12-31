@@ -4,23 +4,26 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { deindex } from 'flux-standard-functions';
 import { Eye, EyeOff } from '../icons';
 
-import { Node, nodes as nodesEntity } from '../state/nodes';
 import { useDispatch, useSelector } from '../state';
-
-import { hideAllNodes, hideUnpinnedNodes } from '../state/nodes/custom-actions';
+import {
+  hideAllNodes,
+  hideNode,
+  hideUnpinnedNodes,
+  showNode,
+} from '../state/graph/actions';
 
 export const NodePicker: React.VFC = () => {
   const dispatch = useDispatch();
 
   const handleHideAll = useCallback(() => {
-    dispatch(hideAllNodes());
+    dispatch(hideAllNodes() as any); // TODO: :(
   }, [dispatch]);
 
   const handleHideUnpinned = useCallback(() => {
-    dispatch(hideUnpinnedNodes());
+    dispatch(hideUnpinnedNodes() as any); // TODO: :(
   }, [dispatch]);
 
-  const nodes = useSelector((state) => deindex(state.nodes.data));
+  const nodes = useSelector((state) => deindex(state.graph.nodes));
   const [filter, setFilter] = useState<string>('');
   const sortedNodes = useMemo(
     () =>
@@ -48,32 +51,27 @@ export const NodePicker: React.VFC = () => {
       <button onClick={handleHideUnpinned}>Hide unpinned</button>
       <ul>
         {sortedNodes.map((node) => (
-          <Item key={node.id} node={node} />
+          <Item key={node.id} nodeId={node.id} />
         ))}
       </ul>
     </div>
   );
 };
 
-const Item: React.VFC<{ node: Node }> = ({ node }) => {
+const Item: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
   const dispatch = useDispatch();
-
-  const handleShow = useCallback(() => {
-    dispatch(nodesEntity.patch(node.id, { isVisible: true }));
-  }, [node.id, dispatch]);
-
-  const { id, isVisible } = node;
+  const isVisible = useSelector((state) => !!state.graph.visibleNodes[nodeId]);
 
   const handleClick = useCallback(() => {
-    dispatch(nodesEntity.patch(id, { isVisible: !isVisible }));
-  }, [id, isVisible, dispatch]);
+    dispatch(isVisible ? hideNode(nodeId) : showNode(nodeId));
+  }, [nodeId, isVisible, dispatch]);
 
   return (
-    <li className={node.isVisible ? 'visible' : 'hidden'}>
+    <li className={isVisible ? 'visible' : 'hidden'}>
       <button onClick={handleClick}>
-        {node.isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+        {isVisible ? <Eye size={16} /> : <EyeOff size={16} />}
       </button>
-      {node.id}
+      {nodeId}
     </li>
   );
 };
