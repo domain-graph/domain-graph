@@ -114,14 +114,16 @@ export function reducer(
       return showNodes(state, nodeIds);
     }
     case 'graph/pin_node': {
-      const { payload: nodeId } = action;
+      const {
+        payload: { nodeId, x, y },
+      } = action;
 
       if (!state.visibleNodes[nodeId]?.isPinned) {
         return fsf.patch(
           state,
           {
             visibleNodes: {
-              [nodeId]: { id: nodeId, isPinned: true },
+              [nodeId]: { id: nodeId, isPinned: true, x, y },
             },
           },
           stateDef,
@@ -139,6 +141,25 @@ export function reducer(
           {
             visibleNodes: {
               [nodeId]: { isPinned: false },
+            },
+          },
+          stateDef,
+        );
+      } else {
+        return state;
+      }
+    }
+    case 'graph/move_node': {
+      const {
+        payload: { nodeId, x, y },
+      } = action;
+
+      if (state.visibleNodes[nodeId]?.isPinned) {
+        return fsf.patch(
+          state,
+          {
+            visibleNodes: {
+              [nodeId]: { x, y },
             },
           },
           stateDef,

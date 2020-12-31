@@ -24,14 +24,19 @@ export const expandNode = (nodeId: string) => ({
   payload: nodeId,
 });
 
-export const pinNode = (nodeId: string) => ({
+export const pinNode = (nodeId: string, x: number, y: number) => ({
   type: 'graph/pin_node' as const,
-  payload: nodeId,
+  payload: { nodeId, x, y },
 });
 
 export const unpinNode = (nodeId: string) => ({
   type: 'graph/unpin_node' as const,
   payload: nodeId,
+});
+
+export const moveNode = (nodeId: string, x: number, y: number) => ({
+  type: 'graph/move_node' as const,
+  payload: { nodeId, x, y },
 });
 
 export const hideNode = (nodeId: string) => ({
@@ -71,6 +76,7 @@ export type Action =
   | ReturnType<typeof expandNode>
   | ReturnType<typeof pinNode>
   | ReturnType<typeof unpinNode>
+  | ReturnType<typeof moveNode>
   | ReturnType<typeof hideNode>
   | ReturnType<typeof showNode>
   | ReturnType<typeof selectNode>

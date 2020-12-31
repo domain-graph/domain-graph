@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from '../state';
 import {
   expandNode,
   hideNode,
+  moveNode,
   pinNode,
   selectNode,
   unpinNode,
@@ -23,25 +24,27 @@ export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
   const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
   const targetId = useSelector((state) => state.graph.selectedTargetNodeId);
 
+  const dragStart = useRef<{ x: number; y: number }>();
+  const location = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
   const handleClickHide = useCallback(() => dispatch(hideNode(nodeId)), [
     nodeId,
     dispatch,
   ]);
 
-  const handleClickPin = useCallback(
-    () => dispatch(isPinned ? unpinNode(nodeId) : pinNode(nodeId)),
-    [nodeId, isPinned, dispatch],
-  );
+  const handleClickPin = useCallback(() => {
+    const { x, y } = location.current;
+    dispatch(isPinned ? unpinNode(nodeId) : pinNode(nodeId, x, y));
+  }, [nodeId, isPinned, dispatch]);
 
   const handleClickExpand = useCallback(() => dispatch(expandNode(nodeId)), [
     nodeId,
     dispatch,
   ]);
 
-  const handleClickSelect = useCallback(() => dispatch(selectNode(nodeId)), [
-    nodeId,
-    dispatch,
-  ]);
+  const handleClickSelect = useCallback(() => {
+    if (targetId || nodeId !== sourceId) dispatch(selectNode(nodeId));
+  }, [nodeId, sourceId, targetId, dispatch]);
 
   const isSelected = nodeId === sourceId || nodeId === targetId;
 
@@ -52,11 +55,23 @@ export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
 
   useNodeSubscriber(nodeId, (event, { x, y }) => {
     if (event === 'dragstart') {
+      dragStart.current = { x, y };
+      console.log('dragStart', dragStart.current);
       setIsDragging(true);
-      if (!isPinned) dispatch(pinNode(nodeId));
+      if (!isPinned) dispatch(pinNode(nodeId, x, y));
     } else if (event === 'dragend') {
+      console.log('dragend', dragStart.current);
       setIsDragging(false);
+      if (
+        dragStart.current &&
+        (x !== dragStart.current.x || y !== dragStart.current.y)
+      ) {
+        dispatch(moveNode(nodeId, x, y));
+      }
+      dragStart.current = undefined;
     }
+
+    location.current = { x, y };
 
     if (handle.current && controls.current && event === 'tick') {
       handle.current.setAttribute('transform', `translate(${x} ${y})`);
