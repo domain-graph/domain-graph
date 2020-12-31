@@ -6,9 +6,7 @@ import { StateRepository } from './graph-state';
 import { ApplicationStore, getStore } from './state/store';
 
 export interface DomainGraphProps {
-  graphId: string;
   introspection: IntrospectionQuery;
-  stateRepository: StateRepository;
 }
 
 export const DomainGraph: React.VFC<DomainGraphProps> = ({ introspection }) => {

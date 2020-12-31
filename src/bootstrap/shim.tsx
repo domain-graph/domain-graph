@@ -22,13 +22,7 @@ export const Shim: React.VFC = () => {
   return (
     <>
       <DataProvider onDrop={handleDrop} onShowOpenDialog={handleShowOpenDialog}>
-        {(introspection) => (
-          <DomainGraph
-            graphId="default" // TODO: add graph picker
-            introspection={introspection}
-            stateRepository={stateRepository}
-          />
-        )}
+        {(introspection) => <DomainGraph introspection={introspection} />}
       </DataProvider>
       <BrowserOpenFileDialog
         ref={openFileDialog}
