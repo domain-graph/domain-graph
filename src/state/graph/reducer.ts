@@ -8,6 +8,7 @@ import {
   edgeDef,
   fieldDef,
   defaultState,
+  argDef,
 } from '.';
 import { Action } from './actions';
 
@@ -18,11 +19,20 @@ export function reducer(
   switch (action.type) {
     case 'graph/import_state': {
       const {
-        payload: { nodes, edges, fields, visibleNodes },
+        payload: { args, nodes, edges, fields, visibleNodes },
       } = action;
 
       const fieldIdsByNodeId = new Map<string, Set<string>>();
       const fieldIdsByEdgeId = new Map<string, Set<string>>();
+      const argIdsByFieldId = new Map<string, Set<string>>();
+      for (const arg of args) {
+        const byFieldId = argIdsByFieldId.get(arg.fieldId);
+        if (byFieldId) {
+          byFieldId.add(arg.id);
+        } else {
+          argIdsByFieldId.set(arg.fieldId, new Set([arg.id]));
+        }
+      }
       for (const field of fields) {
         const byNodeId = fieldIdsByNodeId.get(field.nodeId);
         if (byNodeId) {
@@ -39,6 +49,7 @@ export function reducer(
             fieldIdsByEdgeId.set(field.edgeId, new Set([field.id]));
           }
         }
+        field.argIds = Array.from(argIdsByFieldId.get(field.id) || []);
       }
       for (const node of nodes) {
         node.fieldIds = Array.from(fieldIdsByNodeId.get(node.id) || []);
@@ -56,6 +67,7 @@ export function reducer(
         .map((edge) => edge.id);
 
       return {
+        args: fsf.index(args, argDef),
         nodes: fsf.index(nodes, nodeDef),
         edges: fsf.index(edges, edgeDef),
         fields: fsf.index(fields, fieldDef),

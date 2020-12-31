@@ -38,6 +38,7 @@ export type Field = {
   id: string;
   nodeId: string;
   edgeId?: string;
+  argIds: string[];
   isReverse?: boolean;
   name: string;
   description?: string;
@@ -53,10 +54,37 @@ export const fieldDef = define<Field>({
   id: key(),
   nodeId: required(),
   edgeId: optional(),
+  argIds: required(array()),
   isReverse: optional(),
   name: required(),
   description: optional(),
   heuristic: optional(),
+  typeKind: required(),
+  typeName: required(),
+  isNotNull: required(),
+  isList: required(),
+  isListElementNotNull: optional(),
+});
+
+export type Arg = {
+  id: string;
+  fieldId: string;
+  name: string;
+  description?: string;
+  defaultValue?: string;
+  typeKind: SpecificFieldType['kind'];
+  typeName: SpecificFieldType['name'];
+  isNotNull: boolean;
+  isList: boolean;
+  isListElementNotNull?: boolean;
+};
+
+export const argDef = define<Arg>({
+  id: key(),
+  fieldId: required(),
+  name: required(),
+  description: optional(),
+  defaultValue: optional(),
   typeKind: required(),
   typeName: required(),
   isNotNull: required(),
@@ -75,6 +103,7 @@ export const visibleNodeDef = define<VisibleNode>({
 });
 
 export type GraphState = {
+  args: Record<string, Arg>;
   edges: Record<string, Edge>;
   fields: Record<string, Field>;
   nodes: Record<string, Node>;
@@ -86,6 +115,7 @@ export type GraphState = {
 };
 
 export const stateDef = define<GraphState>({
+  args: required(indexOf(argDef)),
   edges: required(indexOf(edgeDef)),
   fields: required(indexOf(fieldDef)),
   nodes: required(indexOf(nodeDef)),
@@ -97,6 +127,7 @@ export const stateDef = define<GraphState>({
 });
 
 export const defaultState: GraphState = {
+  args: {},
   edges: {},
   fields: {},
   nodes: {},

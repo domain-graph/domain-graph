@@ -1,5 +1,5 @@
 import { IntrospectionQuery } from 'graphql';
-import { Edge, Node, Field } from '../../state/graph';
+import { Edge, Node, Field, Arg } from '../../state/graph';
 import {
   isEnumFieldType,
   isScalarFieldType,
@@ -8,6 +8,7 @@ import {
   SchemaType,
   Field as SchemaField,
   SpecificFieldType,
+  InputValue,
 } from '../types';
 import { normalizeFieldType } from '../utils';
 import { TypeHeuristic, TypeHeuristicResult } from './types';
@@ -27,16 +28,25 @@ function createFieldId(type: SpecificFieldType, field: SchemaField): string {
   return `${type.name}.${field.name}`;
 }
 
+function createArgId(
+  type: SpecificFieldType,
+  field: SchemaField,
+  arg: InputValue,
+): string {
+  return `${type.name}.${field.name}(${arg.name})`;
+}
+
 export function getInitialState(
   introspection: IntrospectionQuery,
   heuristics: TypeHeuristic[],
-): { nodes: Node[]; edges: Edge[]; fields: Field[] } {
+): { nodes: Node[]; edges: Edge[]; fields: Field[]; args: Arg[] } {
   const schema: Schema = { data: introspection as any };
   const { types } = schema.data.__schema;
 
   const nodes = new Map<string, Node>();
   const edges = new Map<string, Edge>();
   const fields = new Map<string, Field>();
+  const args = new Map<string, Arg>();
 
   const edgeIdsByFieldId = new Map<string, string>();
 
@@ -129,6 +139,7 @@ export function getInitialState(
         id: fieldId,
         nodeId,
         edgeId,
+        argIds: [], // This gets populated in the reducer
         isReverse: edgeId === undefined ? undefined : edgeId === reverseEdgeId,
         name: field.name,
         description: field.description || undefined,
@@ -137,11 +148,41 @@ export function getInitialState(
         typeName: targetType.name,
         isNotNull: fieldType.isNotNull,
         isList: hueristicResult ? hueristicResult.forceList : fieldType.isList,
-        isListElementNotNull: fieldType.isListElementNotNull || undefined,
+        isListElementNotNull:
+          fieldType.isListElementNotNull === null
+            ? undefined
+            : fieldType.isListElementNotNull,
       });
 
-      if (type.name === 'Repository') {
-        console.log(fields.get(fieldId));
+      // Build Args
+      for (const arg of field.args) {
+        const argType = normalizeFieldType(arg.type);
+
+        const argId = createArgId(type, field, arg);
+
+        // TODO: put this logic in the heuristic
+        if (hueristicResult?.heuristicName === 'connection') {
+          if (arg.name === 'before') continue;
+          if (arg.name === 'after') continue;
+          if (arg.name === 'first') continue;
+          if (arg.name === 'last') continue;
+        }
+
+        args.set(argId, {
+          id: argId,
+          fieldId,
+          name: arg.name,
+          description: arg.description || undefined,
+          defaultValue: arg.defaultValue || undefined,
+          typeKind: argType.type.kind,
+          typeName: argType.type.name,
+          isNotNull: argType.isNotNull,
+          isList: argType.isList,
+          isListElementNotNull:
+            argType.isListElementNotNull === null
+              ? undefined
+              : argType.isListElementNotNull,
+        });
       }
     }
   }
@@ -150,5 +191,6 @@ export function getInitialState(
     nodes: Array.from(nodes.values()),
     edges: Array.from(edges.values()),
     fields: Array.from(fields.values()),
+    args: Array.from(args.values()),
   };
 }
