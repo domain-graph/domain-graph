@@ -149,7 +149,7 @@ export function reducer(
         return state;
       }
     }
-    case 'graph/move_node': {
+    case 'graph/update_node_location': {
       const {
         payload: { nodeId, x, y },
       } = action;
@@ -167,6 +167,11 @@ export function reducer(
       } else {
         return state;
       }
+    }
+    case 'graph/update_node_locations': {
+      const { payload } = action;
+
+      return fsf.patch(state, { visibleNodes: payload }, stateDef);
     }
     case 'graph/hide_node': {
       const { payload: nodeId } = action;

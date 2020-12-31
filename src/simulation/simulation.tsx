@@ -14,6 +14,9 @@ import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
 import { GraphState } from '../graph-state';
 import { Edge, VisibleNode } from '../state/graph';
 import { useVisibleEdges, useVisibleNodes } from '../state/graph/hooks';
+import { useDispatch, useSelector } from '../state';
+import { updateNodeLocations } from '../state/graph/actions';
+import { shallowEqual } from 'react-redux';
 
 /**
  * Maps items using the provided mapping function. The resulting
@@ -53,8 +56,46 @@ function useStableMap<TIn, TOut, KeyProp extends keyof TIn & keyof TOut>(
     [items, keyProp, map],
   );
 }
+type PartialNode = Pick<VisibleNode, 'id' | 'isPinned'>;
 
-type SimulationNode = VisibleNode & d3.SimulationNodeDatum;
+/**
+ * Returns an array of pinned/unpinned nodes.
+ * The array reference is stable even if the (x,y) coords change.
+ * Note that useEffect cannot be used here because this selector
+ * must be synchronous or the actual D3 simulation throws.
+ */
+function useVisiblePartialNodes(): PartialNode[] {
+  const selector = useCallback(
+    (nodes: typeof visibleNodes): Record<string, boolean> =>
+      Object.keys(nodes).reduce((acc, nodeId) => {
+        acc[nodeId] = nodes[nodeId].isPinned;
+        return acc;
+      }, {}),
+    [],
+  );
+  const mapper = useCallback(
+    (m: Record<string, boolean>): PartialNode[] =>
+      Object.keys(m).map<PartialNode>((id) => ({
+        id,
+        isPinned: m[id],
+      })),
+    [],
+  );
+  const { visibleNodes } = useSelector((state) => state.graph);
+
+  const pinMap = selector(visibleNodes);
+  const pinMapRef = useRef(pinMap);
+  const resultRef = useRef(mapper(pinMap));
+
+  if (!shallowEqual(pinMap, pinMapRef.current)) {
+    pinMapRef.current = pinMap;
+    resultRef.current = mapper(pinMap);
+  }
+
+  return resultRef.current;
+}
+
+type SimulationNode = PartialNode & d3.SimulationNodeDatum;
 type SimulationEdge = Pick<Edge, 'id'> & d3.SimulationLinkDatum<SimulationNode>;
 
 function isNotNull<T>(obj: T | null | undefined): obj is T {
@@ -71,12 +112,13 @@ export const Simulation: React.FC<SimulationProps> = ({
   onChange,
   children,
 }) => {
+  const dispatch = useDispatch();
   const [svg, setSvg] = useState(d3.select('svg'));
   useEffect(() => {
     setSvg(d3.select('svg'));
   }, []);
 
-  const visibleNodes = useVisibleNodes();
+  const visibleNodes = useVisiblePartialNodes();
   const visibleEdges = useVisibleEdges();
 
   const circularEdgeIdsByNode: Record<string, string[]> = useMemo(
@@ -93,10 +135,8 @@ export const Simulation: React.FC<SimulationProps> = ({
     [visibleEdges],
   );
 
-  const clonedNodes: SimulationNode[] = useStableMap(
-    visibleNodes,
-    'id',
-    (node, simNode) => ({
+  const nodeMapper = useCallback(
+    (node: PartialNode, simNode: SimulationNode | undefined) => ({
       ...simNode,
       id: node.id,
       isPinned: node.isPinned,
@@ -105,18 +145,30 @@ export const Simulation: React.FC<SimulationProps> = ({
       vx: node.isPinned ? 0 : simNode?.vx,
       vy: node.isPinned ? 0 : simNode?.vy,
     }),
+    [],
   );
 
-  const clonedEdges: SimulationEdge[] = useStableMap(
-    visibleEdges,
+  const clonedNodes: SimulationNode[] = useStableMap(
+    visibleNodes,
     'id',
-    (edge, simEdge) => {
+    nodeMapper,
+  );
+
+  const edgeMapper = useCallback(
+    (edge: Edge, simEdge: SimulationEdge | undefined) => {
       return {
         ...edge,
         source: simEdge?.source || edge.sourceNodeId,
         target: simEdge?.target || edge.targetNodeId,
       };
     },
+    [],
+  );
+
+  const clonedEdges: SimulationEdge[] = useStableMap(
+    visibleEdges,
+    'id',
+    edgeMapper,
   );
 
   const nodeEventsByNodeId = useRef<Record<string, NodeEvent>>({});
@@ -168,39 +220,33 @@ export const Simulation: React.FC<SimulationProps> = ({
       node.call(drag(simulation, nodeEventsByNodeId.current));
 
       simulation.on('end', () => {
-        onChange({
-          nodes: clonedNodes
-            .map((n) => {
-              if (typeof n.x === 'number' && typeof n.y === 'number') {
-                return {
-                  id: n.id,
-                  fixed: typeof n.fx === 'number',
-                  x: n.x,
-                  y: n.y,
-                };
-              } else {
-                return null;
-              }
-            })
-            .filter(isNotNull),
-        });
+        const payload: Record<
+          string,
+          { x: number; y: number }
+        > = clonedNodes.reduce((acc, item) => {
+          acc[item.id] = { x: r10(item.x || 0), y: r10(item.y || 0) };
+
+          return acc;
+        }, {});
+
+        dispatch(updateNodeLocations(payload));
       });
 
       simulation.on('tick', () => {
         link.each((d: any) => {
           edgeEventsByEdgeId.current[d.id]?.({
-            x1: d.source.x,
-            y1: d.source.y,
-            x2: d.target.x,
-            y2: d.target.y,
+            x1: r10(d.source.x),
+            y1: r10(d.source.y),
+            x2: r10(d.target.x),
+            y2: r10(d.target.y),
           });
         });
 
         node.each((d) => {
           if (typeof d.x === 'number' && typeof d.y === 'number') {
             nodeEventsByNodeId.current[d.id]?.('tick', {
-              x: d.x,
-              y: d.y,
+              x: r10(d.x),
+              y: r10(d.y),
             });
 
             const edgeIds = circularEdgeIdsByNode[d.id];
@@ -208,10 +254,10 @@ export const Simulation: React.FC<SimulationProps> = ({
             if (edgeIds?.length) {
               for (const edgeId of edgeIds) {
                 edgeEventsByEdgeId.current[edgeId]?.({
-                  x1: d.x,
-                  y1: d.y,
-                  x2: d.x,
-                  y2: d.y,
+                  x1: r10(d.x),
+                  y1: r10(d.y),
+                  x2: r10(d.x),
+                  y2: r10(d.y),
                 });
               }
             }
@@ -225,7 +271,14 @@ export const Simulation: React.FC<SimulationProps> = ({
     } else {
       return undefined;
     }
-  }, [clonedNodes, clonedEdges, circularEdgeIdsByNode, svg, onChange]);
+  }, [
+    clonedNodes,
+    clonedEdges,
+    circularEdgeIdsByNode,
+    svg,
+    onChange,
+    dispatch,
+  ]);
 
   return (
     <context.Provider value={{ nodeSubscriber, edgeSubscriber }}>
@@ -241,8 +294,8 @@ function drag(
   function dragstarted(event) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     subscribers[event.subject.id]?.('dragstart', {
-      x: event.subject.x,
-      y: event.subject.y,
+      x: r10(event.subject.x),
+      y: r10(event.subject.y),
     });
     event.subject.fx = event.subject.x;
     event.subject.fy = event.subject.y;
@@ -250,8 +303,8 @@ function drag(
 
   function dragged(event) {
     subscribers[event.subject.id]?.('drag', {
-      x: event.x,
-      y: event.y,
+      x: r10(event.x),
+      y: r10(event.y),
     });
     event.subject.fx = event.x;
     event.subject.fy = event.y;
@@ -260,8 +313,8 @@ function drag(
   function dragended(event) {
     if (!event.active) simulation.alphaTarget(0);
     subscribers[event.subject.id]?.('dragend', {
-      x: event.subject.x,
-      y: event.subject.y,
+      x: r10(event.subject.x),
+      y: r10(event.subject.y),
     });
     if (!event.subject.isPinned) {
       event.subject.fx = null;
@@ -276,4 +329,8 @@ function drag(
     .on('start', dragstarted)
     .on('drag', dragged)
     .on('end', dragended);
+}
+
+function r10(n: number): number {
+  return Math.round(n * 10) / 10.0;
 }

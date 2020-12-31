@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from '../state';
 import {
   expandNode,
   hideNode,
-  moveNode,
+  updateNodeLocation,
   pinNode,
   selectNode,
   unpinNode,
@@ -56,17 +56,15 @@ export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
   useNodeSubscriber(nodeId, (event, { x, y }) => {
     if (event === 'dragstart') {
       dragStart.current = { x, y };
-      console.log('dragStart', dragStart.current);
       setIsDragging(true);
       if (!isPinned) dispatch(pinNode(nodeId, x, y));
     } else if (event === 'dragend') {
-      console.log('dragend', dragStart.current);
       setIsDragging(false);
       if (
         dragStart.current &&
         (x !== dragStart.current.x || y !== dragStart.current.y)
       ) {
-        dispatch(moveNode(nodeId, x, y));
+        dispatch(updateNodeLocation(nodeId, x, y));
       }
       dragStart.current = undefined;
     }
