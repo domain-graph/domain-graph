@@ -1,13 +1,11 @@
 import { combineReducers } from 'redux';
 import { Registry } from '../registry';
-import { edges } from './edges';
-import { reducer as fieldsReducer } from './fields';
-import { reducer as nodesReducer } from './nodes';
 import { OmitByType } from '../utils';
 import {
   useSelector as useOriginalSelector,
   useDispatch as useOriginalDispatch,
 } from 'react-redux';
+import { reducer } from './graph/reducer';
 
 export type FluxStandardAction<
   TType extends string = string,
@@ -46,9 +44,7 @@ export type Thunk<ThunkResult = void> = (
 ) => Promise<ThunkResult>;
 
 export const reducers = combineReducers({
-  edges: edges.standardReducer,
-  fields: fieldsReducer,
-  nodes: nodesReducer,
+  graph: reducer,
 });
 
 export type ApplicationState = OmitByType<

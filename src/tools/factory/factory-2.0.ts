@@ -1,7 +1,5 @@
 import { IntrospectionQuery } from 'graphql';
-import { Edge } from '../../state/edges';
-import { Field } from '../../state/fields';
-import { Node } from '../../state/nodes';
+import { Edge, Node, Field } from '../../state/graph';
 import {
   isEnumFieldType,
   isScalarFieldType,
@@ -70,8 +68,7 @@ export function getInitialState(
     const node: Node = {
       id: createNodeId(type),
       description: type.description || undefined,
-      isPinned: false,
-      isVisible: false,
+      fieldIds: [], // This gets populated in the reducer
     };
     nodes.set(node.id, node);
   }
@@ -102,6 +99,7 @@ export function getInitialState(
         id: edgeId,
         sourceNodeId: nodeId,
         targetNodeId: createNodeId(targetType),
+        fieldIds: [], // This gets populated in the reducer
       });
       edgeIdsByFieldId.set(fieldId, edgeId);
     }
