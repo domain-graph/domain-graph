@@ -11,9 +11,8 @@ import * as d3 from 'd3';
 import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
-import { GraphState } from '../graph-state';
 import { Edge, VisibleNode } from '../state/graph';
-import { useVisibleEdges, useVisibleNodes } from '../state/graph/hooks';
+import { useVisibleEdges } from '../state/graph/hooks';
 import { useDispatch, useSelector } from '../state';
 import { updateNodeLocations } from '../state/graph/actions';
 import { shallowEqual } from 'react-redux';
@@ -57,6 +56,8 @@ function useStableMap<TIn, TOut, KeyProp extends keyof TIn & keyof TOut>(
   );
 }
 type PartialNode = Pick<VisibleNode, 'id' | 'isPinned'>;
+type SimulationNode = PartialNode & d3.SimulationNodeDatum;
+type SimulationEdge = Pick<Edge, 'id'> & d3.SimulationLinkDatum<SimulationNode>;
 
 /**
  * Returns an array of pinned/unpinned nodes.
@@ -95,23 +96,7 @@ function useVisiblePartialNodes(): PartialNode[] {
   return resultRef.current;
 }
 
-type SimulationNode = PartialNode & d3.SimulationNodeDatum;
-type SimulationEdge = Pick<Edge, 'id'> & d3.SimulationLinkDatum<SimulationNode>;
-
-function isNotNull<T>(obj: T | null | undefined): obj is T {
-  return obj !== null && typeof obj !== 'undefined';
-}
-
-export type SimulationState = Pick<GraphState, 'nodes'>;
-
-export interface SimulationProps {
-  onChange: (state: SimulationState) => void;
-}
-
-export const Simulation: React.FC<SimulationProps> = ({
-  onChange,
-  children,
-}) => {
+export const Simulation: React.FC = ({ children }) => {
   const dispatch = useDispatch();
   const [svg, setSvg] = useState(d3.select('svg'));
   useEffect(() => {
@@ -271,14 +256,7 @@ export const Simulation: React.FC<SimulationProps> = ({
     } else {
       return undefined;
     }
-  }, [
-    clonedNodes,
-    clonedEdges,
-    circularEdgeIdsByNode,
-    svg,
-    onChange,
-    dispatch,
-  ]);
+  }, [clonedNodes, clonedEdges, circularEdgeIdsByNode, svg, dispatch]);
 
   return (
     <context.Provider value={{ nodeSubscriber, edgeSubscriber }}>

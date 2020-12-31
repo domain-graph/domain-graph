@@ -19,11 +19,7 @@ export const Graph: React.VFC<GraphProps> = () => {
   const edgeIds = useVisibleEdgeIds();
 
   return (
-    <Simulation
-      onChange={() => {
-        /* todo */
-      }}
-    >
+    <Simulation>
       <SvgCanvas>
         <g>
           {edgeIds.map((edgeId) => (

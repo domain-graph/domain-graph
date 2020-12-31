@@ -7,19 +7,21 @@ import { reducers } from '.';
 import { interospectionHeuristic } from '../tools/factory/heuristics/introspection';
 import { connectionHeuristic } from '../tools/factory/heuristics/relay-connection';
 
-import { importState } from './graph/actions';
+import { importSaveState, importState } from './graph/actions';
 import { getInitialState } from '../tools/factory/factory-2.0';
 import { defaultState } from './graph';
+import { SaveStateRepository } from '../persistence';
 
 const composeEnhancers =
   window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
-// const registry = getRegistry();
 
 export type ApplicationStore = Store<ReturnType<typeof reducers>>;
 
 export async function getStore(
+  graphId: string,
   introspection: IntrospectionQuery,
-): Promise<ApplicationStore> {
+  repository: SaveStateRepository,
+): Promise<{ store: ApplicationStore; unsubscribe: () => void }> {
   const store = createStore(
     reducers,
     { graph: defaultState },
@@ -33,5 +35,30 @@ export async function getStore(
 
   store.dispatch(importState(nodes, edges, fields, args, []));
 
-  return store;
+  const saveState = await repository.get(graphId);
+
+  if (saveState) store.dispatch(importSaveState(saveState));
+
+  const unsubscribe = store.subscribe(() => {
+    // TODO: debounce
+
+    const {
+      visibleNodes,
+      selectedSourceNodeId,
+      selectedFieldId,
+      selectedTargetNodeId,
+    } = store.getState().graph;
+
+    repository.set(graphId, {
+      graph: {
+        visibleNodes,
+        selectedSourceNodeId,
+        selectedFieldId,
+        selectedTargetNodeId,
+      },
+      canvas: { scale: 1, x: 0, y: 0 },
+    });
+  });
+
+  return { store, unsubscribe };
 }
