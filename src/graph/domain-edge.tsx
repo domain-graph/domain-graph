@@ -1,31 +1,45 @@
 import './domain-edge.less';
 
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
+import { deindex } from 'flux-standard-functions';
+import { shallowEqual } from 'react-redux';
 
 import { useEdgeSubscriber } from '../simulation';
 
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
 import { useDispatch, useSelector } from '../state';
-import { useFieldIds } from '../state/nodes/hooks';
 import * as customFieldActions from '../state/fields/custom-actions';
+import { Field } from '../state/fields';
 
 const handleSize = 20;
+
+function useFieldIdsByEdge(edgeId: string): string[] {
+  return useSelector(
+    (state) =>
+      deindex(state.fields.data)
+        .filter((field) => field.edgeId === edgeId)
+        .map((field) => field.id),
+    shallowEqual,
+  );
+}
+
+function useFieldsByEdge(edgeId: string): Field[] {
+  const fieldIds = useFieldIdsByEdge(edgeId);
+
+  const allFields = useSelector((state) => state.fields.data);
+
+  return useMemo(() => {
+    const xx = fieldIds.map((fieldId) => allFields[fieldId]).filter((x) => x);
+    return xx;
+  }, [fieldIds, allFields]);
+}
 
 export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
   const dispatch = useDispatch();
   const edge = useSelector((state) => state.edges.data[edgeId]);
   const { selectedFieldId } = useSelector((state) => state.fields);
-  const sourceFieldIds = useFieldIds(edge.sourceNodeId);
-  const targetFieldIds = useFieldIds(edge.targetNodeId);
-  const allFields = useSelector((state) => state.fields.data);
 
-  const fields = useMemo(
-    () =>
-      [...sourceFieldIds, ...targetFieldIds]
-        .map((fieldId) => allFields[fieldId])
-        .filter((field) => field.edgeId === edgeId),
-    [edgeId, allFields, sourceFieldIds, targetFieldIds],
-  );
+  const fields = useFieldsByEdge(edgeId);
 
   const g = useRef<SVGGElement>(null);
   const paths = useRef<SVGPathElement[]>([]);
