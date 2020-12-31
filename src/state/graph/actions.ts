@@ -1,4 +1,5 @@
 import { VisibleNode, Node, Edge, Field, Arg } from '.';
+import { SaveState } from '../../persistence';
 
 export const importState = (
   nodes: Node[],
@@ -9,6 +10,11 @@ export const importState = (
 ) => ({
   type: 'graph/import_state' as const,
   payload: { args, nodes, edges, fields, visibleNodes },
+});
+
+export const importSaveState = (state: SaveState) => ({
+  type: 'graph/import_save_state' as const,
+  payload: state,
 });
 
 export const hideAllNodes = () => ({
@@ -78,6 +84,7 @@ export const deselectField = (fieldId: string) => ({
 
 export type Action =
   | ReturnType<typeof importState>
+  | ReturnType<typeof importSaveState>
   | ReturnType<typeof hideAllNodes>
   | ReturnType<typeof hideUnpinnedNodes>
   | ReturnType<typeof expandNode>

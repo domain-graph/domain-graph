@@ -1,4 +1,4 @@
-export { Simulation, SimulationState } from './simulation';
+export { Simulation } from './simulation';
 export {
   EdgeEvent,
   EdgeSubscriber,

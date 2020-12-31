@@ -9,6 +9,7 @@ import {
   fieldDef,
   defaultState,
   argDef,
+  VisibleNode,
 } from '.';
 import { Action } from './actions';
 
@@ -74,6 +75,41 @@ export function reducer(
         visibleNodes: fsf.index(visibleNodes, visibleNodeDef),
         visibleEdgeIds,
       };
+    }
+    case 'graph/import_save_state': {
+      const { payload } = action;
+      if (!payload?.graph?.visibleNodes) return state;
+
+      const {
+        visibleNodes,
+        selectedSourceNodeId: s,
+        selectedFieldId: f,
+        selectedTargetNodeId: t,
+      } = payload.graph;
+
+      let nextState = state;
+      nextState = fsf.set(nextState, 'visibleNodes', {}, stateDef);
+      nextState = fsf.set(nextState, 'visibleEdgeIds', [], stateDef);
+      nextState = fsf.unset(nextState, 'selectedSourceNodeId', stateDef);
+      nextState = fsf.unset(nextState, 'selectedFieldId', stateDef);
+      nextState = fsf.unset(nextState, 'selectedTargetNodeId', stateDef);
+
+      const nodeIds = new Set(Object.keys(visibleNodes));
+
+      nextState = showNodes(nextState, nodeIds, visibleNodes);
+
+      // TODO: guard against invalid data
+      if (s) {
+        nextState = fsf.set(nextState, 'selectedSourceNodeId', s, stateDef);
+      }
+      if (f) {
+        nextState = fsf.set(nextState, 'selectedFieldId', f, stateDef);
+      }
+      if (t) {
+        nextState = fsf.set(nextState, 'selectedTargetNodeId', t, stateDef);
+      }
+
+      return nextState;
     }
     case 'graph/hide_all_nodes': {
       let nextState = state;
@@ -284,16 +320,21 @@ function hideNodes(state: GraphState, nodeIds: Set<string>): GraphState {
   return nextState;
 }
 
-function showNodes(state: GraphState, nodeIds: Set<string>): GraphState {
+function showNodes(
+  state: GraphState,
+  nodeIds: Set<string>,
+  data?: Record<string, VisibleNode>,
+): GraphState {
   let nextState = state;
 
   const visibleEdgeIds = new Set(nextState.visibleEdgeIds);
 
-  // TODO: ensure nodes exist
   const nodesToShow = fsf.index(
     Array.from(nodeIds)
-      .filter((nodeId) => !nextState.visibleNodes[nodeId])
-      .map((nodeId) => ({ id: nodeId, isPinned: false })),
+      .filter(
+        (nodeId) => !nextState.visibleNodes[nodeId] && nextState.nodes[nodeId],
+      )
+      .map((nodeId) => data?.[nodeId] || { id: nodeId, isPinned: false }),
     visibleNodeDef,
   );
 
