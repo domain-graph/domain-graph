@@ -64,12 +64,10 @@ function isNotNull<T>(obj: T | null | undefined): obj is T {
 export type SimulationState = Pick<GraphState, 'nodes'>;
 
 export interface SimulationProps {
-  graphId: string;
   onChange: (state: SimulationState) => void;
 }
 
 export const Simulation: React.FC<SimulationProps> = ({
-  graphId,
   onChange,
   children,
 }) => {

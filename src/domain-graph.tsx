@@ -11,22 +11,18 @@ export interface DomainGraphProps {
   stateRepository: StateRepository;
 }
 
-export const DomainGraph: React.VFC<DomainGraphProps> = ({
-  graphId,
-  introspection,
-  stateRepository,
-}) => {
+export const DomainGraph: React.VFC<DomainGraphProps> = ({ introspection }) => {
   const [store, setStore] = useState<ApplicationStore>();
 
   useEffect(() => {
-    getStore(graphId, introspection, stateRepository).then(setStore);
-  }, [graphId, introspection, stateRepository]);
+    getStore(introspection).then(setStore);
+  }, [introspection]);
 
   if (!store) return null;
 
   return (
     <StoreProvider store={store}>
-      <Graph id={graphId} />
+      <Graph />
     </StoreProvider>
   );
 };

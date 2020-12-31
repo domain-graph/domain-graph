@@ -1,10 +1,8 @@
 import { IntrospectionQuery } from 'graphql';
 import { applyMiddleware, compose, createStore, Store } from 'redux';
 import thunk from 'redux-thunk';
-import { index } from 'flux-standard-functions';
 
-import { ApplicationState, reducers } from '.';
-import { StateRepository } from '../graph-state/types';
+import { reducers } from '.';
 // import { getRegistry } from '../registry';
 import { interospectionHeuristic } from '../tools/factory/heuristics/introspection';
 import { connectionHeuristic } from '../tools/factory/heuristics/relay-connection';
@@ -20,9 +18,7 @@ const composeEnhancers =
 export type ApplicationStore = Store<ReturnType<typeof reducers>>;
 
 export async function getStore(
-  graphId: string,
   introspection: IntrospectionQuery,
-  stateRepository: StateRepository,
 ): Promise<ApplicationStore> {
   const store = createStore(
     reducers,
