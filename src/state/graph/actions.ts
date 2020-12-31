@@ -34,9 +34,16 @@ export const unpinNode = (nodeId: string) => ({
   payload: nodeId,
 });
 
-export const moveNode = (nodeId: string, x: number, y: number) => ({
-  type: 'graph/move_node' as const,
+export const updateNodeLocation = (nodeId: string, x: number, y: number) => ({
+  type: 'graph/update_node_location' as const,
   payload: { nodeId, x, y },
+});
+
+export const updateNodeLocations = (
+  nodes: Record<string, { x: number; y: number }>,
+) => ({
+  type: 'graph/update_node_locations' as const,
+  payload: nodes,
 });
 
 export const hideNode = (nodeId: string) => ({
@@ -76,7 +83,8 @@ export type Action =
   | ReturnType<typeof expandNode>
   | ReturnType<typeof pinNode>
   | ReturnType<typeof unpinNode>
-  | ReturnType<typeof moveNode>
+  | ReturnType<typeof updateNodeLocation>
+  | ReturnType<typeof updateNodeLocations>
   | ReturnType<typeof hideNode>
   | ReturnType<typeof showNode>
   | ReturnType<typeof selectNode>
