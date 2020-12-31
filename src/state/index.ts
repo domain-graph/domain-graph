@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import { Registry } from '../registry';
+// import { Registry } from '../registry';
 import { OmitByType } from '../utils';
 import {
   useSelector as useOriginalSelector,
@@ -40,7 +40,7 @@ export type Dispatch<ThunkResult> = <
 export type Thunk<ThunkResult = void> = (
   dispatch: Dispatch<ThunkResult>,
   getState: () => ApplicationState,
-  registry: Registry,
+  // registry: Registry,
 ) => Promise<ThunkResult>;
 
 export const reducers = combineReducers({
