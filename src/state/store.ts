@@ -30,12 +30,12 @@ export async function getStore(
     composeEnhancers(applyMiddleware(thunk)),
   );
 
-  const { nodes, edges, fields } = getInitialState(introspection, [
+  const { nodes, edges, fields, args } = getInitialState(introspection, [
     connectionHeuristic,
     interospectionHeuristic,
   ]);
 
-  store.dispatch(importState(nodes, edges, fields, []));
+  store.dispatch(importState(nodes, edges, fields, args, []));
 
   return store;
 }

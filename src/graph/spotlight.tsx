@@ -25,7 +25,7 @@ export const Spotlight: React.VFC = () => {
 };
 
 const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
-  const { name, description, heuristic } = useSelector(
+  const { name, description, heuristic, argIds } = useSelector(
     (state) => state.graph.fields[fieldId],
   );
   return (
@@ -33,20 +33,27 @@ const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
       <h1>{name}</h1>
       {heuristic && <div>({heuristic})</div>}
       {description && <div>{description}</div>}
-      {/* {!!args.length && (
+      {!!argIds.length && (
         <ul>
-          {args.map((arg) => (
-            <li key={arg.name} className="scalar field">
-              <span>{arg.name}</span>: {arg.isList && '['}
-              <span>{arg.type.name}</span>
-              {arg.isListElementNotNull && '!'}
-              {arg.isList && ']'}
-              {arg.isNotNull && '!'}
-            </li>
+          {argIds.map((argId) => (
+            <ResolverArg key={argId} argId={argId} />
           ))}
         </ul>
-      )} */}
+      )}
     </div>
+  );
+};
+
+const ResolverArg: React.VFC<{ argId: string }> = ({ argId }) => {
+  const arg = useSelector((state) => state.graph.args[argId]);
+  return (
+    <li key={arg.name} className="scalar field">
+      <span>{arg.name}</span>: {arg.isList && '['}
+      <span>{arg.typeName}</span>
+      {arg.isListElementNotNull && '!'}
+      {arg.isList && ']'}
+      {arg.isNotNull && '!'}
+    </li>
   );
 };
 

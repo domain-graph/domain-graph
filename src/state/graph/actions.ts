@@ -1,13 +1,14 @@
-import { VisibleNode, Node, Edge, Field } from '.';
+import { VisibleNode, Node, Edge, Field, Arg } from '.';
 
 export const importState = (
   nodes: Node[],
   edges: Edge[],
   fields: Field[],
+  args: Arg[],
   visibleNodes: VisibleNode[],
 ) => ({
   type: 'graph/import_state' as const,
-  payload: { nodes, edges, fields, visibleNodes },
+  payload: { args, nodes, edges, fields, visibleNodes },
 });
 
 export const hideAllNodes = () => ({
