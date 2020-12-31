@@ -7,6 +7,7 @@ import { Maximize2, Minimize2, X } from '../icons';
 import { useSelector, useDispatch } from '../state';
 import * as customFieldActions from '../state/fields/custom-actions';
 import * as customNodeActions from '../state/nodes/custom-actions';
+import { useFields } from '../state/nodes/hooks';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelector((state) => state.nodes.selectedSourceNodeId);
@@ -25,13 +26,13 @@ export const Spotlight: React.VFC = () => {
 };
 
 const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
-  const { name, description } = useSelector(
+  const { name, description, heuristic } = useSelector(
     (state) => state.fields.data[fieldId],
   );
   return (
     <div className="edge-spotlight">
       <h1>{name}</h1>
-      {/* {heuristic && <div>({heuristic})</div>} */}
+      {heuristic && <div>({heuristic})</div>}
       {description && <div>{description}</div>}
       {/* {!!args.length && (
         <ul>
@@ -72,11 +73,7 @@ const Controls: React.VFC<{
 const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
   const dispatch = useDispatch();
   const node = useSelector((state) => state.nodes.data[nodeId]);
-  const fields = useSelector((state) =>
-    state.fields.ix_nodeId[nodeId].fieldIds.map(
-      (fieldId) => state.fields.data[fieldId],
-    ),
-  );
+  const fields = useFields(nodeId);
   const ids = fields.filter((f) => f.typeName === 'ID');
   const scalars = fields.filter((f) => f.typeName !== 'ID' && !f.edgeId);
   const edges = fields.filter((f) => f.edgeId);
