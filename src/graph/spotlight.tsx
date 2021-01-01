@@ -3,7 +3,7 @@ import './spotlight.less';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { IconButton } from '../components/icon-button';
-import { EyeOff, Maximize2, Minimize2, X } from '../icons';
+import { EyeOff, Maximize2, Minimize2, Trash, X } from '../icons';
 import { useSelector, useDispatch } from '../state';
 import {
   deselectNode,
@@ -11,6 +11,7 @@ import {
   selectField,
 } from '../state/graph/graph-actions';
 import { useFields } from '../state/graph/hooks';
+import { deleteNode } from '../state/graph/edit-actions';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
@@ -86,8 +87,13 @@ const Controls: React.VFC<{
     dispatch(hideNode(nodeId));
   }, [dispatch, nodeId]);
 
+  const handleDeleteClick = useCallback(() => {
+    dispatch(deleteNode(nodeId));
+  }, [dispatch, nodeId]);
+
   return (
     <div className="controls">
+      <IconButton Icon={Trash} size={size} onClick={handleDeleteClick} />
       <IconButton Icon={EyeOff} size={size} onClick={handleHideClick} />
       <IconButton
         Icon={isExpanded ? Minimize2 : Maximize2}
