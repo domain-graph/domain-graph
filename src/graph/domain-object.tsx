@@ -14,7 +14,7 @@ import {
   pinNode,
   selectNode,
   unpinNode,
-} from '../state/graph/actions';
+} from '../state/graph/graph-actions';
 
 export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
   const dispatch = useDispatch();

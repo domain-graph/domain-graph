@@ -7,7 +7,7 @@ import { reducers } from '.';
 import { interospectionHeuristic } from '../tools/factory/heuristics/introspection';
 import { connectionHeuristic } from '../tools/factory/heuristics/relay-connection';
 
-import { importSaveState, importState } from './graph/actions';
+import { importSaveState, importState } from './graph/graph-actions';
 import { getInitialState } from '../tools/factory/factory-2.0';
 import { defaultState } from './graph';
 import { SaveState, SaveStateRepository } from '../persistence';
