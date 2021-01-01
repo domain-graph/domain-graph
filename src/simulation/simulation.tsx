@@ -120,16 +120,28 @@ export const Simulation: React.FC = ({ children }) => {
     [visibleEdges],
   );
 
+  const fullVisibleNodes = useSelector((state) => state.graph.visibleNodes);
+  const fullVisibleNodesRef = useRef(fullVisibleNodes);
+  fullVisibleNodesRef.current = fullVisibleNodes;
+
   const nodeMapper = useCallback(
-    (node: PartialNode, simNode: SimulationNode | undefined) => ({
-      ...simNode,
-      id: node.id,
-      isPinned: node.isPinned,
-      fx: node.isPinned ? simNode?.x : undefined,
-      fy: node.isPinned ? simNode?.y : undefined,
-      vx: node.isPinned ? 0 : simNode?.vx,
-      vy: node.isPinned ? 0 : simNode?.vy,
-    }),
+    (node: PartialNode, simNode: SimulationNode | undefined) => {
+      const fullNode = fullVisibleNodesRef.current[node.id];
+
+      // Initialize with stored coords; otherwise, fall back to sim coords
+      const x = simNode ? simNode.x : fullNode.x;
+      const y = simNode ? simNode.y : fullNode.y;
+      return {
+        ...simNode,
+        ...node,
+        x,
+        y,
+        fx: node.isPinned ? x : undefined,
+        fy: node.isPinned ? y : undefined,
+        vx: node.isPinned ? 0 : simNode?.vx,
+        vy: node.isPinned ? 0 : simNode?.vy,
+      };
+    },
     [],
   );
 
