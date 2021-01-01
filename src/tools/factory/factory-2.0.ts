@@ -103,12 +103,18 @@ export function getInitialState(
       const reverseId = createEdgeId(targetType, type);
 
       const edgeId = edges.has(reverseId) ? reverseId : forwardId;
+      const sourceNodeId = edges.has(reverseId)
+        ? createNodeId(targetType)
+        : nodeId;
+      const targetNodeId = edges.has(reverseId)
+        ? nodeId
+        : createNodeId(targetType);
       const fieldId = createFieldId(type, field);
 
       edges.set(edgeId, {
         id: edgeId,
-        sourceNodeId: nodeId,
-        targetNodeId: createNodeId(targetType),
+        sourceNodeId,
+        targetNodeId,
         fieldIds: [], // This gets populated in the reducer
       });
       edgeIdsByFieldId.set(fieldId, edgeId);

@@ -62,6 +62,7 @@ export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
       const count = paths.current.length;
 
       if (x1 === x2 && y1 === y2) {
+        // "circular" edge
         const midpoints = Array.from(Array(count)).map((_, i) => [
           x1,
           y1 + 60 + i * (handleSize + 5),
@@ -88,6 +89,7 @@ export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
           w *= widthMultiplier;
         });
       } else {
+        // "normal" edge
         const midpoints = getMidPoints(count, x1, y1, x2, y2);
         const angle = (Math.atan2(x2 - x1, y1 - y2) * 180) / Math.PI;
 
