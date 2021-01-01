@@ -14,7 +14,7 @@ import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
 import { Edge, VisibleNode } from '../state/graph';
 import { useVisibleEdges } from '../state/graph/hooks';
 import { useDispatch, useSelector } from '../state';
-import { updateNodeLocations } from '../state/graph/actions';
+import { updateNodeLocations } from '../state/graph/graph-actions';
 import { shallowEqual } from 'react-redux';
 
 /**

@@ -9,7 +9,7 @@ import { useEdgeSubscriber } from '../simulation';
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
 import { useDispatch, useSelector } from '../state';
 import { Field } from '../state/graph';
-import { selectField } from '../state/graph/actions';
+import { selectField } from '../state/graph/graph-actions';
 
 const handleSize = 20;
 
