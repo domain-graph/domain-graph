@@ -5,6 +5,7 @@ export { ChevronUp } from './chevron-up';
 export { ChevronsDown } from './chevrons-down';
 export { ChevronsRight } from './chevrons-right';
 export { ChevronsUp } from './chevrons-up';
+export { CornerUpRight } from './corner-up-right';
 export { EyeOff } from './eye-off';
 export { Eye } from './eye';
 export { Folder } from './folder';
