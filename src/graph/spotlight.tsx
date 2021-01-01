@@ -3,9 +3,13 @@ import './spotlight.less';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { IconButton } from '../components/icon-button';
-import { Maximize2, Minimize2, X } from '../icons';
+import { EyeOff, Maximize2, Minimize2, X } from '../icons';
 import { useSelector, useDispatch } from '../state';
-import { deselectNode, selectField } from '../state/graph/graph-actions';
+import {
+  deselectNode,
+  hideNode,
+  selectField,
+} from '../state/graph/graph-actions';
 import { useFields } from '../state/graph/hooks';
 
 export const Spotlight: React.VFC = () => {
@@ -58,26 +62,44 @@ const ResolverArg: React.VFC<{ argId: string }> = ({ argId }) => {
 };
 
 const Controls: React.VFC<{
+  nodeId: string;
   isExpanded: boolean;
   size: number;
-  onClose: () => void;
   onExpand: () => void;
   onCollapse: () => void;
-}> = ({ isExpanded, size, onClose, onExpand, onCollapse }) => {
+}> = ({ nodeId, isExpanded, size, onExpand, onCollapse }) => {
+  const dispatch = useDispatch();
+
+  const handleExpandClick = useCallback(() => {
+    if (isExpanded) {
+      onCollapse();
+    } else {
+      onExpand();
+    }
+  }, [isExpanded, onCollapse, onExpand]);
+
+  const handleDeselectClick = useCallback(() => {
+    dispatch(deselectNode(nodeId));
+  }, [dispatch, nodeId]);
+
+  const handleHideClick = useCallback(() => {
+    dispatch(hideNode(nodeId));
+  }, [dispatch, nodeId]);
+
   return (
     <div className="controls">
-      {isExpanded ? (
-        <IconButton Icon={Minimize2} size={size} onClick={() => onCollapse()} />
-      ) : (
-        <IconButton Icon={Maximize2} size={size} onClick={() => onExpand()} />
-      )}
-      <IconButton Icon={X} size={size} onClick={() => onClose()} />
+      <IconButton Icon={EyeOff} size={size} onClick={handleHideClick} />
+      <IconButton
+        Icon={isExpanded ? Minimize2 : Maximize2}
+        size={size}
+        onClick={handleExpandClick}
+      />
+      <IconButton Icon={X} size={size} onClick={handleDeselectClick} />
     </div>
   );
 };
 
 const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
-  const dispatch = useDispatch();
   const node = useSelector((state) => state.graph.nodes[nodeId]);
   const fields = useFields(nodeId);
   const ids = fields.filter((f) => f.typeName === 'ID');
@@ -95,9 +117,9 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
   return (
     <div className="node-spotlight">
       <Controls
+        nodeId={nodeId}
         isExpanded={isExpanded}
         size={16}
-        onClose={() => dispatch(deselectNode(nodeId))}
         onExpand={() => setIsExpanded(true)}
         onCollapse={() => setIsExpanded(false)}
       />
