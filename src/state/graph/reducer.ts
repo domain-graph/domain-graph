@@ -38,14 +38,6 @@ function editReducer(state: GraphState, action: Action): GraphState {
 
       let nextState = state;
 
-      // Set "real" node as deleted
-      nextState = fsf.patch(
-        nextState,
-        { nodes: { [nodeId]: { isDeleted: true } } },
-        stateDef,
-      );
-
-      // Set edit data as a "tombstone"
       nextState = fsf.set(
         nextState,
         'nodeEdits',
@@ -65,13 +57,6 @@ function editReducer(state: GraphState, action: Action): GraphState {
       const { payload: nodeId } = action;
 
       let nextState = state;
-
-      // Set "real" node as not deleted
-      nextState = fsf.patch(
-        nextState,
-        { nodes: { [nodeId]: { isDeleted: false } } },
-        stateDef,
-      );
 
       // remove edit tombstone
       nextState = fsf.set(

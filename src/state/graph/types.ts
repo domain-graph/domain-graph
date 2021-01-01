@@ -14,14 +14,12 @@ export type Node = {
   id: string;
   description?: string;
   fieldIds: string[];
-  isDeleted: boolean;
 };
 
 export const nodeDef = define<Node>({
   id: key(),
   description: optional(),
   fieldIds: required(array()),
-  isDeleted: required(),
 });
 
 export type NodeEdit = {
