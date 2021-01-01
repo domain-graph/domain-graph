@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from 'react';
 
 export interface RadialMenuProps {
   isVisible: boolean | null;
@@ -56,11 +56,15 @@ const MenuItem: React.FC<MenuItemProps> = ({
       );
       g.current?.setAttribute('opacity', `${v}`);
     };
+    let cancel: () => void;
     if (isVisible) {
-      enter({ tick });
+      cancel = enter({ tick });
     } else if (g.current?.transform?.baseVal?.numberOfItems) {
-      exit({ tick });
+      cancel = exit({ tick });
     }
+    return () => {
+      cancel?.();
+    };
   }, [isVisible, count, index, radius, spread]);
 
   return <g ref={g}>{children}</g>;
@@ -82,11 +86,15 @@ const Margin: React.FC<MenuItemProps> = ({
       line.current?.setAttribute('y2', `${-v * radius}`);
       line.current?.setAttribute('transform', `rotate(${angle})`);
     };
+    let cancel: () => void;
     if (isVisible) {
-      enter({ tick });
+      cancel = enter({ tick });
     } else if (line.current?.transform?.baseVal?.numberOfItems) {
-      exit({ tick });
+      cancel = exit({ tick });
     }
+    return () => {
+      cancel?.();
+    };
   }, [isVisible, count, index, radius, spread]);
 
   return (
@@ -125,28 +133,37 @@ function tween({
   start,
   tick,
   done,
-}: TweenOptions): void {
+}: TweenOptions): () => void {
+  let isCanceled = false;
   setTimeout(() => {
     const s = performance.now();
 
     start?.(reverse ? 1 : 0);
 
     const doit = () => {
-      requestAnimationFrame(() => {
-        const now = performance.now();
+      if (!isCanceled) {
+        requestAnimationFrame(() => {
+          const now = performance.now();
 
-        if (now - s > duration) {
-          tick?.(reverse ? 0 : 1);
-          done?.(reverse ? 0 : 1);
-        } else {
-          const t = (now - s) / duration;
-          tick?.(easing(reverse ? 1 - t : t));
-          doit();
-        }
-      });
+          if (now - s > duration) {
+            tick?.(reverse ? 0 : 1);
+            done?.(reverse ? 0 : 1);
+          } else {
+            const t = (now - s) / duration;
+            tick?.(easing(reverse ? 1 - t : t));
+            doit();
+          }
+        });
+      }
     };
     doit();
   }, delay);
+
+  return () => {
+    isCanceled = true;
+    tick?.(reverse ? 0 : 1);
+    done?.(reverse ? 0 : 1);
+  };
 }
 
 // TODO: create non-linear functions (issue: #41)
