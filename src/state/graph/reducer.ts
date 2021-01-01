@@ -115,6 +115,9 @@ export function reducer(
       let nextState = state;
       nextState = fsf.set(nextState, 'visibleNodes', {}, stateDef);
       nextState = fsf.set(nextState, 'visibleEdgeIds', [], stateDef);
+      nextState = fsf.unset(nextState, 'selectedSourceNodeId', stateDef);
+      nextState = fsf.unset(nextState, 'selectedFieldId', stateDef);
+      nextState = fsf.unset(nextState, 'selectedTargetNodeId', stateDef);
       return nextState;
     }
     case 'graph/hide_unpinned_nodes': {
@@ -315,7 +318,14 @@ function hideNodes(state: GraphState, nodeIds: Set<string>): GraphState {
     visibleNodes: fsf.unsetEach(nextState.visibleNodes, Array.from(nodeIds)),
   };
 
-  // TODO: deselect if needed (issue: #46)
+  if (nodeIds.has(nextState.selectedSourceNodeId || '')) {
+    nextState = fsf.unset(nextState, 'selectedSourceNodeId', stateDef);
+    nextState = fsf.unset(nextState, 'selectedFieldId', stateDef);
+    nextState = fsf.unset(nextState, 'selectedTargetNodeId', stateDef);
+  } else if (nodeIds.has(nextState.selectedTargetNodeId || '')) {
+    nextState = fsf.unset(nextState, 'selectedFieldId', stateDef);
+    nextState = fsf.unset(nextState, 'selectedTargetNodeId', stateDef);
+  }
 
   return nextState;
 }
