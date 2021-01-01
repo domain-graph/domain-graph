@@ -10,13 +10,85 @@ import {
   defaultState,
   argDef,
   VisibleNode,
+  nodeEditDef,
 } from '.';
-import { Action } from './actions';
+import { EditAction } from './edit-actions';
+import { GraphAction } from './graph-actions';
+
+export type Action = EditAction | GraphAction;
 
 export function reducer(
   state: GraphState = defaultState,
   action: Action,
 ): GraphState {
+  let nextState = state;
+
+  nextState = graphReducer(nextState, action);
+  nextState = editReducer(nextState, action);
+
+  return nextState;
+}
+
+function editReducer(state: GraphState, action: Action): GraphState {
+  switch (action.type) {
+    case 'edit/delete_node': {
+      const { payload: nodeId } = action;
+      const node = state.nodes[nodeId];
+      if (!node) return state;
+
+      let nextState = state;
+
+      // Set "real" node as deleted
+      nextState = fsf.patch(
+        nextState,
+        { nodes: { [nodeId]: { isDeleted: true } } },
+        stateDef,
+      );
+
+      // Set edit data as a "tombstone"
+      nextState = fsf.set(
+        nextState,
+        'nodeEdits',
+        fsf.set(
+          nextState.nodeEdits,
+          { id: nodeId, isDeleted: true },
+          nodeEditDef,
+        ),
+        stateDef,
+      );
+
+      nextState = hideNodes(nextState, new Set([nodeId]));
+
+      return nextState;
+    }
+    case 'edit/restore_node': {
+      const { payload: nodeId } = action;
+
+      let nextState = state;
+
+      // Set "real" node as not deleted
+      nextState = fsf.patch(
+        nextState,
+        { nodes: { [nodeId]: { isDeleted: false } } },
+        stateDef,
+      );
+
+      // remove edit tombstone
+      nextState = fsf.set(
+        nextState,
+        'nodeEdits',
+        fsf.unset(nextState.nodeEdits, nodeId),
+        stateDef,
+      );
+
+      return nextState;
+    }
+  }
+  return state;
+}
+
+// TODO: ignore deleted nodes
+function graphReducer(state: GraphState, action: Action): GraphState {
   switch (action.type) {
     case 'graph/import_state': {
       const {
@@ -70,12 +142,14 @@ export function reducer(
       return {
         args: fsf.index(args, argDef),
         nodes: fsf.index(nodes, nodeDef),
+        nodeEdits: {},
         edges: fsf.index(edges, edgeDef),
         fields: fsf.index(fields, fieldDef),
         visibleNodes: fsf.index(visibleNodes, visibleNodeDef),
         visibleEdgeIds,
       };
     }
+    // TODO: deprecate in favor of passing visible nodes in graph/import_state
     case 'graph/import_save_state': {
       const { payload } = action;
       if (!payload?.graph?.visibleNodes) return state;

@@ -10,7 +10,7 @@ import {
   hideNode,
   hideUnpinnedNodes,
   showNode,
-} from '../state/graph/actions';
+} from '../state/graph/graph-actions';
 
 export const NodePicker: React.VFC = () => {
   const dispatch = useDispatch();

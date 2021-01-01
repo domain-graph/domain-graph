@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { IconButton } from '../components/icon-button';
 import { Maximize2, Minimize2, X } from '../icons';
 import { useSelector, useDispatch } from '../state';
-import { deselectNode, selectField } from '../state/graph/actions';
+import { deselectNode, selectField } from '../state/graph/graph-actions';
 import { useFields } from '../state/graph/hooks';
 
 export const Spotlight: React.VFC = () => {

@@ -79,6 +79,7 @@ export function getInitialState(
       id: createNodeId(type),
       description: type.description || undefined,
       fieldIds: [], // This gets populated in the reducer
+      isDeleted: false,
     };
     nodes.set(node.id, node);
   }

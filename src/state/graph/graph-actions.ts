@@ -1,4 +1,4 @@
-import { VisibleNode, Node, Edge, Field, Arg } from '.';
+import { VisibleNode, Node, Edge, Field, Arg } from './types';
 import { SaveState } from '../../persistence';
 
 export const importState = (
@@ -82,7 +82,7 @@ export const deselectField = (fieldId: string) => ({
   payload: fieldId,
 });
 
-export type Action =
+export type GraphAction =
   | ReturnType<typeof importState>
   | ReturnType<typeof importSaveState>
   | ReturnType<typeof hideAllNodes>
