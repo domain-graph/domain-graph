@@ -40,7 +40,7 @@ export async function getStore(
   if (saveState) store.dispatch(importSaveState(saveState));
 
   const unsubscribe = store.subscribe(() => {
-    // TODO: debounce
+    // TODO: debounce (issue #43)
 
     const {
       visibleNodes,

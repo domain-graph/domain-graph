@@ -149,7 +149,7 @@ function tween({
   }, delay);
 }
 
-// TODO: create non-linear functions
+// TODO: create non-linear functions (issue: #41)
 function linear(t: number) {
   return t;
 }

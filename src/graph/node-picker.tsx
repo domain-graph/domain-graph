@@ -16,11 +16,11 @@ export const NodePicker: React.VFC = () => {
   const dispatch = useDispatch();
 
   const handleHideAll = useCallback(() => {
-    dispatch(hideAllNodes() as any); // TODO: :(
+    dispatch(hideAllNodes() as any); // TODO: (issue: #40)
   }, [dispatch]);
 
   const handleHideUnpinned = useCallback(() => {
-    dispatch(hideUnpinnedNodes() as any); // TODO: :(
+    dispatch(hideUnpinnedNodes() as any); // TODO: (issue: #40)
   }, [dispatch]);
 
   const nodes = useSelector((state) => deindex(state.graph.nodes));

@@ -98,7 +98,7 @@ export function reducer(
 
       nextState = showNodes(nextState, nodeIds, visibleNodes);
 
-      // TODO: guard against invalid data
+      // TODO: guard against invalid data (issue: #44)
       if (s) {
         nextState = fsf.set(nextState, 'selectedSourceNodeId', s, stateDef);
       }
@@ -305,7 +305,7 @@ function hideNodes(state: GraphState, nodeIds: Set<string>): GraphState {
     )
     .map((edge) => edge.id);
 
-  // TODO: avoid unnecessary spread
+  // TODO: avoid unnecessary spread (issue: #45)
   nextState = {
     ...nextState,
     visibleEdgeIds: fsf.unsetEach(
@@ -315,7 +315,7 @@ function hideNodes(state: GraphState, nodeIds: Set<string>): GraphState {
     visibleNodes: fsf.unsetEach(nextState.visibleNodes, Array.from(nodeIds)),
   };
 
-  // TODO: deselect if needed
+  // TODO: deselect if needed (issue: #46)
 
   return nextState;
 }
@@ -350,7 +350,7 @@ function showNodes(
     )
     .map((edge) => edge.id);
 
-  // TODO: avoid unnecessary spread
+  // TODO: avoid unnecessary spread (issue: #45)
   nextState = {
     ...state,
     visibleEdgeIds: fsf.setEach(nextState.visibleEdgeIds, edgeIdsToShow),

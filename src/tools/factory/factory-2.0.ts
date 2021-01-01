@@ -160,7 +160,7 @@ export function getInitialState(
 
         const argId = createArgId(type, field, arg);
 
-        // TODO: put this logic in the heuristic
+        // TODO: put this logic in the heuristic (issue: #47)
         if (hueristicResult?.heuristicName === 'connection') {
           if (arg.name === 'before') continue;
           if (arg.name === 'after') continue;

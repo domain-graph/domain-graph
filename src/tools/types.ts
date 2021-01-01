@@ -208,5 +208,5 @@ export interface Field extends Named, Deprecable {
 
 export interface InputValue extends Named {
   type: FieldType;
-  defaultValue?: string; // TODO: should this really be optional?
+  defaultValue?: string;
 }

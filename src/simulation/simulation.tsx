@@ -197,7 +197,7 @@ export const Simulation: React.FC = ({ children }) => {
         )
         .force('charge', d3.forceManyBody().strength(-500).distanceMax(150));
 
-      // TODO: consider this when we can plumn tick XOR drag event data
+      // TODO: consider this when we can plumn tick XOR drag event data (issue #42)
       // if (!clonedNodes.some((n) => !n.fixed)) simulation.stop();
 
       const link = svg.selectAll('g.edge').data(clonedEdges);
