@@ -121,6 +121,7 @@ const Controls: React.VFC<{
 
 const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
   const node = useSelector((state) => state.graph.nodes[nodeId]);
+  const nodeEdit = useSelector((state) => state.graph.nodeEdits[nodeId]);
   const fields = useFields(nodeId);
   const ids = fields.filter((f) => f.typeName === 'ID');
   const scalars = fields.filter((f) => f.typeName !== 'ID' && !f.edgeId);
@@ -144,7 +145,11 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
         onCollapse={() => setIsExpanded(false)}
       />
       <h1>{nodeId}</h1>
-      {node.description && <div>{node.description}</div>}
+      {nodeEdit?.description ? (
+        <div>{nodeEdit.description} (edited)</div>
+      ) : (
+        !!node.description && <div>{node.description}</div>
+      )}
       {isExpanded && (
         <>
           <ul>

@@ -1,11 +1,11 @@
-import { Edit, NodeEdit } from './types';
+import { Mutable, NodeEdit } from './types';
 
 export const deleteNode = (nodeId: string) => ({
   type: 'edit/delete_node' as const,
   payload: nodeId,
 });
 
-export const editNode = (node: Edit<NodeEdit>) => ({
+export const editNode = (node: Mutable<NodeEdit>) => ({
   type: 'edit/edit_node' as const,
   payload: node,
 });
