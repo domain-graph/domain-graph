@@ -140,6 +140,7 @@ function graphReducer(state: GraphState, action: Action): GraphState {
       if (!payload?.graph?.visibleNodes) return state;
 
       const {
+        nodeEdits,
         visibleNodes,
         selectedSourceNodeId: s,
         selectedFieldId: f,
@@ -147,6 +148,7 @@ function graphReducer(state: GraphState, action: Action): GraphState {
       } = payload.graph;
 
       let nextState = state;
+      nextState = fsf.set(nextState, 'nodeEdits', nodeEdits, stateDef);
       nextState = fsf.set(nextState, 'visibleNodes', {}, stateDef);
       nextState = fsf.set(nextState, 'visibleEdgeIds', [], stateDef);
       nextState = fsf.unset(nextState, 'selectedSourceNodeId', stateDef);
