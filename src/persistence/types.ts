@@ -10,6 +10,7 @@ export interface SaveStateRepository {
 export interface SaveState {
   graph: Pick<
     GraphState,
+    | 'nodeEdits'
     | 'visibleNodes'
     | 'selectedSourceNodeId'
     | 'selectedFieldId'
