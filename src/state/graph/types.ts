@@ -5,10 +5,13 @@ import {
   required,
   optional,
   indexOf,
+  DELETE_VALUE,
 } from 'flux-standard-functions';
 import { SpecificFieldType } from '../../tools/types';
 
-export type Edit<T extends { id: string }> = Pick<T, 'id'> & Partial<T>;
+export type Edit = { id: string; isNew?: boolean; isDeleted?: boolean };
+export type Mutable<T extends Edit> = Pick<T, 'id'> &
+  Partial<Omit<T, keyof Edit>>;
 
 export type Node = {
   id: string;
@@ -24,7 +27,7 @@ export const nodeDef = define<Node>({
 
 export type NodeEdit = {
   id: string;
-  description?: string;
+  description?: string | typeof DELETE_VALUE;
   fieldIds?: string[];
   isNew?: boolean;
   isDeleted?: boolean;
@@ -50,6 +53,20 @@ export const edgeDef = define<Edge>({
   sourceNodeId: required(),
   targetNodeId: required(),
   fieldIds: required(array()),
+});
+
+export type EdgeEdit = {
+  id: string;
+  fieldIds?: string[];
+  isNew?: boolean;
+  isDeleted?: boolean;
+};
+
+export const edgeEditDef = define<EdgeEdit>({
+  id: key(),
+  fieldIds: optional(array()),
+  isNew: optional(),
+  isDeleted: optional(),
 });
 
 export type Field = {
@@ -84,6 +101,36 @@ export const fieldDef = define<Field>({
   isListElementNotNull: optional(),
 });
 
+export type FieldEdit = {
+  id: string;
+  nodeId: string;
+  edgeId?: string;
+  argIds?: string[];
+  isReverse?: boolean;
+  name?: string;
+  description?: string | null;
+  typeKind?: SpecificFieldType['kind'];
+  typeName?: SpecificFieldType['name'];
+  isNotNull?: boolean;
+  isList?: boolean;
+  isListElementNotNull?: boolean | null;
+};
+
+export const fieldEditDef = define<FieldEdit>({
+  id: key(),
+  nodeId: required(),
+  edgeId: optional(),
+  argIds: optional(array()),
+  isReverse: optional(),
+  name: optional(),
+  description: optional(),
+  typeKind: optional(),
+  typeName: optional(),
+  isNotNull: optional(),
+  isList: optional(),
+  isListElementNotNull: optional(),
+});
+
 export type Arg = {
   id: string;
   fieldId: string;
@@ -110,6 +157,32 @@ export const argDef = define<Arg>({
   isListElementNotNull: optional(),
 });
 
+export type ArgEdit = {
+  id: string;
+  fieldId: string;
+  name?: string;
+  description?: string | null;
+  defaultValue?: string | null;
+  typeKind?: SpecificFieldType['kind'];
+  typeName?: SpecificFieldType['name'];
+  isNotNull?: boolean;
+  isList?: boolean;
+  isListElementNotNull?: boolean | null;
+};
+
+export const argEditDef = define<ArgEdit>({
+  id: key(),
+  fieldId: required(),
+  name: optional(),
+  description: optional(),
+  defaultValue: optional(),
+  typeKind: optional(),
+  typeName: optional(),
+  isNotNull: optional(),
+  isList: optional(),
+  isListElementNotNull: optional(),
+});
+
 export type VisibleNode = {
   id: string;
   isPinned: boolean;
@@ -126,8 +199,11 @@ export const visibleNodeDef = define<VisibleNode>({
 
 export type GraphState = {
   args: Record<string, Arg>;
+  argEdits: Record<string, ArgEdit>;
   edges: Record<string, Edge>;
+  edgeEdits: Record<string, EdgeEdit>;
   fields: Record<string, Field>;
+  fieldEdits: Record<string, FieldEdit>;
   nodes: Record<string, Node>;
   nodeEdits: Record<string, NodeEdit>;
   visibleNodes: Record<string, VisibleNode>;
@@ -139,8 +215,11 @@ export type GraphState = {
 
 export const stateDef = define<GraphState>({
   args: required(indexOf(argDef)),
+  argEdits: required(indexOf(argEditDef)),
   edges: required(indexOf(edgeDef)),
+  edgeEdits: required(indexOf(edgeEditDef)),
   fields: required(indexOf(fieldDef)),
+  fieldEdits: required(indexOf(fieldEditDef)),
   nodes: required(indexOf(nodeDef)),
   nodeEdits: required(indexOf(nodeEditDef)),
   visibleNodes: required(indexOf(visibleNodeDef)),
@@ -152,8 +231,11 @@ export const stateDef = define<GraphState>({
 
 export const defaultState: GraphState = {
   args: {},
+  argEdits: {},
   edges: {},
+  edgeEdits: {},
   fields: {},
+  fieldEdits: {},
   nodes: {},
   nodeEdits: {},
   visibleNodes: {},

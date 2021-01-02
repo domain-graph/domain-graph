@@ -44,6 +44,9 @@ export async function getStore(
     // TODO: debounce (issue #43)
 
     const {
+      argEdits,
+      edgeEdits,
+      fieldEdits,
       nodeEdits,
       visibleNodes,
       selectedSourceNodeId,
@@ -53,6 +56,9 @@ export async function getStore(
 
     repository.set(graphId, {
       graph: {
+        argEdits,
+        edgeEdits,
+        fieldEdits,
         nodeEdits,
         visibleNodes,
         selectedSourceNodeId,
