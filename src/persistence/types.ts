@@ -8,13 +8,9 @@ export interface SaveStateRepository {
 }
 
 export interface SaveState {
-  graph: Pick<
+  graph: Omit<
     GraphState,
-    | 'nodeEdits'
-    | 'visibleNodes'
-    | 'selectedSourceNodeId'
-    | 'selectedFieldId'
-    | 'selectedTargetNodeId'
+    'args' | 'edges' | 'fields' | 'nodes' | 'visibleEdgeIds'
   >;
   canvas: CanvasState;
 }
