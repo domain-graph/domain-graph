@@ -19,24 +19,25 @@ export type Node = {
   fieldIds: string[];
 };
 
+export type NewNode = Omit<Node, 'fieldIds'>;
+
 export const nodeDef = define<Node>({
   id: key(),
   description: optional(),
   fieldIds: required(array()),
 });
 
-export type NodeEdit = {
-  id: string;
+export type NodeEdit = Edit & {
   description?: string | typeof DELETE_VALUE;
-  fieldIds?: string[];
-  isNew?: boolean;
-  isDeleted?: boolean;
+  createdFieldIds?: string[];
+  deletedFieldIds?: string[];
 };
 
 export const nodeEditDef = define<NodeEdit>({
   id: key(),
   description: optional(),
-  fieldIds: optional(array()),
+  createdFieldIds: optional(array()),
+  deletedFieldIds: optional(array()),
   isNew: optional(),
   isDeleted: optional(),
 });
@@ -85,6 +86,11 @@ export type Field = {
   isListElementNotNull?: boolean;
 };
 
+export type NewField = Omit<
+  Field,
+  'edgeId' | 'argIds' | 'isReverse' | 'heuristic'
+>;
+
 export const fieldDef = define<Field>({
   id: key(),
   nodeId: required(),
@@ -101,19 +107,18 @@ export const fieldDef = define<Field>({
   isListElementNotNull: optional(),
 });
 
-export type FieldEdit = {
-  id: string;
+export type FieldEdit = Edit & {
   nodeId: string;
   edgeId?: string;
   argIds?: string[];
-  isReverse?: boolean;
+  isReverse?: boolean | typeof DELETE_VALUE;
   name?: string;
-  description?: string | null;
+  description?: string | typeof DELETE_VALUE;
   typeKind?: SpecificFieldType['kind'];
   typeName?: SpecificFieldType['name'];
   isNotNull?: boolean;
   isList?: boolean;
-  isListElementNotNull?: boolean | null;
+  isListElementNotNull?: boolean | typeof DELETE_VALUE;
 };
 
 export const fieldEditDef = define<FieldEdit>({
@@ -129,6 +134,8 @@ export const fieldEditDef = define<FieldEdit>({
   isNotNull: optional(),
   isList: optional(),
   isListElementNotNull: optional(),
+  isNew: optional(),
+  isDeleted: optional(),
 });
 
 export type Arg = {
