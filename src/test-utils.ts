@@ -22,7 +22,7 @@ export function test<
     fn(type);
   };
 
-  describe(type, jestFn);
+  describe(`Action type: "${type}"`, jestFn);
 }
 
 export const describeAction: Describe = test as any;
