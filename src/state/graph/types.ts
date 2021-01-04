@@ -58,14 +58,20 @@ export const edgeDef = define<Edge>({
 
 export type EdgeEdit = {
   id: string;
-  fieldIds?: string[];
+  sourceNodeId: string;
+  targetNodeId: string;
+  createdFieldIds?: string[];
+  deletedFieldIds?: string[];
   isNew?: boolean;
   isDeleted?: boolean;
 };
 
 export const edgeEditDef = define<EdgeEdit>({
   id: key(),
-  fieldIds: optional(array()),
+  sourceNodeId: required(),
+  targetNodeId: required(),
+  createdFieldIds: optional(array()),
+  deletedFieldIds: optional(array()),
   isNew: optional(),
   isDeleted: optional(),
 });
@@ -110,7 +116,8 @@ export const fieldDef = define<Field>({
 export type FieldEdit = Edit & {
   nodeId: string;
   edgeId?: string;
-  argIds?: string[];
+  createdArgIds?: string[];
+  deletedArgIds?: string[];
   isReverse?: boolean | typeof DELETE_VALUE;
   name?: string;
   description?: string | typeof DELETE_VALUE;
@@ -125,7 +132,8 @@ export const fieldEditDef = define<FieldEdit>({
   id: key(),
   nodeId: required(),
   edgeId: optional(),
-  argIds: optional(array()),
+  createdArgIds: optional(array()),
+  deletedArgIds: optional(array()),
   isReverse: optional(),
   name: optional(),
   description: optional(),
@@ -164,8 +172,7 @@ export const argDef = define<Arg>({
   isListElementNotNull: optional(),
 });
 
-export type ArgEdit = {
-  id: string;
+export type ArgEdit = Edit & {
   fieldId: string;
   name?: string;
   description?: string | null;
@@ -176,6 +183,8 @@ export type ArgEdit = {
   isList?: boolean;
   isListElementNotNull?: boolean | null;
 };
+
+export type NewArg = Arg;
 
 export const argEditDef = define<ArgEdit>({
   id: key(),
@@ -188,6 +197,8 @@ export const argEditDef = define<ArgEdit>({
   isNotNull: optional(),
   isList: optional(),
   isListElementNotNull: optional(),
+  isNew: optional(),
+  isDeleted: optional(),
 });
 
 export type VisibleNode = {

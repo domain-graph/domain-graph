@@ -12,9 +12,10 @@ import {
   VisibleNode,
   nodeEditDef,
 } from '.';
+import { chainReducers, Reducer } from '../state-utils';
 import { EditAction } from './edit-actions';
 import { GraphAction } from './graph-actions';
-import { fieldEditDef, NodeEdit } from './types';
+import { argEditDef, fieldEditDef, NodeEdit } from './types';
 
 export type Action = EditAction | GraphAction;
 
@@ -67,7 +68,7 @@ function editReducer(state: GraphState, action: Action): GraphState {
         );
       }
 
-      nextState = hideNodes(nextState, new Set([nodeId]));
+      nextState = hideNodes(new Set([nodeId]))(nextState, action);
 
       return nextState;
     }
@@ -241,6 +242,12 @@ function editReducer(state: GraphState, action: Action): GraphState {
             createdFieldIds: [payload.id],
           };
 
+      if (payload.typeKind === 'OBJECT' || payload.typeKind === 'INTERFACE') {
+        // TODO: support unions
+        // get existing edge or net-new edge edit
+        // update with
+      }
+
       return fsf.patch(
         state,
         {
@@ -254,6 +261,7 @@ function editReducer(state: GraphState, action: Action): GraphState {
         stateDef,
       );
     }
+
     default:
       return state;
   }
@@ -397,7 +405,7 @@ function graphReducer(state: GraphState, action: Action): GraphState {
 
       const nodeIds = new Set(Object.keys(visibleNodes));
 
-      nextState = showNodes(nextState, nodeIds, visibleNodes);
+      nextState = showNodes(nodeIds, visibleNodes)(nextState, action);
 
       // TODO: guard against invalid data (issue: #44)
       if (s) {
@@ -429,7 +437,7 @@ function graphReducer(state: GraphState, action: Action): GraphState {
           .map((visibleNode) => visibleNode.id),
       );
 
-      return hideNodes(state, unpinnedNodeIds);
+      return hideNodes(unpinnedNodeIds)(state, action);
     }
     case 'graph/expand_node': {
       const { payload: nodeId } = action;
@@ -451,7 +459,7 @@ function graphReducer(state: GraphState, action: Action): GraphState {
           ),
       );
 
-      return showNodes(state, nodeIds);
+      return showNodes(nodeIds)(state, action);
     }
     case 'graph/pin_node': {
       const {
@@ -515,11 +523,11 @@ function graphReducer(state: GraphState, action: Action): GraphState {
     }
     case 'graph/hide_node': {
       const { payload: nodeId } = action;
-      return hideNodes(state, new Set([nodeId]));
+      return hideNodes(new Set([nodeId]))(state, action);
     }
     case 'graph/show_node': {
       const { payload: nodeId } = action;
-      return showNodes(state, new Set([nodeId]));
+      return showNodes(new Set([nodeId]))(state, action);
     }
     case 'graph/select_node': {
       const { payload: nodeId } = action;
@@ -534,7 +542,9 @@ function graphReducer(state: GraphState, action: Action): GraphState {
       const nodesToShow = new Set<string>();
       if (!nextState.visibleNodes[node.id]) nodesToShow.add(node.id);
 
-      if (nodesToShow.size) nextState = showNodes(nextState, nodesToShow);
+      if (nodesToShow.size) {
+        nextState = showNodes(nodesToShow)(nextState, action);
+      }
 
       return nextState;
     }
@@ -578,7 +588,9 @@ function graphReducer(state: GraphState, action: Action): GraphState {
       if (!nextState.visibleNodes[s]) nodesToShow.add(s);
       if (!nextState.visibleNodes[t]) nodesToShow.add(t);
 
-      if (nodesToShow.size) nextState = showNodes(nextState, nodesToShow);
+      if (nodesToShow.size) {
+        nextState = showNodes(nodesToShow)(nextState, action);
+      }
 
       return nextState;
     }
@@ -599,7 +611,9 @@ function graphReducer(state: GraphState, action: Action): GraphState {
   }
 }
 
-function hideNodes(state: GraphState, nodeIds: Set<string>): GraphState {
+const hideNodes = (nodeIds: Set<string>): Reducer<GraphState, Action> => (
+  state,
+) => {
   let nextState = state;
   const edgeIdsToHide = state.visibleEdgeIds
     .map((edgeId) => state.edges[edgeId])
@@ -629,13 +643,12 @@ function hideNodes(state: GraphState, nodeIds: Set<string>): GraphState {
   }
 
   return nextState;
-}
+};
 
-function showNodes(
-  state: GraphState,
+const showNodes = (
   nodeIds: Set<string>,
   data?: Record<string, VisibleNode>,
-): GraphState {
+): Reducer<GraphState, Action> => (state) => {
   let nextState = state;
 
   const visibleEdgeIds = new Set(nextState.visibleEdgeIds);
@@ -673,4 +686,4 @@ function showNodes(
   };
 
   return nextState;
-}
+};

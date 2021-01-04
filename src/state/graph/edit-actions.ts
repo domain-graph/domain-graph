@@ -1,4 +1,12 @@
-import { FieldEdit, Mutable, NewField, NewNode, NodeEdit } from './types';
+import {
+  ArgEdit,
+  FieldEdit,
+  Mutable,
+  NewArg,
+  NewField,
+  NewNode,
+  NodeEdit,
+} from './types';
 
 export const deleteNode = (nodeId: string) => ({
   type: 'edit/delete_node' as const,
@@ -40,6 +48,26 @@ export const createField = (field: NewField) => ({
   payload: field,
 });
 
+export const deleteArg = (argId: string) => ({
+  type: 'edit/delete_arg' as const,
+  payload: argId,
+});
+
+export const editArg = (arg: Mutable<ArgEdit>) => ({
+  type: 'edit/edit_arg' as const,
+  payload: arg,
+});
+
+export const restoreArg = (argId: string) => ({
+  type: 'edit/restore_arg' as const,
+  payload: argId,
+});
+
+export const createArg = (arg: NewArg) => ({
+  type: 'edit/create_arg' as const,
+  payload: arg,
+});
+
 export type EditAction =
   | ReturnType<typeof deleteNode>
   | ReturnType<typeof editNode>
@@ -48,4 +76,8 @@ export type EditAction =
   | ReturnType<typeof deleteField>
   | ReturnType<typeof editField>
   | ReturnType<typeof restoreField>
-  | ReturnType<typeof createField>;
+  | ReturnType<typeof createField>
+  | ReturnType<typeof deleteArg>
+  | ReturnType<typeof editArg>
+  | ReturnType<typeof restoreArg>
+  | ReturnType<typeof createArg>;

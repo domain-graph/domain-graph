@@ -804,6 +804,70 @@ describe('reducer', () => {
       });
     });
 
+    it('creates an edge if the field has an object type', () => {
+      // ARRANGE
+      originalState.nodes = {
+        ['node-1']: {
+          id: 'node-1',
+          description: 'some node',
+          fieldIds: [],
+        },
+        ['node-2']: {
+          id: 'node-2',
+          description: 'another node',
+          fieldIds: [],
+        },
+      };
+
+      const action: Action = {
+        type,
+        payload: {
+          id: 'field-1',
+          nodeId: 'node-1',
+          name: 'some field',
+          typeKind: 'OBJECT',
+          typeName: 'node-1',
+          isNotNull: true,
+          isList: false,
+        },
+      };
+
+      // ACT
+      const result = reducer(originalState, action);
+
+      // ASSERT
+      expect(result).toEqual<GraphState>({
+        ...originalState,
+        nodeEdits: {
+          ['node-1']: {
+            id: 'node-1',
+            createdFieldIds: ['field-1'],
+          },
+        },
+        edgeEdits: {
+          ['edge-1']: {
+            id: 'edge-1',
+            sourceNodeId: 'node-1',
+            targetNodeId: 'node-2',
+            createdFieldIds: ['field-1'],
+            isNew: true,
+          },
+        },
+        fieldEdits: {
+          ['field-1']: {
+            id: 'field-1',
+            nodeId: 'node-1',
+            name: 'some field',
+            typeKind: 'OBJECT',
+            typeName: 'node-1',
+            isNotNull: true,
+            isList: false,
+            isNew: true,
+          },
+        },
+      });
+    });
+
     it('no-ops if a field with the same ID already exists', () => {
       // ARRANGE
       originalState.nodes = {
