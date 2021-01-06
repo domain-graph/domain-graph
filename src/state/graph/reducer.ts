@@ -98,14 +98,18 @@ export function reducer(
 
       nextState = showNodes(nextState, nodeIds, visibleNodes);
 
-      // TODO: guard against invalid data (issue: #44)
-      if (s) {
+      if (s && nextState.nodes[s]) {
         nextState = fsf.set(nextState, 'selectedSourceNodeId', s, stateDef);
       }
-      if (f) {
+      if (
+        f &&
+        s &&
+        t &&
+        nextState.nodes[s] &&
+        nextState.fields[f] &&
+        nextState.nodes[t]
+      ) {
         nextState = fsf.set(nextState, 'selectedFieldId', f, stateDef);
-      }
-      if (t) {
         nextState = fsf.set(nextState, 'selectedTargetNodeId', t, stateDef);
       }
 
