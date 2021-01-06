@@ -133,16 +133,21 @@ function parse(
 
     try {
       schema = buildSchema(str);
-    } catch (ex) {
-      console.error(ex);
-      return {
-        introspection: null,
-        errors: [
-          {
-            message: 'Not a valid schema',
-          },
-        ],
-      };
+    } catch (firstEx) {
+      try {
+        schema = buildSchema(str + federationSchema);
+      } catch (secondEx) {
+        console.error(firstEx);
+        console.error(secondEx);
+        return {
+          introspection: null,
+          errors: [
+            {
+              message: 'Not a valid schema',
+            },
+          ],
+        };
+      }
     }
 
     const introspection = introspectionFromSchema(schema);
@@ -183,3 +188,14 @@ function parse(
     };
   }
 }
+
+// see: https://www.apollographql.com/docs/federation/federation-spec/
+const federationSchema = `
+scalar _FieldSet
+
+directive @external on FIELD_DEFINITION
+directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+directive @key(fields: _FieldSet!) on OBJECT | INTERFACE
+directive @extends on OBJECT | INTERFACE
+`;
