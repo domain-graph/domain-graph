@@ -12,7 +12,7 @@ import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
 import { Edge, VisibleNode } from '../state/graph';
-import { useVisibleEdges } from '../state/graph/hooks';
+import { Edited, useVisibleEdges } from '../state/graph/hooks';
 import { useDispatch, useSelector } from '../state';
 import { updateNodeLocations } from '../state/graph/graph-actions';
 import { shallowEqual } from 'react-redux';
@@ -26,17 +26,17 @@ import { shallowEqual } from 'react-redux';
  * @param keyProp The prop on the incomming and mapped items used to establish equality
  * @param map The mapping function
  */
-function useStableMap<TIn, TOut, KeyProp extends keyof TIn & keyof TOut>(
+function useStableMap<TIn, TOut, TKey>(
   items: TIn[],
-  keyProp: KeyProp,
+  keyFn: (item: TIn) => TKey,
   map: (item: TIn, existing: TOut | undefined) => TOut,
 ): TOut[] {
-  const existingMap = useRef(new Map<TIn[KeyProp], TOut>());
+  const existingMap = useRef(new Map<TKey, TOut>());
 
   return useMemo(
     () =>
       items.map((item) => {
-        const key = item[keyProp];
+        const key = keyFn(item);
         const existing = existingMap.current.get(key);
         const clonedExisting = existing ? ({ ...existing } as TOut) : undefined;
         const mappedExisting = map(item, clonedExisting);
@@ -52,7 +52,7 @@ function useStableMap<TIn, TOut, KeyProp extends keyof TIn & keyof TOut>(
           return mappedExisting;
         }
       }),
-    [items, keyProp, map],
+    [items, keyFn, map],
   );
 }
 type PartialNode = Pick<VisibleNode, 'id' | 'isPinned'>;
@@ -109,11 +109,13 @@ export const Simulation: React.FC = ({ children }) => {
   const circularEdgeIdsByNode: Record<string, string[]> = useMemo(
     () =>
       visibleEdges
-        .filter((edge) => edge.sourceNodeId === edge.targetNodeId)
+        .filter(
+          (edge) => edge.current.sourceNodeId === edge.current.targetNodeId,
+        )
         .reduce<Record<string, string[]>>((acc, edge) => {
-          acc[edge.sourceNodeId] ||= [];
+          acc[edge.current.sourceNodeId] ||= [];
 
-          acc[edge.sourceNodeId].push(edge.id);
+          acc[edge.current.sourceNodeId].push(edge.current.id);
 
           return acc;
         }, {}),
@@ -145,26 +147,33 @@ export const Simulation: React.FC = ({ children }) => {
     [],
   );
 
+  const getVisibleNodeId = useCallback((item: VisibleNode) => item.id, []);
+
   const clonedNodes: SimulationNode[] = useStableMap(
     visibleNodes,
-    'id',
+    getVisibleNodeId,
     nodeMapper,
   );
 
   const edgeMapper = useCallback(
-    (edge: Edge, simEdge: SimulationEdge | undefined) => {
+    (edge: Edited<Edge>, simEdge: SimulationEdge | undefined) => {
       return {
-        ...edge,
-        source: simEdge?.source || edge.sourceNodeId,
-        target: simEdge?.target || edge.targetNodeId,
+        ...edge.current,
+        source: simEdge?.source || edge.current.sourceNodeId,
+        target: simEdge?.target || edge.current.targetNodeId,
       };
     },
     [],
   );
 
+  const getCurrentEdgeId = useCallback(
+    (item: Edited<Edge>) => item.current.id,
+    [],
+  );
+
   const clonedEdges: SimulationEdge[] = useStableMap(
     visibleEdges,
-    'id',
+    getCurrentEdgeId,
     edgeMapper,
   );
 

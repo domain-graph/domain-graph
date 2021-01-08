@@ -2,312 +2,34 @@ import * as fsf from 'flux-standard-functions';
 
 import {
   GraphState,
-  stateDef,
-  visibleNodeDef,
-  nodeDef,
-  edgeDef,
-  fieldDef,
   defaultState,
-  argDef,
+  edgeDef,
+  stateDef,
   VisibleNode,
-  nodeEditDef,
+  visibleNodeDef,
 } from '.';
-import { EditAction } from './edit-actions';
+import { reducer as argsReducer } from './args/reducer';
+import { reducer as fieldsReducer } from './fields/reducer';
+import { reducer as nodesReducer } from './nodes/reducer';
 import { GraphAction } from './graph-actions';
-import { fieldEditDef, NodeEdit } from './types';
+import { ArgAction } from './args/actions';
+import { chainReducers } from '../state-utils';
+import { FieldAction, fieldDef } from './fields';
+import { NodeAction, nodeDef } from './nodes';
+import { argDef } from './args/types';
 
-export type Action = EditAction | GraphAction;
+export type Action = GraphAction | ArgAction | FieldAction | NodeAction;
 
 export function reducer(
   state: GraphState = defaultState,
   action: Action,
 ): GraphState {
-  let nextState = state;
-
-  nextState = graphReducer(nextState, action);
-  nextState = editReducer(nextState, action);
-
-  return nextState;
-}
-
-function editReducer(state: GraphState, action: Action): GraphState {
-  switch (action.type) {
-    case 'edit/delete_node': {
-      const { payload: nodeId } = action;
-      const node = state.nodes[nodeId];
-      if (!node) return state;
-      const nodeEdit = state.nodeEdits[nodeId];
-
-      let nextState = state;
-
-      if (nodeEdit?.isNew) {
-        nextState = fsf.set(
-          nextState,
-          'nodes',
-          fsf.unset(nextState.nodes, nodeId),
-          stateDef,
-        );
-        nextState = fsf.set(
-          nextState,
-          'nodeEdits',
-          fsf.unset(nextState.nodeEdits, nodeId),
-          stateDef,
-        );
-        // TODO: if node is net-new, also unset all associated new edges, fields, and args
-      } else {
-        nextState = fsf.set(
-          nextState,
-          'nodeEdits',
-          fsf.set(
-            nextState.nodeEdits,
-            { id: nodeId, isDeleted: true },
-            nodeEditDef,
-          ),
-          stateDef,
-        );
-      }
-
-      nextState = hideNodes(nextState, new Set([nodeId]));
-
-      return nextState;
-    }
-    case 'edit/restore_node': {
-      const { payload: nodeId } = action;
-      const nodeEdit = state.nodeEdits[nodeId];
-      if (nodeEdit?.isNew) return state;
-
-      return fsf.set(
-        state,
-        'nodeEdits',
-        fsf.unset(state.nodeEdits, nodeId),
-        stateDef,
-      );
-    }
-    case 'edit/edit_node': {
-      const { payload } = action;
-
-      const node = state.nodes[payload.id];
-      if (!node) return state;
-      if (node === fsf.patch(node, payload, nodeDef)) return state;
-
-      return fsf.patch(
-        state,
-        {
-          nodeEdits: {
-            [payload.id]: { ...payload, isDeleted: false },
-          },
-        },
-        stateDef,
-      );
-    }
-    case 'edit/create_node': {
-      const { payload } = action;
-      if (state.nodes[payload.id]) return state;
-      if (state.nodeEdits[payload.id]) return state;
-
-      return fsf.patch(
-        state,
-        {
-          nodeEdits: {
-            [payload.id]: { ...payload, isNew: true },
-          },
-        },
-        stateDef,
-      );
-    }
-    case 'edit/edit_field': {
-      const { payload } = action;
-
-      const field = state.fields[payload.id];
-      if (!field) return state;
-      if (field === fsf.patch(field, payload, fieldDef)) return state;
-
-      return fsf.patch(
-        state,
-        {
-          fieldEdits: {
-            [payload.id]: {
-              ...payload,
-              nodeId: field.nodeId,
-              isDeleted: false,
-            },
-          },
-        },
-        stateDef,
-      );
-    }
-    case 'edit/delete_field': {
-      const { payload: fieldId } = action;
-      const field = state.fields[fieldId];
-      if (!field) return state;
-      const nodeEdit = state.nodeEdits[field.nodeId];
-      const fieldEdit = state.fieldEdits[fieldId];
-
-      let nextState = state;
-
-      // If the field is net-new
-      if (fieldEdit?.isNew) {
-        // unset field edit
-        nextState = fsf.set(
-          nextState,
-          'fieldEdits',
-          fsf.unset(nextState.fieldEdits, fieldId),
-          stateDef,
-        );
-
-        nextState = removeFieldIdsFromNodeEdit(
-          nextState,
-          [fieldId],
-          fieldEdit.nodeId,
-        );
-      } else {
-        // set fieldEdit as deleted
-        nextState = fsf.set(
-          nextState,
-          'fieldEdits',
-          fsf.set(
-            nextState.fieldEdits,
-            { id: fieldId, nodeId: field.nodeId, isDeleted: true },
-            fieldEditDef,
-          ),
-          stateDef,
-        );
-
-        // add fieldId to nodeEdit.deletedFieldIds
-        nextState = fsf.patch(
-          nextState,
-          {
-            nodeEdits: {
-              [field.nodeId]: {
-                id: field.nodeId,
-                deletedFieldIds: fsf.set(
-                  nodeEdit?.deletedFieldIds || [],
-                  fieldId,
-                ),
-              },
-            },
-          },
-          stateDef,
-        );
-      }
-
-      return nextState;
-    }
-    case 'edit/restore_field': {
-      const { payload: fieldId } = action;
-      const fieldEdit = state.fieldEdits[fieldId];
-      if (!fieldEdit) return state;
-      if (fieldEdit.isNew) return state;
-
-      let nextState = state;
-
-      if (fieldEdit.isDeleted) {
-        nextState = removeFieldIdsFromNodeEdit(
-          nextState,
-          [fieldId],
-          fieldEdit.nodeId,
-        );
-      }
-      nextState = fsf.set(
-        nextState,
-        'fieldEdits',
-        fsf.unset(nextState.fieldEdits, fieldId),
-        stateDef,
-      );
-
-      return nextState;
-    }
-    case 'edit/create_field': {
-      const { payload } = action;
-      if (!payload.id) return state;
-      if (state.fields[payload.id]) return state;
-      if (state.fieldEdits[payload.id]) return state;
-
-      const nodeEdit = state.nodeEdits[payload.nodeId];
-
-      const updatedNodeEdit: NodeEdit = nodeEdit
-        ? fsf.patch(
-            nodeEdit,
-            {
-              createdFieldIds: fsf.set(
-                nodeEdit.createdFieldIds || [],
-                payload.id,
-              ),
-            },
-            nodeEditDef,
-          )
-        : {
-            id: payload.nodeId,
-            createdFieldIds: [payload.id],
-          };
-
-      return fsf.patch(
-        state,
-        {
-          nodeEdits: {
-            [updatedNodeEdit.id]: updatedNodeEdit,
-          },
-          fieldEdits: {
-            [payload.id]: { ...payload, isNew: true },
-          },
-        },
-        stateDef,
-      );
-    }
-    default:
-      return state;
-  }
-}
-
-function removeFieldIdsFromNodeEdit(
-  state: GraphState,
-  fieldIds: string[],
-  nodeId: string,
-): GraphState {
-  let nodeEdit = state.nodeEdits[nodeId];
-  if (!nodeEdit) return state;
-
-  // remove from nodeEdit field arrays
-  nodeEdit = fsf.patch(
-    nodeEdit || {},
-    {
-      deletedFieldIds: nodeEdit?.deletedFieldIds
-        ? fsf.unsetEach(nodeEdit.deletedFieldIds, fieldIds)
-        : undefined,
-      createdFieldIds: nodeEdit?.createdFieldIds
-        ? fsf.unsetEach(nodeEdit.createdFieldIds, fieldIds)
-        : undefined,
-    },
-    nodeEditDef,
-  );
-
-  // unset nodeEdit field arrays if empty
-  if (!nodeEdit.deletedFieldIds?.length) {
-    nodeEdit = fsf.unset(nodeEdit, 'deletedFieldIds', nodeEditDef);
-  }
-  if (!nodeEdit.createdFieldIds?.length) {
-    nodeEdit = fsf.unset(nodeEdit, 'createdFieldIds', nodeEditDef);
-  }
-
-  // if nodeEdit doesn't change the node an non-net-new node
-  const node = state.nodes[nodeId];
-  if (!nodeEdit?.isNew && node === fsf.patch(node, nodeEdit, nodeDef)) {
-    // unset nodeEdit
-    return fsf.set(
-      state,
-      'nodeEdits',
-      fsf.unset(state.nodeEdits, nodeEdit.id),
-      stateDef,
-    );
-  } else {
-    // otherwise, update state
-    return fsf.set(
-      state,
-      'nodeEdits',
-      fsf.set(state.nodeEdits, nodeEdit, nodeEditDef),
-      stateDef,
-    );
-  }
+  return chainReducers(
+    graphReducer,
+    nodesReducer,
+    argsReducer,
+    fieldsReducer,
+  )(state, action);
 }
 
 function graphReducer(state: GraphState, action: Action): GraphState {
@@ -381,6 +103,9 @@ function graphReducer(state: GraphState, action: Action): GraphState {
 
       const {
         nodeEdits,
+        fieldEdits,
+        edgeEdits, 
+        argEdits,
         visibleNodes,
         selectedSourceNodeId: s,
         selectedFieldId: f,
@@ -389,6 +114,9 @@ function graphReducer(state: GraphState, action: Action): GraphState {
 
       let nextState = state;
       nextState = fsf.set(nextState, 'nodeEdits', nodeEdits, stateDef);
+      nextState = fsf.set(nextState, 'fieldEdits', fieldEdits, stateDef);
+      nextState = fsf.set(nextState, 'edgeEdits', edgeEdits, stateDef);
+      nextState = fsf.set(nextState, 'argEdits', argEdits, stateDef);
       nextState = fsf.set(nextState, 'visibleNodes', {}, stateDef);
       nextState = fsf.set(nextState, 'visibleEdgeIds', [], stateDef);
       nextState = fsf.unset(nextState, 'selectedSourceNodeId', stateDef);

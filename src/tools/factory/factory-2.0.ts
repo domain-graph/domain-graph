@@ -1,5 +1,5 @@
 import { IntrospectionQuery } from 'graphql';
-import { Edge, Node, Field, Arg } from '../../state/graph';
+import { Arg, Edge, Field, Node } from '../../state/types';
 import {
   isEnumFieldType,
   isScalarFieldType,

@@ -1,5 +1,8 @@
-import { VisibleNode, Node, Edge, Field, Arg } from './types';
+import { VisibleNode, Edge } from './types';
 import { SaveState } from '../../persistence';
+import { Arg } from './args/types';
+import { Field } from './fields/types';
+import { Node } from './nodes/types';
 
 export const importState = (
   nodes: Node[],

@@ -1,8 +1,7 @@
-import { EditAction } from './state/graph/edit-actions';
-import { GraphAction } from './state/graph/graph-actions';
+import { Action } from './state/graph/reducer';
 
 export interface Test {
-  <ActionType extends EditAction['type'] | GraphAction['type']>(
+  <ActionType extends Action['type']>(
     type: ActionType,
     fn: (typeUnderTest: ActionType) => void,
   ): void;
@@ -15,9 +14,10 @@ export interface Describe extends Test {
   each: jest.Each;
 }
 
-export function test<
-  ActionType extends EditAction['type'] | GraphAction['type']
->(type: ActionType, fn: (typeUnderTest: ActionType) => void) {
+export function test<ActionType extends Action['type']>(
+  type: ActionType,
+  fn: (typeUnderTest: ActionType) => void,
+) {
   const jestFn = () => {
     fn(type);
   };
