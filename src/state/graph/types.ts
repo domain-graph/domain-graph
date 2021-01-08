@@ -5,42 +5,17 @@ import {
   required,
   optional,
   indexOf,
-  DELETE_VALUE,
 } from 'flux-standard-functions';
-import { SpecificFieldType } from '../../tools/types';
+import { Arg, argDef, ArgEdit, argEditDef } from './args/types';
+import { Field, fieldDef, FieldEdit, fieldEditDef } from './fields/types';
+import { Node, nodeDef, NodeEdit, nodeEditDef } from './nodes/types';
 
-export type Edit = { id: string; isNew?: boolean; isDeleted?: boolean };
-export type Mutable<T extends Edit> = Pick<T, 'id'> &
+export type Entity = { id: string };
+export type Edit = Entity & { isNew?: boolean; isDeleted?: boolean };
+export type MutableEntity<T extends Entity> = Pick<T, 'id'> &
+  Partial<Omit<T, keyof Entity>>;
+export type MutableEdit<T extends Edit> = Pick<T, 'id'> &
   Partial<Omit<T, keyof Edit>>;
-
-export type Node = {
-  id: string;
-  description?: string;
-  fieldIds: string[];
-};
-
-export type NewNode = Omit<Node, 'fieldIds'>;
-
-export const nodeDef = define<Node>({
-  id: key(),
-  description: optional(),
-  fieldIds: required(array()),
-});
-
-export type NodeEdit = Edit & {
-  description?: string | typeof DELETE_VALUE;
-  createdFieldIds?: string[];
-  deletedFieldIds?: string[];
-};
-
-export const nodeEditDef = define<NodeEdit>({
-  id: key(),
-  description: optional(),
-  createdFieldIds: optional(array()),
-  deletedFieldIds: optional(array()),
-  isNew: optional(),
-  isDeleted: optional(),
-});
 
 export type Edge = {
   id: string;
@@ -58,136 +33,22 @@ export const edgeDef = define<Edge>({
 
 export type EdgeEdit = {
   id: string;
-  fieldIds?: string[];
+  sourceNodeId: string;
+  targetNodeId: string;
+  createdFieldIds?: string[];
+  deletedFieldIds?: string[];
   isNew?: boolean;
   isDeleted?: boolean;
 };
 
 export const edgeEditDef = define<EdgeEdit>({
   id: key(),
-  fieldIds: optional(array()),
+  sourceNodeId: required(),
+  targetNodeId: required(),
+  createdFieldIds: optional(array()),
+  deletedFieldIds: optional(array()),
   isNew: optional(),
   isDeleted: optional(),
-});
-
-export type Field = {
-  id: string;
-  nodeId: string;
-  edgeId?: string;
-  argIds: string[];
-  isReverse?: boolean;
-  name: string;
-  description?: string;
-  heuristic?: string;
-  typeKind: SpecificFieldType['kind'];
-  typeName: SpecificFieldType['name'];
-  isNotNull: boolean;
-  isList: boolean;
-  isListElementNotNull?: boolean;
-};
-
-export type NewField = Omit<
-  Field,
-  'edgeId' | 'argIds' | 'isReverse' | 'heuristic'
->;
-
-export const fieldDef = define<Field>({
-  id: key(),
-  nodeId: required(),
-  edgeId: optional(),
-  argIds: required(array()),
-  isReverse: optional(),
-  name: required(),
-  description: optional(),
-  heuristic: optional(),
-  typeKind: required(),
-  typeName: required(),
-  isNotNull: required(),
-  isList: required(),
-  isListElementNotNull: optional(),
-});
-
-export type FieldEdit = Edit & {
-  nodeId: string;
-  edgeId?: string;
-  argIds?: string[];
-  isReverse?: boolean | typeof DELETE_VALUE;
-  name?: string;
-  description?: string | typeof DELETE_VALUE;
-  typeKind?: SpecificFieldType['kind'];
-  typeName?: SpecificFieldType['name'];
-  isNotNull?: boolean;
-  isList?: boolean;
-  isListElementNotNull?: boolean | typeof DELETE_VALUE;
-};
-
-export const fieldEditDef = define<FieldEdit>({
-  id: key(),
-  nodeId: required(),
-  edgeId: optional(),
-  argIds: optional(array()),
-  isReverse: optional(),
-  name: optional(),
-  description: optional(),
-  typeKind: optional(),
-  typeName: optional(),
-  isNotNull: optional(),
-  isList: optional(),
-  isListElementNotNull: optional(),
-  isNew: optional(),
-  isDeleted: optional(),
-});
-
-export type Arg = {
-  id: string;
-  fieldId: string;
-  name: string;
-  description?: string;
-  defaultValue?: string;
-  typeKind: SpecificFieldType['kind'];
-  typeName: SpecificFieldType['name'];
-  isNotNull: boolean;
-  isList: boolean;
-  isListElementNotNull?: boolean;
-};
-
-export const argDef = define<Arg>({
-  id: key(),
-  fieldId: required(),
-  name: required(),
-  description: optional(),
-  defaultValue: optional(),
-  typeKind: required(),
-  typeName: required(),
-  isNotNull: required(),
-  isList: required(),
-  isListElementNotNull: optional(),
-});
-
-export type ArgEdit = {
-  id: string;
-  fieldId: string;
-  name?: string;
-  description?: string | null;
-  defaultValue?: string | null;
-  typeKind?: SpecificFieldType['kind'];
-  typeName?: SpecificFieldType['name'];
-  isNotNull?: boolean;
-  isList?: boolean;
-  isListElementNotNull?: boolean | null;
-};
-
-export const argEditDef = define<ArgEdit>({
-  id: key(),
-  fieldId: required(),
-  name: optional(),
-  description: optional(),
-  defaultValue: optional(),
-  typeKind: optional(),
-  typeName: optional(),
-  isNotNull: optional(),
-  isList: optional(),
-  isListElementNotNull: optional(),
 });
 
 export type VisibleNode = {

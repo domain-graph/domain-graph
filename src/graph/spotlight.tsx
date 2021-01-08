@@ -18,7 +18,7 @@ import {
   selectField,
 } from '../state/graph/graph-actions';
 import { useFields } from '../state/graph/hooks';
-import { deleteNode, restoreNode } from '../state/graph/edit-actions';
+import { deleteNode, restoreNode } from '../state/graph/nodes/actions';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);

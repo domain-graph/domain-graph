@@ -2,19 +2,59 @@ import { useMemo } from 'react';
 import { shallowEqual } from 'react-redux';
 import * as fsf from 'flux-standard-functions';
 
-import { Node, Edge, Field, VisibleNode } from '.';
+import { Node, Edge, Field, VisibleNode, edgeDef, EdgeEdit } from '../types';
 import { useSelector } from '..';
+
+export interface Edited<T> {
+  current: T;
+  original: T | undefined;
+}
+
+function getEditedEdge(
+  original: Edge | undefined,
+  edit: EdgeEdit | undefined,
+): Edited<Edge> {
+  if (!edit && original) {
+    return {
+      original,
+      current: original,
+    };
+  }
+
+  const fieldIds = fsf.setEach(
+    fsf.unsetEach(original?.fieldIds || [], edit?.deletedFieldIds || []),
+    edit?.createdFieldIds || [],
+  );
+
+  const current: Edge | undefined = original
+    ? fsf.patch(original, { ...edit, fieldIds }, edgeDef)
+    : edgeDef.getPayload({ ...edit, fieldIds });
+
+  return {
+    original,
+    current,
+  };
+}
+
+export function useEdge(edgeId: string): Edited<Edge> {
+  const original = useSelector((state) => state.graph.edges[edgeId]);
+  const edit = useSelector((state) => state.graph.edgeEdits[edgeId]);
+
+  return useMemo(() => getEditedEdge(original, edit), [original, edit]);
+}
 
 export function useVisibleEdgeIds(): string[] {
   return useSelector((state) => state.graph.visibleEdgeIds);
 }
-export function useVisibleEdges(): Edge[] {
-  const { visibleEdgeIds, edges } = useSelector((state) => state.graph);
+export function useVisibleEdges(): Edited<Edge>[] {
+  const { visibleEdgeIds, edges, edgeEdits } = useSelector(
+    (state) => state.graph,
+  );
 
-  return useMemo(() => visibleEdgeIds.map((id) => edges[id]), [
-    visibleEdgeIds,
-    edges,
-  ]);
+  return useMemo(
+    () => visibleEdgeIds.map((id) => getEditedEdge(edges[id], edgeEdits[id])),
+    [visibleEdgeIds, edges, edgeEdits],
+  );
 }
 
 export function useVisibleNodeIds(): string[] {
