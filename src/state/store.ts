@@ -10,7 +10,7 @@ import { connectionHeuristic } from '../tools/factory/heuristics/relay-connectio
 import { importSaveState, importState } from './graph/actions';
 import { getInitialState } from '../tools/factory/factory-2.0';
 import { defaultState } from './graph';
-import { SaveStateRepository } from '../persistence';
+import { SaveState, SaveStateRepository } from '../persistence';
 
 const composeEnhancers =
   window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
@@ -21,6 +21,7 @@ export async function getStore(
   graphId: string,
   introspection: IntrospectionQuery,
   repository: SaveStateRepository,
+  initialSaveState?: SaveState,
 ): Promise<{ store: ApplicationStore; unsubscribe: () => void }> {
   const store = createStore(
     reducers,
@@ -35,7 +36,7 @@ export async function getStore(
 
   store.dispatch(importState(nodes, edges, fields, args, []));
 
-  const saveState = await repository.get(graphId);
+  const saveState = initialSaveState || (await repository.get(graphId));
 
   if (saveState) store.dispatch(importSaveState(saveState));
 
