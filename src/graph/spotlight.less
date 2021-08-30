@@ -1,5 +1,3 @@
-@import '../colors.less';
-
 .c-spotlight {
   font-family: sans-serif;
   overflow: scroll;
@@ -22,17 +20,29 @@
 
   .node-spotlight {
     position: relative;
-    border: 2px solid @color-border-dark-primary;
-    background-color: @color-brand-primary;
+    border: 2px solid @color-node-preview-border;
+    background-color: @color-node-preview-background;
+    color: @color-node-preview-text;
     margin: 10px;
 
     border-radius: 30px;
     padding: 16px 20px;
+
+    .c-icon-button {
+      background-color: @color-node-preview-button-background;
+      stroke: @color-node-preview-button-icon;
+
+      &:hover {
+        background-color: @color-node-preview-button-hover-background;
+        stroke: @color-node-preview-button-hover-icon;
+      }
+    }
   }
 
   .edge-spotlight {
-    border: 2px solid @color-border-dark-primary;
-    background-color: @color-background-primary;
+    border: 2px solid @color-edge-preview-border;
+    background-color: @color-edge-preview-background;
+    color: @color-edge-preview-text;
 
     border-radius: 5px;
     padding: 10px 20px;

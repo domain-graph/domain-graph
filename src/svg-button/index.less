@@ -1,11 +1,23 @@
-@import '../colors.less';
-
 .c-svg-button {
   circle.background {
-    fill: @color-background-secondary;
-    stroke: @color-border-dark-primary;
+    fill: @color-radial-menu-background;
+    stroke: @color-radial-menu-border;
     stroke-width: 2;
   }
+  .c-icon {
+    stroke: @color-radial-menu-icon;
+  }
+
+  &:hover {
+    circle.background {
+      fill: @color-radial-menu-hover-background;
+      stroke: @color-radial-menu-hover-border;
+    }
+    .c-icon {
+      stroke: @color-radial-menu-hover-icon;
+    }
+  }
+
   .click-target {
     cursor: pointer;
     fill: transparent;

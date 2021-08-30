@@ -22,7 +22,10 @@ module.exports = merge(common, {
           'css-hot-loader',
           MiniCssExtractPlugin.loader,
           'css-loader',
-          'less-loader',
+          {
+            loader: 'less-loader',
+            options: { additionalData: "@import '/src/colors.less';" },
+          },
         ],
         exclude: /node_modules/,
       },

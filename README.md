@@ -61,6 +61,39 @@ This component renders all of the of UI for opening or dropping files; however, 
 - Web implementation: [github.com/domain-graph/website](https://github.com/domain-graph/website/blob/master/src/app.tsx)
 - Desktop (Electron) implementation: [github.com/domain-graph/desktop](https://github.com/domain-graph/desktop/blob/master/src/app.tsx)
 
+### Styles and Themes
+
+The components are styled with LESS and the raw .less files are included in the package. You will need to use a transpiler/bundler such as webpack to generate CSS to include in your project. You will also need to include a theme file. This package provides an example theme in `/lib/colors.less` or you may include your own custom theme. Custom themes must export _at least_ the same LESS variables as the included theme.
+
+Include the theme in your build using the `additionalData` less-loader option in your webpack config:
+
+```js
+config = {
+  // ...
+  module: {
+    rules: [
+      {
+        test: /\.less$/,
+        use: [
+          'css-loader',
+          {
+            loader: 'less-loader',
+            options: {
+              additionalData:
+                "@import '/node_modules/domain-graph/lib/colors.less';", // Or the path to your theme file
+            },
+          },
+        ],
+      },
+    ],
+  },
+  // ...
+};
+```
+
+Note that if you _don't_ include a theme file, you'll see an error message such as:
+> Variable @color-some-color-description is undefined
+
 ## How To:
 
 ### Run the Dev Server with Hot Module Reloading (HMR)

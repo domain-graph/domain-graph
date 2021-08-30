@@ -1,5 +1,3 @@
-@import './colors.less';
-
 .c-uploader {
   font-family: sans-serif;
   text-align: center;
@@ -11,15 +9,15 @@
 
   border-radius: 100px;
 
-  border: 8px dashed @color-border-dark-primary;
+  border: 8px dashed @color-drop-target-border;
 
   &.drop-ready {
-    background-color: @color-background-secondary;
+    background-color: @color-drop-target-ready-background;
   }
 
   ul.errors {
     margin: 0;
-    padding: 32px 0 0 0 ;
+    padding: 32px 0 0 0;
     li {
       list-style: none;
       display: inline-flex;

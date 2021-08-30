@@ -1,27 +1,35 @@
-@import '../colors.less';
-
 .c-domain-edge {
   .handle {
+    cursor: pointer;
+
     rect {
-      cursor: pointer;
       rx: 3;
-      fill: @color-background-primary;
-      stroke: @color-border-dark-primary;
+      fill: @color-edge-background;
+      stroke: @color-edge-border;
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
     }
 
+    .c-icon {
+      stroke: @color-edge-chevron;
+    }
+
     &.selected {
       rect {
-        stroke: @terra-cotta;
+        fill: @color-selected-edge-background;
+        stroke: @color-selected-edge-border;
         stroke-width: 4;
+      }
+
+      .c-icon {
+        stroke: @color-selected-edge-chevron;
       }
     }
   }
 
   path {
-    stroke: @color-border-dark-primary;
+    stroke: @color-edge-border;
     stroke-width: 2;
     fill: none;
 
@@ -30,7 +38,7 @@
     }
 
     &.selected {
-      stroke: @terra-cotta;
+      stroke: @color-selected-edge-border;
       stroke-width: 4;
     }
   }
