@@ -1,5 +1,3 @@
-@import '../colors.less';
-
 .c-node-picker {
   overflow: hidden;
   display: inline-block;
@@ -50,8 +48,9 @@
     padding: 4px 8px;
     outline: none;
 
-    &:focus {
-      background-color: @color-background-secondary;
+    &:focus,
+    &:hover {
+      background-color: @color-button-hover-background;
     }
   }
 }

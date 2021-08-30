@@ -1,12 +1,6 @@
-@import '../colors.less';
-
 body {
-  background: @color-background-primary;
-  color: @color-text-dark-primary;
-
-  text {
-    fill: @color-text-dark-primary;
-  }
+  background: @color-window-background;
+  color: @color-window-text-default;
 }
 
 .c-uploader {
@@ -20,9 +14,9 @@ body {
 
   border-radius: 100px;
 
-  border: 8px dashed @color-border-dark-primary;
+  border: 8px dashed @color-drop-target-border;
 
   &.drop-ready {
-    background-color: @color-background-secondary;
+    background-color: @color-drop-target-ready-background;
   }
 }
