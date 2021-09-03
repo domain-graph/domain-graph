@@ -29,12 +29,21 @@ export async function getStore(
     composeEnhancers(applyMiddleware(thunk)),
   );
 
-  const { nodes, edges, fields, args } = getInitialState(introspection, [
+  const {
+    nodes,
+    edges,
+    fields,
+    args,
+    enums,
+    enumValues,
+  } = getInitialState(introspection, [
     connectionHeuristic,
     interospectionHeuristic,
   ]);
 
-  store.dispatch(importState(nodes, edges, fields, args, []));
+  store.dispatch(
+    importState(nodes, edges, fields, args, enums, enumValues, []),
+  );
 
   const saveState = initialSaveState || (await repository.get(graphId));
 
