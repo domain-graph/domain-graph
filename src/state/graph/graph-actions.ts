@@ -3,16 +3,20 @@ import { SaveState } from '../../persistence';
 import { Arg } from './args/types';
 import { Field } from './fields/types';
 import { Node } from './nodes/types';
+import { Enum } from './enums/types';
+import { EnumValue } from './enum-values/types';
 
 export const importState = (
   nodes: Node[],
   edges: Edge[],
   fields: Field[],
   args: Arg[],
+  enums: Enum[],
+  enumValues: EnumValue[],
   visibleNodes: VisibleNode[],
 ) => ({
   type: 'graph/import_state' as const,
-  payload: { args, nodes, edges, fields, visibleNodes },
+  payload: { args, nodes, edges, fields, enums, enumValues, visibleNodes },
 });
 
 export const importSaveState = (state: SaveState) => ({

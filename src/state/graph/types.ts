@@ -7,6 +7,8 @@ import {
   indexOf,
 } from 'flux-standard-functions';
 import { Arg, argDef, ArgEdit, argEditDef } from './args/types';
+import { Enum, enumDef } from './enums/types';
+import { EnumValue, enumValueDef } from './enum-values/types';
 import { Field, fieldDef, FieldEdit, fieldEditDef } from './fields/types';
 import { Node, nodeDef, NodeEdit, nodeEditDef } from './nodes/types';
 
@@ -74,6 +76,8 @@ export type GraphState = {
   fieldEdits: Record<string, FieldEdit>;
   nodes: Record<string, Node>;
   nodeEdits: Record<string, NodeEdit>;
+  enums: Record<string, Enum>;
+  enumValues: Record<string, EnumValue>;
   visibleNodes: Record<string, VisibleNode>;
   visibleEdgeIds: string[];
   selectedSourceNodeId?: string;
@@ -90,6 +94,8 @@ export const stateDef = define<GraphState>({
   fieldEdits: required(indexOf(fieldEditDef)),
   nodes: required(indexOf(nodeDef)),
   nodeEdits: required(indexOf(nodeEditDef)),
+  enums: required(indexOf(enumDef)),
+  enumValues: required(indexOf(enumValueDef)),
   visibleNodes: required(indexOf(visibleNodeDef)),
   visibleEdgeIds: required(array()),
   selectedSourceNodeId: optional(),
@@ -106,6 +112,8 @@ export const defaultState: GraphState = {
   fieldEdits: {},
   nodes: {},
   nodeEdits: {},
+  enums: {},
+  enumValues: {},
   visibleNodes: {},
   visibleEdgeIds: [],
 };

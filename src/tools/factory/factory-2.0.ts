@@ -1,5 +1,5 @@
 import { IntrospectionQuery } from 'graphql';
-import { Arg, Edge, Field, Node } from '../../state/types';
+import { Arg, Edge, Enum, EnumValue, Field, Node } from '../../state/types';
 import {
   isEnumFieldType,
   isScalarFieldType,
@@ -9,6 +9,7 @@ import {
   Field as SchemaField,
   SpecificFieldType,
   InputValue,
+  EnumType,
 } from '../types';
 import { normalizeFieldType } from '../utils';
 import { TypeHeuristic, TypeHeuristicResult } from './types';
@@ -39,7 +40,14 @@ function createArgId(
 export function getInitialState(
   introspection: IntrospectionQuery,
   heuristics: TypeHeuristic[],
-): { nodes: Node[]; edges: Edge[]; fields: Field[]; args: Arg[] } {
+): {
+  nodes: Node[];
+  edges: Edge[];
+  fields: Field[];
+  args: Arg[];
+  enums: Enum[];
+  enumValues: EnumValue[];
+} {
   const schema: Schema = { data: introspection as any };
   const { types } = schema.data.__schema;
 
@@ -193,10 +201,50 @@ export function getInitialState(
     }
   }
 
+  // Build Enums
+  const { enums, enumValues } = getEnums(types);
+
+  console.log({ enums, enumValues });
+
   return {
     nodes: Array.from(nodes.values()),
     edges: Array.from(edges.values()),
     fields: Array.from(fields.values()),
     args: Array.from(args.values()),
+    enums: Array.from(enums.values()),
+    enumValues: Array.from(enumValues.values()),
   };
+}
+
+function getEnums(types: SchemaType[]) {
+  const enumTypes = types.filter(
+    (t: SchemaType): t is EnumType => t.kind === 'ENUM',
+  );
+
+  const enums = new Map<string, Enum>();
+  const enumValues = new Map<string, EnumValue>();
+
+  for (const e of enumTypes) {
+    enums.set(e.name, {
+      id: e.name,
+      description: e.description === null ? undefined : e.description,
+      valueIds: e.enumValues.map((v) => {
+        const enumValue: EnumValue = {
+          id: `${e.name}.${v.name}`,
+          enumId: e.name,
+          name: v.name,
+          description: v.description === null ? undefined : v.description,
+          isDeprecated: v.isDeprecated,
+          deprecationReason:
+            v.deprecationReason === null ? undefined : v.deprecationReason,
+        };
+
+        enumValues.set(enumValue.id, enumValue);
+
+        return enumValue.id;
+      }),
+    });
+  }
+
+  return { enums, enumValues };
 }
