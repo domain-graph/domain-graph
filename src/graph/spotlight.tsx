@@ -17,8 +17,15 @@ import {
   hideNode,
   selectField,
 } from '../state/graph/graph-actions';
-import { useField, useFields, useNode } from '../state/graph/hooks';
+import {
+  useEnum,
+  useEnumValues,
+  useField,
+  useFields,
+  useNode,
+} from '../state/graph/hooks';
 import { deleteNode, restoreNode } from '../state/graph/nodes/actions';
+import { Icons } from '..';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
@@ -201,18 +208,54 @@ const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
 const ScalarField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
   const {
     name,
+    description,
     typeName,
     isNotNull,
     isList,
     isListElementNotNull,
   } = useSelector((state) => state.graph.fields[fieldId]);
+  const e = useEnum(typeName);
   return (
     <li className="scalar field">
-      <span>{name}</span>: {isList && '['}
-      <span>{typeName}</span>
-      {isListElementNotNull && '!'}
-      {isList && ']'}
-      {isNotNull && '!'}
+      <div>
+        <span className="name">{name}</span>: {isList && '['}
+        <span className="type" title={e?.description}>
+          {typeName}
+          {isListElementNotNull && '!'}
+          {isList && ']'}
+          {isNotNull && '!'}
+        </span>
+      </div>
+      <div className="description">{!!description ? description : null}</div>
+      <EnumValuesInfo enumId={typeName} />
     </li>
+  );
+};
+
+const EnumValuesInfo: React.VFC<{ enumId: string }> = ({ enumId }) => {
+  const e = useEnum(enumId);
+  const values = useEnumValues(enumId);
+
+  if (!e) return null;
+
+  return (
+    <ul className="enum-values">
+      {values.map((value) => (
+        <li
+          key={value.id}
+          className={
+            value.isDeprecated ? 'deprecated enum-value' : 'enum-value'
+          }
+        >
+          <span className="name">{value.name}</span>
+          {!!value.description && (
+            <span className="description">: {value.description}</span>
+          )}
+          {!!value.isDeprecated && !!value.deprecationReason && (
+            <div className="notice">⚠️ {value.deprecationReason}</div>
+          )}
+        </li>
+      ))}
+    </ul>
   );
 };

@@ -12,6 +12,19 @@
 
   width: 400px;
 
+  li {
+    list-style-type: none;
+  }
+
+  ul {
+    padding: 0;
+  }
+
+  .description, .notice {
+    font-size: 90%;
+    opacity: 90%;
+  }
+
   .controls {
     top: 4px;
     right: 16px;
@@ -47,6 +60,30 @@
     border-radius: 5px;
     padding: 10px 20px;
     margin: 16px 30px;
+  }
+
+  .enum-values {
+    margin-top: 4px;
+    margin-left: 8px;
+    .deprecated {
+      .name,
+      .description {
+        text-decoration: line-through;
+      }
+
+      .notice {
+        padding: 0 8px 0 8px;
+        font-style: italic;
+      }
+    }
+
+    li.enum-value {
+      margin-bottom: 4px;
+    }
+  }
+
+  .field {
+    padding-bottom: 8px;
   }
 
   h1 {

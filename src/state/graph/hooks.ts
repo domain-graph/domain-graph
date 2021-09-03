@@ -13,6 +13,8 @@ import {
   Arg,
   ArgEdit,
   argDef,
+  Enum,
+  EnumValue,
 } from '../types';
 import { useSelector } from '..';
 import { fieldDef, FieldEdit } from './fields';
@@ -219,4 +221,17 @@ export function useFields(nodeId: string): Field[] {
         .filter((x) => x),
     [allFields, fieldIds],
   );
+}
+
+export function useEnum(enumId: string): Enum | undefined {
+  return useSelector((state) => state.graph.enums[enumId]);
+}
+
+export function useEnumValues(enumId: string): EnumValue[] {
+  const enumValueIds = useEnum(enumId)?.valueIds;
+  const enumValues = useSelector((state) => state.graph.enumValues);
+
+  return useMemo(() => {
+    return (enumValueIds || []).map((id) => enumValues[id]).filter((x) => x);
+  }, [enumValueIds, enumValues]);
 }
