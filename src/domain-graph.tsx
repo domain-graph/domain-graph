@@ -4,7 +4,7 @@ import { Provider as StoreProvider } from 'react-redux';
 import { Graph } from './graph';
 import { ApplicationStore, getStore } from './state/store';
 import { SaveState, SaveStateRepository } from './persistence';
-import { importSaveState } from './state/graph/actions';
+import { importSaveState } from './state/graph/graph-actions';
 import { SubscribedStateRepository } from './persistence/subscribed-state-repository';
 
 export interface DomainGraphProps {

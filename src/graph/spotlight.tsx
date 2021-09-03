@@ -17,7 +17,7 @@ import {
   hideNode,
   selectField,
 } from '../state/graph/graph-actions';
-import { useFields } from '../state/graph/hooks';
+import { useField, useFields, useNode } from '../state/graph/hooks';
 import { deleteNode, restoreNode } from '../state/graph/nodes/actions';
 
 export const Spotlight: React.VFC = () => {
@@ -77,9 +77,7 @@ const Controls: React.VFC<{
   onCollapse: () => void;
 }> = ({ nodeId, isExpanded, size, onExpand, onCollapse }) => {
   const dispatch = useDispatch();
-  const isDeleted = useSelector(
-    (state) => state.graph.nodeEdits[nodeId]?.isDeleted || false,
-  );
+  const isDeleted = useNode(nodeId)?.isDeleted;
 
   const handleExpandClick = useCallback(() => {
     if (isExpanded) {
@@ -103,12 +101,12 @@ const Controls: React.VFC<{
 
   return (
     <div className="controls">
-      <IconButton
+      {/* <IconButton
         Icon={isDeleted ? CornerUpRight : Trash}
         size={size}
         onClick={handleDeleteClick}
-      />
-      <IconButton Icon={EyeOff} size={size} onClick={handleHideClick} />
+      /> */}
+      {/* <IconButton Icon={EyeOff} size={size} onClick={handleHideClick} /> */}
       <IconButton
         Icon={isExpanded ? Minimize2 : Maximize2}
         size={size}
@@ -120,8 +118,8 @@ const Controls: React.VFC<{
 };
 
 const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
-  const node = useSelector((state) => state.graph.nodes[nodeId]);
-  const nodeEdit = useSelector((state) => state.graph.nodeEdits[nodeId]);
+  const node = useNode(nodeId);
+
   const fields = useFields(nodeId);
   const ids = fields.filter((f) => f.typeName === 'ID');
   const scalars = fields.filter((f) => f.typeName !== 'ID' && !f.edgeId);
@@ -145,10 +143,13 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
         onCollapse={() => setIsExpanded(false)}
       />
       <h1>{nodeId}</h1>
-      {nodeEdit?.description ? (
-        <div>{nodeEdit.description} (edited)</div>
-      ) : (
-        !!node.description && <div>{node.description}</div>
+      {!!node?.current.description && (
+        <div>
+          {node.current.description}
+          {node?.current?.description === node?.original?.description
+            ? null
+            : ' (edited)'}
+        </div>
       )}
       {isExpanded && (
         <>
@@ -174,7 +175,7 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
 };
 
 const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
-  const { name } = useSelector((state) => state.graph.fields[fieldId]);
+  const name = useField(fieldId)?.current.name;
   return (
     <li className="id field">
       <span>{name}</span>
@@ -184,7 +185,7 @@ const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
 
 const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
   const dispatch = useDispatch();
-  const { name } = useSelector((state) => state.graph.fields[fieldId]);
+  const name = useField(fieldId)?.current.name;
 
   const handleClick = useCallback(() => {
     dispatch(selectField(fieldId));
