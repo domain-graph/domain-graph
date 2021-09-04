@@ -182,25 +182,55 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
 };
 
 const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
-  const name = useField(fieldId)?.current.name;
+  const field = useField(fieldId)?.current;
+  if (!field) return null;
+  const { name, description } = field;
   return (
     <li className="id field">
-      <span>{name}</span>
+      <div className="name">{name}</div>
+      {!!description && <div className="description">{description}</div>}
     </li>
   );
 };
 
 const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
   const dispatch = useDispatch();
-  const name = useField(fieldId)?.current.name;
+  const field = useField(fieldId)?.current;
 
   const handleClick = useCallback(() => {
     dispatch(selectField(fieldId));
   }, [fieldId, dispatch]);
 
+  const { selectedFieldId } = useSelector((state) => state.graph);
+
+  const isSelected = selectedFieldId === fieldId;
+
+  if (!field) return null;
+  const {
+    name,
+    description,
+    isList,
+    typeName,
+    isListElementNotNull,
+    isNotNull,
+  } = field;
+
   return (
-    <li className="edge field">
-      <button onClick={handleClick}>{name}</button>
+    <li
+      className={isSelected ? 'selected edge field' : 'edge field'}
+      onClick={handleClick}
+      role="button"
+    >
+      <span className="name">{name}</span>
+      {': '}
+      <span className="type">
+        {isList && '['}
+        {typeName}
+        {isListElementNotNull && '!'}
+        {isList && ']'}
+        {isNotNull && '!'}
+      </span>
+      <div className="description">{!!description ? description : null}</div>
     </li>
   );
 };
@@ -218,8 +248,10 @@ const ScalarField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
   return (
     <li className="scalar field">
       <div>
-        <span className="name">{name}</span>: {isList && '['}
+        <span className="name">{name}</span>
+        {': '}
         <span className="type" title={e?.description}>
+          {isList && '['}
           {typeName}
           {isListElementNotNull && '!'}
           {isList && ']'}
