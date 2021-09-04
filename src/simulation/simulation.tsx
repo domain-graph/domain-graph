@@ -218,7 +218,7 @@ export const Simulation: React.FC = ({ children }) => {
           return d ? d.id : this.id;
         });
 
-      node.on('mouseover', function (d) {
+      node.on('mouseover', function () {
         // eslint-disable-next-line no-invalid-this
         d3.select((this as any).parentNode).raise();
       });

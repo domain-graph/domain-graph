@@ -3,14 +3,7 @@ import './spotlight.less';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { IconButton } from '../components/icon-button';
-import {
-  CornerUpRight,
-  EyeOff,
-  Maximize2,
-  Minimize2,
-  Trash,
-  X,
-} from '../icons';
+import { Maximize2, Minimize2, X } from '../icons';
 import { useSelector, useDispatch } from '../state';
 import {
   deselectNode,
@@ -25,7 +18,6 @@ import {
   useNode,
 } from '../state/graph/hooks';
 import { deleteNode, restoreNode } from '../state/graph/nodes/actions';
-import { Icons } from '..';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
@@ -116,11 +108,11 @@ const Controls: React.VFC<{
     dispatch(deselectNode(nodeId));
   }, [dispatch, nodeId]);
 
-  const handleHideClick = useCallback(() => {
+  const _handleHideClick = useCallback(() => {
     dispatch(hideNode(nodeId));
   }, [dispatch, nodeId]);
 
-  const handleDeleteClick = useCallback(() => {
+  const _handleDeleteClick = useCallback(() => {
     dispatch(isDeleted ? restoreNode(nodeId) : deleteNode(nodeId));
   }, [dispatch, isDeleted, nodeId]);
 

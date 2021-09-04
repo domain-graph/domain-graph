@@ -13,7 +13,12 @@
     "project": "tsconfig.json",
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint", "eslint-plugin-import", "react-hooks"],
+  "plugins": [
+    "@typescript-eslint",
+    "eslint-plugin-import",
+    "react-hooks",
+    "unused-imports"
+  ],
   "rules": {
     "@typescript-eslint/adjacent-overload-signatures": "error",
     "@typescript-eslint/no-empty-function": "error",
@@ -58,6 +63,12 @@
     "no-var": "warn",
     "prefer-const": "warn",
     "react-hooks/rules-of-hooks": "error",
-    "react-hooks/exhaustive-deps": "warn"
+    "react-hooks/exhaustive-deps": "warn",
+    "no-unused-vars": "off",
+		"unused-imports/no-unused-imports": "error",
+		"unused-imports/no-unused-vars": [
+			"warn",
+			{ "vars": "all", "varsIgnorePattern": "^_", "args": "after-used", "argsIgnorePattern": "^_" }
+		]
   }
 }

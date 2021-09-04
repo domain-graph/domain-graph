@@ -38,7 +38,17 @@ export const CircleButton: React.FC<ButtonProps> = ({
 };
 
 export const RectButton: React.FC<React.SVGProps<SVGRectElement>> = (props) => {
-  const { className, children, x, x1, y, y1, x2, y2, ...rectProps } = props;
+  const {
+    className,
+    children,
+    x,
+    x1,
+    y,
+    y1,
+    x2: _x2,
+    y2: _y2,
+    ...rectProps
+  } = props;
 
   const { width, height } = getSize(props);
 

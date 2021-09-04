@@ -1,7 +1,6 @@
 import './domain-edge.less';
 
 import React, { useLayoutEffect, useMemo, useRef } from 'react';
-import { deindex } from 'flux-standard-functions';
 import { shallowEqual } from 'react-redux';
 
 import { useEdgeSubscriber } from '../simulation';
