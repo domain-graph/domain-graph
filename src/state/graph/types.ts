@@ -11,6 +11,8 @@ import { Enum, enumDef } from './enums/types';
 import { EnumValue, enumValueDef } from './enum-values/types';
 import { Field, fieldDef, FieldEdit, fieldEditDef } from './fields/types';
 import { Node, nodeDef, NodeEdit, nodeEditDef } from './nodes/types';
+import { Input, inputDef } from './inputs/types';
+import { InputField, inputFieldDef } from './input-fields/types';
 
 export type Entity = { id: string };
 export type Edit = Entity & { isNew?: boolean; isDeleted?: boolean };
@@ -78,6 +80,8 @@ export type GraphState = {
   nodeEdits: Record<string, NodeEdit>;
   enums: Record<string, Enum>;
   enumValues: Record<string, EnumValue>;
+  inputs: Record<string, Input>;
+  inputFields: Record<string, InputField>;
   visibleNodes: Record<string, VisibleNode>;
   visibleEdgeIds: string[];
   selectedSourceNodeId?: string;
@@ -96,6 +100,8 @@ export const stateDef = define<GraphState>({
   nodeEdits: required(indexOf(nodeEditDef)),
   enums: required(indexOf(enumDef)),
   enumValues: required(indexOf(enumValueDef)),
+  inputs: required(indexOf(inputDef)),
+  inputFields: required(indexOf(inputFieldDef)),
   visibleNodes: required(indexOf(visibleNodeDef)),
   visibleEdgeIds: required(array()),
   selectedSourceNodeId: optional(),
@@ -114,6 +120,8 @@ export const defaultState: GraphState = {
   nodeEdits: {},
   enums: {},
   enumValues: {},
+  inputs: {},
+  inputFields: {},
   visibleNodes: {},
   visibleEdgeIds: [],
 };

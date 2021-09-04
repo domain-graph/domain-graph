@@ -6,7 +6,7 @@ import {
   DELETE_VALUE,
 } from 'flux-standard-functions';
 
-import { SpecificFieldType } from '../../../tools/types';
+import { SpecificInputFieldType } from '../../../tools/types';
 import { Edit } from '../types';
 
 export type Arg = {
@@ -15,8 +15,8 @@ export type Arg = {
   name: string;
   description?: string;
   defaultValue?: string;
-  typeKind: SpecificFieldType['kind'];
-  typeName: SpecificFieldType['name'];
+  typeKind: SpecificInputFieldType['kind'];
+  typeName: SpecificInputFieldType['name'];
   isNotNull: boolean;
   isList: boolean;
   isListElementNotNull?: boolean;
@@ -40,8 +40,8 @@ export type ArgEdit = Edit & {
   name?: string;
   description?: string | typeof DELETE_VALUE;
   defaultValue?: string | typeof DELETE_VALUE;
-  typeKind?: SpecificFieldType['kind'];
-  typeName?: SpecificFieldType['name'];
+  typeKind?: SpecificInputFieldType['kind'];
+  typeName?: SpecificInputFieldType['name'];
   isNotNull?: boolean;
   isList?: boolean;
   isListElementNotNull?: boolean | typeof DELETE_VALUE;

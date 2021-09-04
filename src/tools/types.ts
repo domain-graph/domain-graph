@@ -108,8 +108,10 @@ export function isTypeWithFields(
 }
 
 export type FieldType = WrappedFieldType | SpecificFieldType;
+export type InputFieldType = WrappedInputFieldType | SpecificInputFieldType;
 
 export type WrappedFieldType = NonNullFieldType | ListFieldType;
+export type WrappedInputFieldType = NonNullInputFieldType | ListInputFieldType;
 
 export function isWrappedFieldType(
   type: FieldType | undefined | null,
@@ -122,6 +124,11 @@ export interface NonNullFieldType {
   ofType: SpecificFieldType;
 }
 
+export interface NonNullInputFieldType {
+  kind: 'NON_NULL';
+  ofType: SpecificInputFieldType;
+}
+
 export function isNonNullFieldType(
   type: FieldType | undefined | null,
 ): type is NonNullFieldType {
@@ -131,6 +138,11 @@ export function isNonNullFieldType(
 export interface ListFieldType {
   kind: 'LIST';
   ofType: SpecificFieldType | NonNullFieldType;
+}
+
+export interface ListInputFieldType {
+  kind: 'LIST';
+  ofType: SpecificInputFieldType | NonNullInputFieldType;
 }
 
 export function isListFieldType(
@@ -146,6 +158,11 @@ export type SpecificFieldType =
   | UnionFieldType
   | InterfaceFieldType;
 
+  export type SpecificInputFieldType =
+  | ScalarFieldType
+  | EnumFieldType
+  | InputObjectFieldType
+
 export interface ObjectFieldType {
   kind: 'OBJECT';
   name: string;
@@ -155,6 +172,11 @@ export function isObjectFieldType(
   type: FieldType | undefined | null,
 ): type is ObjectFieldType {
   return type?.kind === 'OBJECT';
+}
+
+export interface InputObjectFieldType {
+  kind: 'INPUT_OBJECT';
+  name: string;
 }
 
 export interface ScalarFieldType {
@@ -207,6 +229,6 @@ export interface Field extends Named, Deprecable {
 }
 
 export interface InputValue extends Named {
-  type: FieldType;
+  type: InputFieldType;
   defaultValue?: string;
 }

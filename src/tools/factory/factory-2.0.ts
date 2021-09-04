@@ -1,5 +1,14 @@
 import { IntrospectionQuery } from 'graphql';
-import { Arg, Edge, Enum, EnumValue, Field, Node } from '../../state/types';
+import {
+  Arg,
+  Edge,
+  Enum,
+  EnumValue,
+  Field,
+  Input,
+  InputField,
+  Node,
+} from '../../state/types';
 import {
   isEnumFieldType,
   isScalarFieldType,
@@ -10,8 +19,9 @@ import {
   SpecificFieldType,
   InputValue,
   EnumType,
+  isInputObjectType,
 } from '../types';
-import { normalizeFieldType } from '../utils';
+import { normalizeFieldType, normalizeInputFieldType } from '../utils';
 import { TypeHeuristic, TypeHeuristicResult } from './types';
 
 function createNodeId(type: SchemaType | SpecificFieldType): string {
@@ -47,6 +57,8 @@ export function getInitialState(
   args: Arg[];
   enums: Enum[];
   enumValues: EnumValue[];
+  inputs: Input[];
+  inputFields: InputField[];
 } {
   const schema: Schema = { data: introspection as any };
   const { types } = schema.data.__schema;
@@ -170,7 +182,7 @@ export function getInitialState(
 
       // Build Args
       for (const arg of field.args) {
-        const argType = normalizeFieldType(arg.type);
+        const argType = normalizeInputFieldType(arg.type);
 
         const argId = createArgId(type, field, arg);
 
@@ -204,7 +216,8 @@ export function getInitialState(
   // Build Enums
   const { enums, enumValues } = getEnums(types);
 
-  console.log({ enums, enumValues });
+  // Build Enums
+  const { inputs, inputFields } = getInputs(types);
 
   return {
     nodes: Array.from(nodes.values()),
@@ -213,6 +226,8 @@ export function getInitialState(
     args: Array.from(args.values()),
     enums: Array.from(enums.values()),
     enumValues: Array.from(enumValues.values()),
+    inputs: Array.from(inputs.values()),
+    inputFields: Array.from(inputFields.values()),
   };
 }
 
@@ -247,4 +262,44 @@ function getEnums(types: SchemaType[]) {
   }
 
   return { enums, enumValues };
+}
+
+function getInputs(types: SchemaType[]) {
+  const inputTypes = types.filter(isInputObjectType);
+
+  const inputs = new Map<string, Input>();
+  const inputFields = new Map<string, InputField>();
+
+  for (const inputType of inputTypes) {
+    const inputId = inputType.name;
+    inputs.set(inputId, {
+      id: inputId,
+      description: inputType.description || undefined,
+      inputFieldIds: inputType.inputFields.map((field) => {
+        const fieldType = normalizeInputFieldType(field.type);
+
+        const inputField: InputField = {
+          id: `${inputId}.${field.name}`,
+          inputId,
+          name: field.name,
+          description: field.description || undefined,
+          defaultValue: field.defaultValue,
+          typeName: fieldType.type.name,
+          typeKind: fieldType.type.kind,
+          isNotNull: fieldType.isNotNull,
+          isList: fieldType.isList,
+          isListElementNotNull: fieldType.isListElementNotNull || undefined,
+        };
+
+        inputFields.set(inputField.id, inputField);
+
+        return inputField.id;
+      }),
+    });
+  }
+
+  return {
+    inputs,
+    inputFields,
+  };
 }

@@ -10,7 +10,15 @@ export interface SaveStateRepository {
 export interface SaveState {
   graph: Omit<
     GraphState,
-    'args' | 'edges' | 'fields' | 'nodes' | 'enums' | 'enumValues' | 'visibleEdgeIds'
+    | 'args'
+    | 'edges'
+    | 'fields'
+    | 'nodes'
+    | 'enums'
+    | 'enumValues'
+    | 'inputs'
+    | 'inputFields'
+    | 'visibleEdgeIds'
   >;
   canvas: CanvasState;
 }

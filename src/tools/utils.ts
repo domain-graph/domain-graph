@@ -5,6 +5,8 @@ import {
   SpecificFieldType,
   isObjectType,
   isInterfaceType,
+  InputFieldType,
+  SpecificInputFieldType,
 } from './types';
 
 export function getType(typeName: string, schema: Schema): SchemaType | null {
@@ -45,8 +47,43 @@ export type NormalizedFieldType = {
   isListElementNotNull: boolean | null;
 };
 
+export type NormalizedInputFieldType = {
+  type: SpecificInputFieldType;
+  isNotNull: boolean;
+  isList: boolean;
+  isListElementNotNull: boolean | null;
+};
+
 export function normalizeFieldType(fieldType: FieldType): NormalizedFieldType {
   let type: FieldType = fieldType;
+  const isNotNull = type.kind === 'NON_NULL';
+  let isList = false;
+  let isListElementNotNull: boolean | null = null;
+
+  if (type.kind === 'NON_NULL') {
+    type = type.ofType;
+  }
+
+  if (type.kind === 'LIST') {
+    isList = true;
+    type = type.ofType;
+    isListElementNotNull = type.kind === 'NON_NULL';
+
+    if (type.kind === 'NON_NULL') {
+      type = type.ofType;
+    }
+  }
+
+  return {
+    type,
+    isNotNull,
+    isList,
+    isListElementNotNull,
+  };
+}
+
+export function normalizeInputFieldType(fieldType: InputFieldType): NormalizedInputFieldType {
+  let type: InputFieldType = fieldType;
   const isNotNull = type.kind === 'NON_NULL';
   let isList = false;
   let isListElementNotNull: boolean | null = null;
