@@ -20,7 +20,8 @@
     padding: 0;
   }
 
-  .description, .notice {
+  .description,
+  .notice {
     font-size: 90%;
     opacity: 90%;
   }
@@ -40,6 +41,26 @@
 
     border-radius: 30px;
     padding: 16px 20px;
+
+    li.edge.field {
+      padding: 6px 8px 6px 8px;
+      margin: -2px -8px -2px -8px;
+
+      &.selected {
+        border-left: 4px solid @color-selected-edge-border;
+      }
+
+      &:hover {
+        cursor: pointer;
+        background-color: @color-node-preview-button-hover-background;
+      }
+
+      .description {
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+    }
 
     .c-icon-button {
       background-color: @color-node-preview-button-background;
