@@ -15,6 +15,8 @@ import {
   argDef,
   Enum,
   EnumValue,
+  Input,
+  InputField,
 } from '../types';
 import { useSelector } from '..';
 import { fieldDef, FieldEdit } from './fields';
@@ -234,4 +236,17 @@ export function useEnumValues(enumId: string): EnumValue[] {
   return useMemo(() => {
     return (enumValueIds || []).map((id) => enumValues[id]).filter((x) => x);
   }, [enumValueIds, enumValues]);
+}
+
+export function useInput(inputId: string): Input | undefined {
+  return useSelector((state) => state.graph.inputs[inputId]);
+}
+
+export function useInputFields(inputId: string): InputField[] {
+  const inputFieldIds = useInput(inputId)?.inputFieldIds;
+  const inputFields = useSelector((state) => state.graph.inputFields);
+
+  return useMemo(() => {
+    return (inputFieldIds || []).map((id) => inputFields[id]).filter((x) => x);
+  }, [inputFieldIds, inputFields]);
 }
