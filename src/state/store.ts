@@ -36,13 +36,25 @@ export async function getStore(
     args,
     enums,
     enumValues,
+    inputs,
+    inputFields,
   } = getInitialState(introspection, [
     connectionHeuristic,
     interospectionHeuristic,
   ]);
 
   store.dispatch(
-    importState(nodes, edges, fields, args, enums, enumValues, []),
+    importState(
+      nodes,
+      edges,
+      fields,
+      args,
+      enums,
+      enumValues,
+      inputs,
+      inputFields,
+      [],
+    ),
   );
 
   const saveState = initialSaveState || (await repository.get(graphId));

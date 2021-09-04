@@ -5,6 +5,8 @@ import { Field } from './fields/types';
 import { Node } from './nodes/types';
 import { Enum } from './enums/types';
 import { EnumValue } from './enum-values/types';
+import { Input } from './inputs/types';
+import { InputField } from './input-fields/types';
 
 export const importState = (
   nodes: Node[],
@@ -13,10 +15,22 @@ export const importState = (
   args: Arg[],
   enums: Enum[],
   enumValues: EnumValue[],
+  inputs: Input[],
+  inputFields: InputField[],
   visibleNodes: VisibleNode[],
 ) => ({
   type: 'graph/import_state' as const,
-  payload: { args, nodes, edges, fields, enums, enumValues, visibleNodes },
+  payload: {
+    args,
+    nodes,
+    edges,
+    fields,
+    enums,
+    enumValues,
+    inputs,
+    inputFields,
+    visibleNodes,
+  },
 });
 
 export const importSaveState = (state: SaveState) => ({

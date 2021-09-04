@@ -17,7 +17,7 @@ import { chainReducers } from '../state-utils';
 import { FieldAction, fieldDef } from './fields';
 import { NodeAction, nodeDef } from './nodes';
 import { argDef } from './args/types';
-import { enumDef, enumValueDef } from '../types';
+import { enumDef, enumValueDef, inputDef, inputFieldDef } from '../types';
 
 export type Action = GraphAction | ArgAction | FieldAction | NodeAction;
 
@@ -44,6 +44,8 @@ function graphReducer(state: GraphState, action: Action): GraphState {
           fields,
           enums,
           enumValues,
+          inputs,
+          inputFields,
           visibleNodes,
         },
       } = action;
@@ -103,6 +105,8 @@ function graphReducer(state: GraphState, action: Action): GraphState {
         fieldEdits: {},
         enums: fsf.index(enums, enumDef),
         enumValues: fsf.index(enumValues, enumValueDef),
+        inputs: fsf.index(inputs, inputDef),
+        inputFields: fsf.index(inputFields, inputFieldDef),
         visibleNodes: fsf.index(visibleNodes, visibleNodeDef),
         visibleEdgeIds,
       };
