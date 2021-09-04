@@ -65,13 +65,31 @@ const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
 
 const ResolverArg: React.VFC<{ argId: string }> = ({ argId }) => {
   const arg = useSelector((state) => state.graph.args[argId]);
+  const e = useEnum(arg.typeName);
+
+  if (!arg) return null;
+
+  const {
+    name,
+    description,
+    isList,
+    typeName,
+    isListElementNotNull,
+    isNotNull,
+  } = arg;
   return (
     <li key={arg.name} className="scalar field">
-      <span>{arg.name}</span>: {arg.isList && '['}
-      <span>{arg.typeName}</span>
-      {arg.isListElementNotNull && '!'}
-      {arg.isList && ']'}
-      {arg.isNotNull && '!'}
+      <span className="name">{name}</span>
+      {': '}
+      <span className="type" title={e?.description}>
+        {isList && '['}
+        {typeName}
+        {isListElementNotNull && '!'}
+        {isList && ']'}
+        {isNotNull && '!'}
+      </span>
+      {!!description && <div className="description">{description}</div>}
+      <EnumValuesInfo enumId={typeName} />
     </li>
   );
 };
