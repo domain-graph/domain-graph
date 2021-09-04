@@ -27,9 +27,12 @@
   }
 
   .controls {
-    top: 4px;
-    right: 16px;
     position: absolute;
+
+    .c-icon-button:hover {
+      background-color: @color-node-preview-button-hover-background;
+      stroke: @color-node-preview-button-hover-icon;
+    }
   }
 
   .node-spotlight {
@@ -62,18 +65,19 @@
       }
     }
 
-    .c-icon-button {
-      background-color: @color-node-preview-button-background;
-      stroke: @color-node-preview-button-icon;
+    .controls {
+      top: 4px;
+      right: 16px;
 
-      &:hover {
-        background-color: @color-node-preview-button-hover-background;
-        stroke: @color-node-preview-button-hover-icon;
+      .c-icon-button {
+        background-color: @color-node-preview-button-background;
+        stroke: @color-node-preview-button-icon;
       }
     }
   }
 
   .edge-spotlight {
+    position: relative;
     border: 2px solid @color-edge-preview-border;
     background-color: @color-edge-preview-background;
     color: @color-edge-preview-text;
@@ -81,9 +85,18 @@
     border-radius: 5px;
     padding: 10px 20px;
     margin: 16px 30px;
+
+    .controls {
+      top: 1px;
+      right: 1px;
+      .c-icon-button {
+        stroke: @color-node-preview-button-icon;
+      }
+    }
   }
 
-  .enum-values {
+  .enum-values,
+  .input-fields {
     margin-top: 4px;
     margin-left: 8px;
     .deprecated {
@@ -98,7 +111,8 @@
       }
     }
 
-    li.enum-value {
+    li.enum-value,
+    li.input-field {
       margin-bottom: 4px;
     }
   }

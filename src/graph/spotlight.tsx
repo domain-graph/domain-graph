@@ -15,9 +15,12 @@ import {
   useEnumValues,
   useField,
   useFields,
+  useInput,
+  useInputFields,
   useNode,
 } from '../state/graph/hooks';
 import { deleteNode, restoreNode } from '../state/graph/nodes/actions';
+import { InputField } from '../state/graph/input-fields/types';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
@@ -39,12 +42,25 @@ const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
   const { name, description, heuristic, argIds } = useSelector(
     (state) => state.graph.fields[fieldId],
   );
+  const [isExpanded, setIsExpanded] = useState(true);
+  useEffect(() => {
+    setIsExpanded(true);
+  }, [fieldId]);
   return (
     <div className="edge-spotlight">
+      {!!argIds.length && (
+        <div className="controls">
+          <IconButton
+            Icon={isExpanded ? Minimize2 : Maximize2}
+            size={16}
+            onClick={() => setIsExpanded(!isExpanded)}
+          />
+        </div>
+      )}
       <h1>{name}</h1>
       {heuristic && <div>({heuristic})</div>}
       {description && <div>{description}</div>}
-      {!!argIds.length && (
+      {!!argIds.length && isExpanded && (
         <ul>
           {argIds.map((argId) => (
             <ResolverArg key={argId} argId={argId} />
@@ -58,6 +74,7 @@ const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
 const ResolverArg: React.VFC<{ argId: string }> = ({ argId }) => {
   const arg = useSelector((state) => state.graph.args[argId]);
   const e = useEnum(arg.typeName);
+  const input = useInput(arg.typeName);
 
   if (!arg) return null;
 
@@ -73,15 +90,16 @@ const ResolverArg: React.VFC<{ argId: string }> = ({ argId }) => {
     <li key={arg.name} className="scalar field">
       <span className="name">{name}</span>
       {': '}
-      <span className="type" title={e?.description}>
-        {isList && '['}
-        {typeName}
-        {isListElementNotNull && '!'}
-        {isList && ']'}
-        {isNotNull && '!'}
-      </span>
+      <TypeDisplayName
+        typeName={typeName}
+        typeDescription={e?.description || input?.description}
+        isList={isList}
+        isNotNull={isNotNull}
+        isListElementNotNull={isListElementNotNull}
+      />
       {!!description && <div className="description">{description}</div>}
       <EnumValuesInfo enumId={typeName} />
+      <InputFieldsInfo inputId={typeName} />
     </li>
   );
 };
@@ -225,6 +243,8 @@ const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
     isNotNull,
   } = field;
 
+  const typeDescription = undefined; // TODO:
+
   return (
     <li
       className={isSelected ? 'selected edge field' : 'edge field'}
@@ -233,13 +253,13 @@ const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
     >
       <span className="name">{name}</span>
       {': '}
-      <span className="type">
-        {isList && '['}
-        {typeName}
-        {isListElementNotNull && '!'}
-        {isList && ']'}
-        {isNotNull && '!'}
-      </span>
+      <TypeDisplayName
+        typeName={typeName}
+        typeDescription={typeDescription}
+        isList={isList}
+        isNotNull={isNotNull}
+        isListElementNotNull={isListElementNotNull}
+      />
       <div className="description">{!!description ? description : null}</div>
     </li>
   );
@@ -260,13 +280,13 @@ const ScalarField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
       <div>
         <span className="name">{name}</span>
         {': '}
-        <span className="type" title={e?.description}>
-          {isList && '['}
-          {typeName}
-          {isListElementNotNull && '!'}
-          {isList && ']'}
-          {isNotNull && '!'}
-        </span>
+        <TypeDisplayName
+          typeName={typeName}
+          typeDescription={e?.description}
+          isList={isList}
+          isNotNull={isNotNull}
+          isListElementNotNull={isListElementNotNull}
+        />
       </div>
       <div className="description">{!!description ? description : null}</div>
       <EnumValuesInfo enumId={typeName} />
@@ -301,3 +321,65 @@ const EnumValuesInfo: React.VFC<{ enumId: string }> = ({ enumId }) => {
     </ul>
   );
 };
+
+const InputFieldsInfo: React.VFC<{ inputId: string }> = ({ inputId }) => {
+  const input = useInput(inputId);
+  const fields = useInputFields(inputId);
+
+  if (!input) return null;
+
+  return (
+    <ul className="input-fields">
+      {fields.map((field) => (
+        <InputFieldInfo key={inputId} field={field} />
+      ))}
+    </ul>
+  );
+};
+
+const InputFieldInfo: React.VFC<{ field: InputField }> = ({ field }) => {
+  const e = useEnum(field.typeName);
+  const input = useInput(field.typeName);
+  return (
+    <li key={field.id} className="enum-value">
+      <div>
+        <span className="name">{field.name}</span>
+        {': '}
+        <TypeDisplayName
+          typeName={field.typeName}
+          typeDescription={e?.description || input?.description}
+          isList={field.isList}
+          isNotNull={field.isNotNull}
+          isListElementNotNull={field.isListElementNotNull}
+        />
+      </div>
+      {!!field.description && (
+        <div className="description">{field.description}</div>
+      )}
+      <EnumValuesInfo enumId={field.typeName} />
+      <InputFieldsInfo inputId={field.typeName} />
+    </li>
+  );
+};
+
+const TypeDisplayName: React.VFC<{
+  typeName: string;
+  typeDescription?: string;
+  isList?: boolean;
+  isNotNull?: boolean;
+  isListElementNotNull?: boolean;
+}> = ({
+  typeName,
+  typeDescription,
+  isListElementNotNull,
+  isList,
+  isNotNull,
+}) => (
+  <span className="type" title={typeDescription}>
+    {isList && '['}
+    {typeName}
+    {isListElementNotNull && '!'}
+    {isList && ']'}
+    {isNotNull && '!'}
+  </span>
+);
