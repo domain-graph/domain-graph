@@ -31,7 +31,7 @@ export const IconButton = forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const className = useMemo(
-      () => ['c-icon-button', originalClassName].filter((x) => x).join(' '),
+      () => ['c-icon-button', originalClassName].filter((c) => c).join(' '),
       [originalClassName],
     );
 

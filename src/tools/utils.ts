@@ -1,5 +1,4 @@
 import {
-  Field,
   FieldType,
   Schema,
   SchemaType,
