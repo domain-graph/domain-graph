@@ -1,4 +1,10 @@
-import React, { useCallback, useRef, useState, forwardRef } from 'react';
+import React, {
+  useCallback,
+  useRef,
+  useState,
+  forwardRef,
+  useImperativeHandle,
+} from 'react';
 
 import { useDrag } from './use-drag';
 import { useResize } from './use-resize';
@@ -22,8 +28,13 @@ interface State {
   height: number;
 }
 
+export interface SvgCanvasMethods {
+  resetZoom(): void;
+  fitAll(): void;
+}
+
 export const SvgCanvas = forwardRef<
-  SVGSVGElement,
+  SvgCanvasMethods,
   React.PropsWithChildren<SvgCanvasProps>
 >(({ className, style, children }, forwardedRef) => {
   const [isDragging, setIsDragging] = useState(false);
@@ -40,22 +51,26 @@ export const SvgCanvas = forwardRef<
     height: 150,
   });
 
-  const [wrapper, setWrapper] = useState<HTMLDivElement | null>(null);
-  const wrapperRef = useCallback(
-    (element: HTMLDivElement) => {
-      setWrapper(element);
-      const ref = forwardedRef as any;
-      if (ref) {
-        if (typeof ref === 'function') {
-          ref(element);
-        } else {
-          ref.current = element;
-        }
-      }
-      state.current.wrapper = element;
+  const divRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(forwardedRef, () => ({
+    resetZoom: () => {
+      setZoom(1);
+
+      state.current.preX = 0;
+      state.current.preY = 0;
+
+      state.current.postX = 0;
+      state.current.postY = 0;
+
+      state.current.scale = 1;
+
+      updateFn.current();
     },
-    [forwardedRef],
-  );
+    fitAll: () => {
+      console.log('fitAll');
+    },
+  }));
 
   const [canvas, setCanvas] = useState<SVGSVGElement | null>(null);
   const canvasRef = useCallback((element: SVGSVGElement) => {
@@ -97,7 +112,7 @@ export const SvgCanvas = forwardRef<
     onEnd: () => setIsDragging(false),
   });
 
-  useZoom(canvas, ({ value, x, y }) => {
+  const setZoom = useZoom(canvas, ({ value, x, y }) => {
     const centerX = state.current.width / 2;
     const centerY = state.current.height / 2;
 
@@ -118,7 +133,7 @@ export const SvgCanvas = forwardRef<
     updateFn.current();
   });
 
-  useResize(wrapper, ({ width, height }) => {
+  useResize(divRef.current, ({ width, height }) => {
     state.current.width = width;
     state.current.height = height;
 
@@ -127,7 +142,7 @@ export const SvgCanvas = forwardRef<
 
   return (
     <div
-      ref={wrapperRef}
+      ref={divRef}
       className={`c-svg-canvas${className ? ' ' + className : ''}${
         isDragging ? ' dragging' : ''
       }`}
