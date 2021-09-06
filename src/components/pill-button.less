@@ -1,0 +1,35 @@
+.c-pill-button {
+  display: inline-flex;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: none;
+  padding: 8px 12px;
+
+  user-select: none;
+
+  border-radius: 40px;
+
+  svg {
+    margin-top: -2px;
+    margin-right: 4px;
+  }
+
+  align-items: center;
+
+  transition: box-shadow 100ms ease-in-out, background-color 100ms ease-in-out;
+
+  box-shadow: rgba(60, 64, 67, 0.28) 0px 1px 6px 0px;
+
+  &:hover {
+    box-shadow: rgba(60, 64, 67, 0.28) 0px 4px 10px 0px;
+  }
+
+  &:active {
+    box-shadow: rgba(60, 64, 67, 0.28) 0px 1px 6px 0px;
+  }
+
+  &:focus {
+    outline: none;
+  }
+}

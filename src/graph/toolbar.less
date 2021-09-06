@@ -1,0 +1,24 @@
+.c-toolbar {
+  display: inline-block;
+  position: relative;
+
+  top: 0px;
+  left: 400px;
+
+  .c-pill-button {
+    margin: 6px;
+    background-color: @color-toolbar-background;
+    color: @color-toolbar-foreground;
+    svg {
+      stroke: @color-toolbar-foreground;
+    }
+
+    &:active {
+      background-color: @color-toolbar-active-background;
+      color: @color-toolbar-active-foreground;
+      svg {
+        stroke: @color-toolbar-active-foreground;
+      }
+    }
+  }
+}

@@ -250,3 +250,21 @@ export function useInputFields(inputId: string): InputField[] {
     return (inputFieldIds || []).map((id) => inputFields[id]).filter((x) => x);
   }, [inputFieldIds, inputFields]);
 }
+
+export function useVisibleNodeBounds() {
+  const visibleNodes = useVisibleNodes();
+
+  let minX = 0;
+  let maxX = 0;
+  let minY = 0;
+  let maxY = 0;
+
+  for (const node of visibleNodes) {
+    if (typeof node.x === 'number' && node.x < minX) minX = node.x;
+    if (typeof node.x === 'number' && node.x > maxX) maxX = node.x;
+    if (typeof node.y === 'number' && node.y < minY) minY = node.y;
+    if (typeof node.y === 'number' && node.y > maxY) maxY = node.y;
+  }
+
+  return useMemo(() => ({ minX, maxX, minY, maxY }), [minX, maxX, minY, maxY]);
+}

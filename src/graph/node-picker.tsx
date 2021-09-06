@@ -5,24 +5,9 @@ import { deindex } from 'flux-standard-functions';
 import { Eye, EyeOff } from '../icons';
 
 import { useDispatch, useSelector } from '../state';
-import {
-  hideAllNodes,
-  hideNode,
-  hideUnpinnedNodes,
-  showNode,
-} from '../state/graph/graph-actions';
+import { hideNode, showNode } from '../state/graph/graph-actions';
 
 export const NodePicker: React.VFC = () => {
-  const dispatch = useDispatch();
-
-  const handleHideAll = useCallback(() => {
-    dispatch(hideAllNodes() as any); // TODO: (issue: #40)
-  }, [dispatch]);
-
-  const handleHideUnpinned = useCallback(() => {
-    dispatch(hideUnpinnedNodes() as any); // TODO: (issue: #40)
-  }, [dispatch]);
-
   const nodes = useSelector((state) => deindex(state.graph.nodes));
   const [filter, setFilter] = useState<string>('');
   const sortedNodes = useMemo(
@@ -47,8 +32,6 @@ export const NodePicker: React.VFC = () => {
   return (
     <div className="c-node-picker">
       <input onChange={handleFilter} />
-      <button onClick={handleHideAll}>Hide all</button>
-      <button onClick={handleHideUnpinned}>Hide unpinned</button>
       <ul>
         {sortedNodes.map((node) => (
           <Item key={node.id} nodeId={node.id} />
