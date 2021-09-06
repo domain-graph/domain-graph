@@ -6,6 +6,7 @@ import { ApplicationStore, getStore } from './state/store';
 import { SaveState, SaveStateRepository } from './persistence';
 import { importSaveState } from './state/graph/graph-actions';
 import { SubscribedStateRepository } from './persistence/subscribed-state-repository';
+import { useIndexBuilder } from './search';
 
 export interface DomainGraphProps {
   graphId: string;
@@ -44,6 +45,8 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
     );
   }, [repository, onSaveState]);
 
+  const buildIndex = useIndexBuilder();
+
   useEffect(() => {
     let unsubscribe = () => {
       // noop
@@ -56,12 +59,13 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
     ).then((result) => {
       setStore(result.store);
       unsubscribe = result.unsubscribe;
+      buildIndex(result.store.getState());
     });
 
     return () => {
       unsubscribe();
     };
-  }, [graphId, introspection, subscribedRepository]);
+  }, [graphId, introspection, subscribedRepository, buildIndex]);
 
   useEffect(() => {
     if (saveState) store?.dispatch(importSaveState(saveState));
