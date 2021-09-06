@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 export interface ZoomOptions {
   max?: number;
@@ -91,4 +91,8 @@ export function useZoom(
       return undefined;
     }
   }, [element]);
+
+  return useCallback((value: number) => {
+    state.current.value = value;
+  }, []);
 }
