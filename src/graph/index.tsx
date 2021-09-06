@@ -6,10 +6,10 @@ import { SvgCanvas, SvgCanvasMethods } from '../svg-canvas';
 import { DomainObject } from './domain-object';
 import { DomainEdge } from './domain-edge';
 import { Simulation } from '../simulation';
-import { NodePicker } from './node-picker';
 import { Spotlight } from './spotlight';
 import { useVisibleEdgeIds, useVisibleNodeIds } from '../state/graph/hooks';
 import { Toolbar } from './toolbar';
+import { SearchBox } from '../search/search-box';
 
 export interface GraphProps {
   className?: string;
@@ -47,7 +47,8 @@ export const Graph: React.VFC<GraphProps> = () => {
         onFitAll={handleClickFitAll}
         onResetZoom={handleClickResetZoom}
       />
-      <NodePicker />
+      <SearchBox />
+      {/* <NodePicker /> */}
       <Spotlight />
     </Simulation>
   );

@@ -1,0 +1,47 @@
+.c-search-box {
+  overflow: hidden;
+  display: inline-block;
+  position: absolute;
+
+  width: 340px;
+
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.3);
+
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 22px 70px 4px rgba(0, 0, 0, 0.56), 0 0 0 1px rgba(0, 0, 0, 0);
+
+  border-radius: 20px;
+
+  padding: 16px;
+
+  top: 20px;
+  left: 20px;
+  font-family: sans-serif;
+
+  ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .result {
+    padding: 8px;
+
+    cursor: pointer;
+
+    &.node {
+      background-color: @color-node-background;
+      border: 2px solid @color-node-border;
+      border-radius: 12px;
+      margin: 8px 0;
+    }
+
+    &.field, &.arg {
+      background-color: @color-edge-background;
+      border: 2px solid @color-edge-border;
+      border-radius: 5px;
+      margin: 8px 4px;
+    }
+  }
+}

@@ -362,7 +362,7 @@ const InputFieldInfo: React.VFC<{ field: InputField }> = ({ field }) => {
   );
 };
 
-const TypeDisplayName: React.VFC<{
+export const TypeDisplayName: React.VFC<{
   typeName: string;
   typeDescription?: string;
   isList?: boolean;
