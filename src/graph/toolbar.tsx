@@ -33,7 +33,7 @@ export const Toolbar: React.VFC<ToolbarProps> = ({ onResetZoom }) => {
         Fit all
       </PillButton> */}
       <PillButton icon={Icons.Home} onClick={onResetZoom}>
-        Reset Zoom
+        Reset view
       </PillButton>
     </div>
   );
