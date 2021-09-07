@@ -22,6 +22,8 @@ export const SearchBox: React.VFC = () => {
     null,
   );
 
+  const [query, setQuery] = useState<string | null>(null);
+
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   const handleSearch = useCallback(
@@ -42,20 +44,37 @@ export const SearchBox: React.VFC = () => {
     }
 
     setResults(null);
+    setQuery(null);
   }, []);
 
   const debouncedSearch = useDebouncedCallback(handleSearch, 500);
 
+  const handleChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setQuery(event.target.value);
+      debouncedSearch(event);
+    },
+    [debouncedSearch],
+  );
+
   return (
     <div className="c-search-box">
-      <input ref={inputRef} onChange={debouncedSearch} />
-      <IconButton Icon={Icons.X} onClick={handleClear} />
+      <div className="controls">
+        <input placeholder="Search" ref={inputRef} onChange={handleChange} />
+        <IconButton
+          Icon={!!query ? Icons.X : Icons.Search}
+          size={16}
+          onClick={handleClear}
+        />
+      </div>
       {results !== null && !results.length && 'No results found'}
-      <ol>
-        {results?.map((result) => (
-          <SearchResult resultRef={result.ref} />
-        ))}
-      </ol>
+      {!!results?.length && (
+        <ol>
+          {results?.map((result) => (
+            <SearchResult resultRef={result.ref} />
+          ))}
+        </ol>
+      )}
     </div>
   );
 };
@@ -87,8 +106,8 @@ const NodeResult: React.VFC<{ id: string }> = ({ id }) => {
   if (!node) return null;
   return (
     <li className="node result" role="button" onClick={handleClick}>
-      <div>{node.id}</div>
-      <div>{node.description}</div>
+      <div className="name">{node.id}</div>
+      <div className="description">{node.description}</div>
     </li>
   );
 };
@@ -117,8 +136,8 @@ const FieldResult: React.VFC<{ id: string }> = ({ id }) => {
   if (!field || !node) return null;
   return (
     <li className={`${resultKind} result`} role="button" onClick={handleClick}>
-      <div>{node.id}</div>
-      <div>
+      <div className="name">{node.id}</div>
+      <div className="name">
         {field.name}
         {': '}
         <TypeDisplayName
@@ -130,7 +149,7 @@ const FieldResult: React.VFC<{ id: string }> = ({ id }) => {
         />
       </div>
 
-      <div>{field.description}</div>
+      <div className="description">{field.description}</div>
     </li>
   );
 };
@@ -165,7 +184,7 @@ const ArgResult: React.VFC<{ id: string }> = ({ id }) => {
         )
       </div>
 
-      <div>{arg.description}</div>
+      <div className="description">{arg.description}</div>
     </li>
   );
 };
