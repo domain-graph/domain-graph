@@ -20,19 +20,6 @@
     top: 16px;
     left: 16px;
 
-    &:focus,
-    &:hover {
-      input {
-        box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 10px 0px;
-      }
-    }
-
-    &:active {
-      input {
-        box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 6px 0px;
-      }
-    }
-
     input {
       width: 320px;
       padding: 8px 40px 8px 12px;
@@ -53,6 +40,23 @@
       }
 
       box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 6px 0px;
+
+      &:focus {
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 10px 0px;
+      }
+    }
+
+    &:focus,
+    &:hover {
+      input {
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 4px 10px 0px;
+      }
+    }
+
+    &:active {
+      input {
+        box-shadow: rgba(0, 0, 0, 0.2) 0px 1px 6px 0px;
+      }
     }
 
     .c-icon-button {
