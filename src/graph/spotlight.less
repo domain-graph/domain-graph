@@ -1,16 +1,19 @@
 .c-spotlight {
-  font-family: sans-serif;
   overflow: scroll;
-
-  background-color: transparent;
-
+  &::-webkit-scrollbar {
+    width: 0 !important;
+  }
+  overflow: -moz-scrollbars-none;
+  -ms-overflow-style: none;
+  display: block;
   position: absolute;
+
+  max-height: 100vh;
+  width: 400px;
 
   top: 0;
   right: 0;
-  bottom: 0;
-
-  width: 400px;
+  font-family: sans-serif;
 
   li {
     list-style-type: none;
