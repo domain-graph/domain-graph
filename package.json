@@ -70,6 +70,7 @@
   "dependencies": {
     "d3": "^6.3.1",
     "d3-force": "^2.1.1",
+    "fast-fuzzy": "^1.10.10",
     "flux-standard-functions": "^0.2.0",
     "graphql": "^15.4.0",
     "lunr": "^2.3.9",
