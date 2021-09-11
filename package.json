@@ -1,6 +1,6 @@
 {
   "name": "domain-graph",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Beautiful interactive visualizations for GraphQL schemas",
   "main": "lib/index.js",
   "files": [
