@@ -15,6 +15,7 @@ import { useDispatch } from '../state';
 import { selectField, selectNode } from '../state/graph/graph-actions';
 import { IconButton } from '../components/icon-button';
 import { Icons } from '..';
+import { Result } from './types';
 
 export const SearchBox: React.VFC = () => {
   const search = useSearch();
@@ -71,7 +72,7 @@ export const SearchBox: React.VFC = () => {
       {!!results?.length && (
         <ol>
           {results?.map((result) => (
-            <SearchResult resultRef={result.ref} />
+            <SearchResult key={`${result.kind}:${result.id}`} {...result} />
           ))}
         </ol>
       )}
@@ -79,22 +80,21 @@ export const SearchBox: React.VFC = () => {
   );
 };
 
-const SearchResult: React.VFC<{ resultRef: string }> = ({ resultRef }) => {
-  const [kind, id] = resultRef.split(':');
-
+const SearchResult: React.VFC<Result> = (props) => {
+  const { kind, ...rest } = props;
   switch (kind) {
-    case 'Node':
-      return <NodeResult id={id} />;
+    case 'Type':
+      return <NodeResult {...rest} />;
     case 'Field':
-      return <FieldResult id={id} />;
+      return <FieldResult {...rest} />;
     case 'Arg':
-      return <ArgResult id={id} />;
+      return <ArgResult {...rest} />;
     default:
       return null;
   }
 };
 
-const NodeResult: React.VFC<{ id: string }> = ({ id }) => {
+const NodeResult: React.VFC<Omit<Result, 'kind'>> = ({ id }) => {
   const dispatch = useDispatch();
 
   const node = useNode(id)?.current;
