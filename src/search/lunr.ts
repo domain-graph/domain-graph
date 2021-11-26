@@ -1,6 +1,6 @@
 /* eslint-disable no-invalid-this */
 import lunr from 'lunr';
-import { Arg, Field, GraphState, Node } from '../state/types';
+import { Arg, Field, GraphState, Node } from '../state/graph';
 import {
   isResultField,
   isResultKind,

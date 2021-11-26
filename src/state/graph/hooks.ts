@@ -7,192 +7,50 @@ import {
   Edge,
   Field,
   VisibleNode,
-  edgeDef,
-  EdgeEdit,
   Arg,
-  ArgEdit,
-  argDef,
   Enum,
   EnumValue,
   Input,
   InputField,
-} from '../types';
+} from './types';
 import { useSelector } from '..';
-import { fieldDef, FieldEdit } from './fields';
 
-export interface Edited<T> {
-  current: T;
-  original: T | undefined;
-  isDeleted: boolean;
+export function useArg(argId: string): Arg | undefined {
+  // TODO: respect plugins
+  return useSelector((state) => state.graph.args[argId]);
 }
 
-function getEditedArg(
-  original: Arg | undefined,
-  edit: ArgEdit | undefined,
-): Edited<Arg> | undefined {
-  if (original) {
-    if (edit) {
-      return {
-        original,
-        current: fsf.patch(original, edit, argDef),
-        isDeleted: !!edit?.isDeleted,
-      };
-    } else {
-      return {
-        original,
-        current: original,
-        isDeleted: false,
-      };
-    }
-  } else if (edit) {
-    // TODO: don't allow undefined current
-    const current: Arg | undefined = original
-      ? fsf.patch(original, edit, argDef)
-      : argDef.getPayload(edit);
-
-    return {
-      original,
-      current,
-      isDeleted: edit.isDeleted === true,
-    };
-  }
-
-  return undefined;
+export function useField(fieldId: string): Field | undefined {
+  // TODO: respect plugins
+  return useSelector((state) => state.graph.fields[fieldId]);
 }
 
-function getEditedField(
-  original: Field | undefined,
-  edit: FieldEdit | undefined,
-): Edited<Field> {
-  if (!edit && original) {
-    return {
-      original,
-      current: original,
-      isDeleted: false,
-    };
-  }
-
-  const argIds = fsf.setEach(
-    fsf.unsetEach(original?.argIds || [], edit?.deletedArgIds || []),
-    edit?.createdArgIds || [],
-  );
-
-  const current: Field | undefined = original
-    ? fsf.patch(original, { ...edit, argIds }, fieldDef)
-    : fieldDef.getPayload({ ...edit, argIds });
-
-  return {
-    original,
-    current,
-    isDeleted: !!edit?.isDeleted,
-  };
+export function useEdge(edgeId: string): Edge | undefined {
+  // TODO: respect plugins
+  return useSelector((state) => state.graph.edges[edgeId]);
 }
 
-function getEditedEdge(
-  original: Edge | undefined,
-  edit: EdgeEdit | undefined,
-): Edited<Edge> {
-  if (!edit && original) {
-    return {
-      original,
-      current: original,
-      isDeleted: false,
-    };
-  }
-
-  const fieldIds = fsf.setEach(
-    fsf.unsetEach(original?.fieldIds || [], edit?.deletedFieldIds || []),
-    edit?.createdFieldIds || [],
-  );
-
-  const current: Edge | undefined = original
-    ? fsf.patch(original, { ...edit, fieldIds }, edgeDef)
-    : edgeDef.getPayload({ ...edit, fieldIds });
-
-  return {
-    original,
-    current,
-    isDeleted: !!edit?.isDeleted,
-  };
-}
-
-// function getEditedNode(
-//   original: Node | undefined,
-//   edit: NodeEdit | undefined,
-// ): Edited<Node> {
-//   if (!edit && original) {
-//     return {
-//       original,
-//       current: original,
-//       isDeleted: false,
-//     };
-//   }
-
-//   const fieldIds = fsf.setEach(
-//     fsf.unsetEach(original?.fieldIds || [], edit?.deletedFieldIds || []),
-//     edit?.createdFieldIds || [],
-//   );
-
-//   const current: Node | undefined = original
-//     ? fsf.patch(original, { ...edit, fieldIds }, edgeDef)
-//     : edgeDef.getPayload({ ...edit, fieldIds });
-
-//   return {
-//     original,
-//     current,
-//     isDeleted: !!edit?.isDeleted,
-//   };
-// }
-
-export function useArg(argId: string): Edited<Arg> | undefined {
-  const original = useSelector((state) => state.graph.args[argId]);
-  const edit = useSelector((state) => state.graph.argEdits[argId]);
-
-  return useMemo(() => getEditedArg(original, edit), [original, edit]);
-}
-
-export function useField(fieldId: string): Edited<Field> | undefined {
-  const original = useSelector((state) => state.graph.fields[fieldId]);
-  const edit = useSelector((state) => state.graph.fieldEdits[fieldId]);
-
-  return useMemo(() => getEditedField(original, edit), [original, edit]);
-}
-
-export function useEdge(edgeId: string): Edited<Edge> | undefined {
-  const original = useSelector((state) => state.graph.edges[edgeId]);
-  const edit = useSelector((state) => state.graph.edgeEdits[edgeId]);
-
-  return useMemo(() => getEditedEdge(original, edit), [original, edit]);
-}
-
-export function useNode(nodeId: string): Edited<Node> | undefined {
-  const original = useSelector((state) => state.graph.nodes[nodeId]);
-
-  return useMemo(
-    () => ({
-      original,
-      current: original,
-      isDeleted: false,
-    }),
-    [original],
-  );
+export function useNode(nodeId: string): Node | undefined {
+  // TODO: respect plugins
+  return useSelector((state) => state.graph.nodes[nodeId]);
 }
 
 export function useVisibleEdgeIds(): string[] {
+  // TODO: respect plugins
   return useSelector((state) => state.graph.visibleEdgeIds);
 }
-export function useVisibleEdges(): Edited<Edge>[] {
-  const { visibleEdgeIds, edges, edgeEdits } = useSelector(
-    (state) => state.graph,
-  );
+export function useVisibleEdges(): Edge[] {
+  const { visibleEdgeIds, edges } = useSelector((state) => state.graph);
 
-  return useMemo(
-    () => visibleEdgeIds.map((id) => getEditedEdge(edges[id], edgeEdits[id])),
-    [visibleEdgeIds, edges, edgeEdits],
-  );
+  // TODO: respect plugins
+  return useMemo(() => visibleEdgeIds.map((id) => edges[id]), [
+    visibleEdgeIds,
+    edges,
+  ]);
 }
 
 export function useVisibleNodeIds(): string[] {
+  // TODO: respect plugins
   return useSelector(
     (state) => fsf.deindex(state.graph.visibleNodes).map((x) => x.id),
     shallowEqual,
@@ -201,10 +59,12 @@ export function useVisibleNodeIds(): string[] {
 
 export function useVisibleNodes(): VisibleNode[] {
   const { visibleNodes } = useSelector((state) => state.graph);
+  // TODO: respect plugins
   return useMemo(() => fsf.deindex(visibleNodes), [visibleNodes]);
 }
 
 export function useFieldIds(nodeId: string): string[] {
+  // TODO: respect plugins
   return useSelector(
     (state) => state.graph.nodes[nodeId]?.fieldIds || [],
     shallowEqual,

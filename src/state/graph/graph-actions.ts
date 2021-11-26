@@ -1,12 +1,15 @@
-import { VisibleNode, Edge } from './types';
+import {
+  Arg,
+  Edge,
+  Enum,
+  EnumValue,
+  Field,
+  Input,
+  Node,
+  InputField,
+  VisibleNode,
+} from './types';
 import { SaveState } from '../../persistence';
-import { Arg } from './args/types';
-import { Field } from './fields/types';
-import { Node } from './nodes/types';
-import { Enum } from './enums/types';
-import { EnumValue } from './enum-values/types';
-import { Input } from './inputs/types';
-import { InputField } from './input-fields/types';
 
 export const importState = (
   nodes: Node[],

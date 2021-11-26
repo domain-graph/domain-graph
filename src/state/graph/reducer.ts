@@ -7,33 +7,19 @@ import {
   stateDef,
   VisibleNode,
   visibleNodeDef,
+  argDef,
+  fieldDef,
+  nodeDef,
 } from '.';
-import { reducer as argsReducer } from './args/reducer';
-import { reducer as fieldsReducer } from './fields/reducer';
-import { reducer as nodesReducer } from './nodes/reducer';
 import { GraphAction } from './graph-actions';
-import { ArgAction } from './args/actions';
-import { chainReducers } from '../state-utils';
-import { FieldAction, fieldDef } from './fields';
-import { NodeAction, nodeDef } from './nodes';
-import { argDef } from './args/types';
-import { enumDef, enumValueDef, inputDef, inputFieldDef } from '../types';
+import { enumDef, enumValueDef, inputDef, inputFieldDef } from './types';
 
-export type Action = GraphAction | ArgAction | FieldAction | NodeAction;
+export type Action = GraphAction;
 
 export function reducer(
   state: GraphState = defaultState,
   action: Action,
 ): GraphState {
-  return chainReducers(
-    graphReducer,
-    nodesReducer,
-    argsReducer,
-    fieldsReducer,
-  )(state, action);
-}
-
-function graphReducer(state: GraphState, action: Action): GraphState {
   switch (action.type) {
     case 'graph/import_state': {
       const {
@@ -96,13 +82,9 @@ function graphReducer(state: GraphState, action: Action): GraphState {
 
       return {
         args: fsf.index(args, argDef),
-        argEdits: {},
         nodes: fsf.index(nodes, nodeDef),
-        nodeEdits: {},
         edges: fsf.index(edges, edgeDef),
-        edgeEdits: {},
         fields: fsf.index(fields, fieldDef),
-        fieldEdits: {},
         enums: fsf.index(enums, enumDef),
         enumValues: fsf.index(enumValues, enumValueDef),
         inputs: fsf.index(inputs, inputDef),
@@ -117,10 +99,6 @@ function graphReducer(state: GraphState, action: Action): GraphState {
       if (!payload?.graph?.visibleNodes) return state;
 
       const {
-        nodeEdits,
-        fieldEdits,
-        edgeEdits,
-        argEdits,
         visibleNodes,
         selectedSourceNodeId: s,
         selectedFieldId: f,
@@ -128,10 +106,6 @@ function graphReducer(state: GraphState, action: Action): GraphState {
       } = payload.graph;
 
       let nextState = state;
-      nextState = fsf.set(nextState, 'nodeEdits', nodeEdits, stateDef);
-      nextState = fsf.set(nextState, 'fieldEdits', fieldEdits, stateDef);
-      nextState = fsf.set(nextState, 'edgeEdits', edgeEdits, stateDef);
-      nextState = fsf.set(nextState, 'argEdits', argEdits, stateDef);
       nextState = fsf.set(nextState, 'visibleNodes', {}, stateDef);
       nextState = fsf.set(nextState, 'visibleEdgeIds', [], stateDef);
       nextState = fsf.unset(nextState, 'selectedSourceNodeId', stateDef);

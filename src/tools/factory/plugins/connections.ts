@@ -1,4 +1,4 @@
-import { Edge, Field } from '../../../state/types';
+import { Edge, Field } from '../../../state/graph';
 import { buildEdgeId } from '../factory-3.0';
 import { V3StatePlugin } from '../types';
 

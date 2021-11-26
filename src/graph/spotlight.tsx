@@ -19,8 +19,7 @@ import {
   useInputFields,
   useNode,
 } from '../state/graph/hooks';
-import { deleteNode, restoreNode } from '../state/graph/nodes/actions';
-import { InputField } from '../state/graph/input-fields/types';
+import { InputField } from '../state/graph';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
@@ -112,7 +111,6 @@ const Controls: React.VFC<{
   onCollapse: () => void;
 }> = ({ nodeId, isExpanded, size, onExpand, onCollapse }) => {
   const dispatch = useDispatch();
-  const isDeleted = useNode(nodeId)?.isDeleted;
 
   const handleExpandClick = useCallback(() => {
     if (isExpanded) {
@@ -129,10 +127,6 @@ const Controls: React.VFC<{
   const _handleHideClick = useCallback(() => {
     dispatch(hideNode(nodeId));
   }, [dispatch, nodeId]);
-
-  const _handleDeleteClick = useCallback(() => {
-    dispatch(isDeleted ? restoreNode(nodeId) : deleteNode(nodeId));
-  }, [dispatch, isDeleted, nodeId]);
 
   return (
     <div className="controls">
@@ -178,14 +172,7 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
         onCollapse={() => setIsExpanded(false)}
       />
       <h1>{nodeId}</h1>
-      {!!node?.current.description && (
-        <div>
-          {node.current.description}
-          {node?.current?.description === node?.original?.description
-            ? null
-            : ' (edited)'}
-        </div>
-      )}
+      {!!node?.description && <div>{node.description}</div>}
       {isExpanded && (
         <>
           <ul>
@@ -210,7 +197,7 @@ const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
 };
 
 const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
-  const field = useField(fieldId)?.current;
+  const field = useField(fieldId);
   if (!field) return null;
   const { name, description } = field;
   return (
@@ -223,7 +210,7 @@ const IdField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
 
 const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
   const dispatch = useDispatch();
-  const field = useField(fieldId)?.current;
+  const field = useField(fieldId);
 
   const handleClick = useCallback(() => {
     dispatch(selectField(fieldId));

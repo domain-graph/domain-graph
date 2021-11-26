@@ -8,7 +8,7 @@ import {
   Input,
   InputField,
   Node,
-} from '../../state/types';
+} from '../../state/graph';
 import {
   isEnumFieldType,
   isScalarFieldType,
