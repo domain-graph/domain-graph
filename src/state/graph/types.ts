@@ -26,6 +26,8 @@ export type Edge = {
   sourceNodeId: string;
   targetNodeId: string;
   fieldIds: string[];
+  hideWith?: string[];
+  showWith?: string[];
 };
 
 export const edgeDef = define<Edge>({
@@ -33,6 +35,8 @@ export const edgeDef = define<Edge>({
   sourceNodeId: required(),
   targetNodeId: required(),
   fieldIds: required(array()),
+  hideWith: optional(array()),
+  showWith: optional(array()),
 });
 
 export type EdgeEdit = {

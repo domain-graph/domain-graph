@@ -16,6 +16,7 @@ describe('field reducer', () => {
       originalState.nodes = {
         ['node-1']: {
           id: 'node-1',
+          edgeIds: [],
           fieldIds: ['field-1'],
         },
       };
@@ -67,6 +68,7 @@ describe('field reducer', () => {
       originalState.nodes = {
         'node-1': {
           id: 'node-1',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -99,6 +101,7 @@ describe('field reducer', () => {
       originalState.nodes = {
         ['node-1']: {
           id: 'node-1',
+          edgeIds: [],
           fieldIds: ['field-1'],
         },
       };
@@ -138,6 +141,7 @@ describe('field reducer', () => {
       originalState.nodes = {
         ['node-1']: {
           id: 'node-1',
+          edgeIds: [],
           fieldIds: ['field-1', 'field-2'],
         },
       };
@@ -197,6 +201,7 @@ describe('field reducer', () => {
       originalState.nodes = {
         ['node-1']: {
           id: 'node-1',
+          edgeIds: [],
           fieldIds: ['field-1', 'field-2'],
         },
       };
@@ -263,6 +268,7 @@ describe('field reducer', () => {
       originalState.nodes = {
         ['node-1']: {
           id: 'node-1',
+          edgeIds: [],
           fieldIds: ['field-2'],
         },
       };
@@ -345,6 +351,7 @@ describe('field reducer', () => {
         [node1Id]: {
           id: node1Id,
           description: 'original description',
+          edgeIds: [],
           fieldIds: [fieldId],
         },
       };
@@ -394,11 +401,13 @@ describe('field reducer', () => {
         [node1Id]: {
           id: node1Id,
           description: 'source node',
+          edgeIds: [],
           fieldIds: [fieldId],
         },
         [node2Id]: {
           id: node2Id,
           description: 'target node',
+          edgeIds: [],
           fieldIds: [fieldId],
         },
       };
@@ -468,6 +477,7 @@ describe('field reducer', () => {
       originalState.nodes = {
         ['node-1']: {
           id: 'node-1',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -515,6 +525,7 @@ describe('field reducer', () => {
         [nodeId]: {
           id: nodeId,
           description: 'original description',
+          edgeIds: [],
           fieldIds: [fieldId],
         },
       };
@@ -581,11 +592,13 @@ describe('field reducer', () => {
         [node1Id]: {
           id: node1Id,
           description: 'some node',
+          edgeIds: [],
           fieldIds: [],
         },
         [node2Id]: {
           id: node2Id,
           description: 'another node',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -647,6 +660,7 @@ describe('field reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: ['field-1'],
         },
       };
@@ -689,6 +703,7 @@ describe('field reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: [],
         },
       };

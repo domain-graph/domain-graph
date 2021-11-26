@@ -30,6 +30,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -61,6 +62,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -85,6 +87,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -115,6 +118,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -151,6 +155,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -200,6 +205,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'original description',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -230,6 +236,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'a new node',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -275,6 +282,7 @@ describe('reducer', () => {
         payload: {
           id: 'some-node',
           description: 'a new node',
+          edgeIds: [],
         },
       };
 
@@ -300,6 +308,7 @@ describe('reducer', () => {
         ['node-1']: {
           id: 'node-1',
           description: 'an existing node',
+          edgeIds: [],
           fieldIds: [],
         },
       };
@@ -308,6 +317,7 @@ describe('reducer', () => {
         payload: {
           id: 'node-1',
           description: 'a new node',
+          edgeIds: [],
         },
       };
 

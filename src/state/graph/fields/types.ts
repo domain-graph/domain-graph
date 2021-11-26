@@ -4,7 +4,6 @@ import {
   key,
   required,
   optional,
-  indexOf,
   DELETE_VALUE,
 } from 'flux-standard-functions';
 import { SpecificFieldType } from '../../../tools/types';
@@ -24,6 +23,8 @@ export type Field = {
   isNotNull: boolean;
   isList: boolean;
   isListElementNotNull?: boolean;
+  hideWith?: string[];
+  showWith?: string[];
 };
 
 export type NewField = Omit<
@@ -45,6 +46,8 @@ export const fieldDef = define<Field>({
   isNotNull: required(),
   isList: required(),
   isListElementNotNull: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
 });
 
 export type FieldEdit = Edit & {

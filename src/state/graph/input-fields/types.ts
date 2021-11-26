@@ -1,4 +1,4 @@
-import { define, key, required, optional } from 'flux-standard-functions';
+import { define, key, required, optional, array } from 'flux-standard-functions';
 import { SpecificInputFieldType } from '../../../tools/types';
 
 export type InputField = {
@@ -12,6 +12,8 @@ export type InputField = {
   isNotNull: boolean;
   isList: boolean;
   isListElementNotNull?: boolean;
+  hideWith?: string[];
+  showWith?: string[];
 };
 
 export const inputFieldDef = define<InputField>({
@@ -25,4 +27,6 @@ export const inputFieldDef = define<InputField>({
   isNotNull: required(),
   isList: required(),
   isListElementNotNull: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
 });

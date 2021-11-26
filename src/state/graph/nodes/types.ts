@@ -12,7 +12,10 @@ import { Edit } from '../types';
 export type Node = {
   id: string;
   description?: string;
+  edgeIds: string[];
   fieldIds: string[];
+  hideWith?: string[];
+  showWith?: string[];
 };
 
 export type NewNode = Omit<Node, 'fieldIds'>;
@@ -20,7 +23,10 @@ export type NewNode = Omit<Node, 'fieldIds'>;
 export const nodeDef = define<Node>({
   id: key(),
   description: optional(),
+  edgeIds: required(array()),
   fieldIds: required(array()),
+  hideWith: optional(array()),
+  showWith: optional(array()),
 });
 
 export type NodeEdit = Edit & {

@@ -98,6 +98,7 @@ export function getInitialState(
     const node: Node = {
       id: createNodeId(type),
       description: type.description || undefined,
+      edgeIds: [],
       fieldIds: [], // This gets populated in the reducer
     };
     nodes.set(node.id, node);
