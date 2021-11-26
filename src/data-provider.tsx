@@ -1,11 +1,6 @@
 import './data-provider.less';
 
-import {
-  buildSchema,
-  GraphQLSchema,
-  introspectionFromSchema,
-  IntrospectionQuery,
-} from 'graphql';
+import { parse as parseDocument, DocumentNode } from 'graphql';
 import React, { useCallback, useState } from 'react';
 import { AlertTriangle, Folder, UploadCloud } from './icons';
 import { Button } from './components/button';
@@ -21,7 +16,7 @@ export interface OpenFilesResult {
 export interface DataProviderProps {
   onShowOpenDialog?: () => Promise<OpenFilesResult>;
   onDrop?: (filename: string, contents: string) => Promise<boolean>;
-  children: (data: IntrospectionQuery) => React.ReactElement;
+  children: (data: DocumentNode) => React.ReactElement;
 }
 
 export const DataProvider: React.VFC<DataProviderProps> = ({
@@ -29,7 +24,7 @@ export const DataProvider: React.VFC<DataProviderProps> = ({
   children,
   onShowOpenDialog,
 }) => {
-  const [data, setData] = useState<IntrospectionQuery | null>(null);
+  const [data, setData] = useState<DocumentNode | null>(null);
 
   const [dropReady, setDropReady] = useState(false);
   const [parseErrors, setParseErrors] = useState<readonly ParseError[]>([]);
@@ -54,10 +49,10 @@ export const DataProvider: React.VFC<DataProviderProps> = ({
       const text = new TextDecoder().decode(arrayBuffer);
 
       if (onDrop && (await onDrop(file.name, text))) {
-        const { introspection, errors } = parse(text);
+        const { documentNode, errors } = parse(text);
 
         setParseErrors(errors);
-        setData(introspection);
+        setData(documentNode);
       }
     },
     [onDrop],
@@ -70,10 +65,10 @@ export const DataProvider: React.VFC<DataProviderProps> = ({
     if (result && !result.canceled && result.files.length) {
       const text = result.files[0].contents;
 
-      const { introspection, errors } = parse(text);
+      const { documentNode, errors } = parse(text);
 
       setParseErrors(errors);
-      setData(introspection);
+      setData(documentNode);
     }
   }, [onShowOpenDialog]);
 
@@ -120,73 +115,34 @@ type ParseError = {
 
 function parse(
   str: string,
-): { introspection: IntrospectionQuery | null; errors: readonly ParseError[] } {
+): { documentNode: DocumentNode | null; errors: readonly ParseError[] } {
   const errors: ParseError[] = [];
-  let json: any = null;
+
+  let documentNode: DocumentNode | null = null;
 
   try {
-    json = JSON.parse(str);
-  } catch {
-    // Parse as SDL
-
-    let schema: GraphQLSchema | null = null;
-
+    documentNode = parseDocument(str);
+  } catch (firstEx) {
     try {
-      schema = buildSchema(str);
-    } catch (firstEx) {
-      try {
-        schema = buildSchema(str + federationSchema);
-      } catch (secondEx) {
-        console.error(firstEx);
-        console.error(secondEx);
-        return {
-          introspection: null,
-          errors: [
-            {
-              message: 'Not a valid schema',
-            },
-          ],
-        };
-      }
+      documentNode = parseDocument(str + federationSchema);
+    } catch (secondEx) {
+      console.error(firstEx);
+      console.error(secondEx);
+      return {
+        documentNode: null,
+        errors: [
+          {
+            message: 'Not a valid schema',
+          },
+        ],
+      };
     }
-
-    const introspection = introspectionFromSchema(schema);
-
-    return {
-      introspection,
-      errors: [],
-    };
   }
 
-  if (typeof json.__schema === 'object') {
-    for (const prop of [
-      'queryType',
-      'mutationType',
-      'subscriptionType',
-      'types',
-      'directives',
-    ]) {
-      if (typeof json.__schema[prop] === undefined) {
-        errors.push({
-          message: `Missing property "__schema.${prop}" in introspection`,
-        });
-      }
-    }
-  } else {
-    errors.push({ message: 'Missing property "__schema" in introspection' });
-  }
-
-  if (errors.length) {
-    return {
-      introspection: null,
-      errors,
-    };
-  } else {
-    return {
-      introspection: json,
-      errors,
-    };
-  }
+  return {
+    documentNode,
+    errors,
+  };
 }
 
 // see: https://www.apollographql.com/docs/federation/federation-spec/
