@@ -42,7 +42,7 @@ describe('factory 3.0', () => {
       const result = factory(document);
 
       // ASSERT
-      console.log(result);
+      // console.log(result);
     });
   });
 
@@ -77,9 +77,15 @@ describe('factory 3.0', () => {
 
       // ASSERT
       expect(result).toStrictEqual([
-        { id: 'Query', fieldIds: ['Query.x'], description: 'The query node' },
+        {
+          id: 'Query',
+          edgeIds: ['ComplexType>Query'],
+          fieldIds: ['Query.x'],
+          description: 'The query node',
+        },
         {
           id: 'ComplexType',
+          edgeIds: ['ComplexType>Query'],
           fieldIds: ['ComplexType.id', 'ComplexType.value'],
         },
       ]);

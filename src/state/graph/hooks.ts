@@ -9,7 +9,6 @@ import {
   VisibleNode,
   edgeDef,
   EdgeEdit,
-  NodeEdit,
   Arg,
   ArgEdit,
   argDef,
@@ -117,33 +116,33 @@ function getEditedEdge(
   };
 }
 
-function getEditedNode(
-  original: Node | undefined,
-  edit: NodeEdit | undefined,
-): Edited<Node> {
-  if (!edit && original) {
-    return {
-      original,
-      current: original,
-      isDeleted: false,
-    };
-  }
+// function getEditedNode(
+//   original: Node | undefined,
+//   edit: NodeEdit | undefined,
+// ): Edited<Node> {
+//   if (!edit && original) {
+//     return {
+//       original,
+//       current: original,
+//       isDeleted: false,
+//     };
+//   }
 
-  const fieldIds = fsf.setEach(
-    fsf.unsetEach(original?.fieldIds || [], edit?.deletedFieldIds || []),
-    edit?.createdFieldIds || [],
-  );
+//   const fieldIds = fsf.setEach(
+//     fsf.unsetEach(original?.fieldIds || [], edit?.deletedFieldIds || []),
+//     edit?.createdFieldIds || [],
+//   );
 
-  const current: Node | undefined = original
-    ? fsf.patch(original, { ...edit, fieldIds }, edgeDef)
-    : edgeDef.getPayload({ ...edit, fieldIds });
+//   const current: Node | undefined = original
+//     ? fsf.patch(original, { ...edit, fieldIds }, edgeDef)
+//     : edgeDef.getPayload({ ...edit, fieldIds });
 
-  return {
-    original,
-    current,
-    isDeleted: !!edit?.isDeleted,
-  };
-}
+//   return {
+//     original,
+//     current,
+//     isDeleted: !!edit?.isDeleted,
+//   };
+// }
 
 export function useArg(argId: string): Edited<Arg> | undefined {
   const original = useSelector((state) => state.graph.args[argId]);
@@ -168,9 +167,15 @@ export function useEdge(edgeId: string): Edited<Edge> | undefined {
 
 export function useNode(nodeId: string): Edited<Node> | undefined {
   const original = useSelector((state) => state.graph.nodes[nodeId]);
-  const edit = useSelector((state) => state.graph.nodeEdits[nodeId]);
 
-  return useMemo(() => getEditedNode(original, edit), [original, edit]);
+  return useMemo(
+    () => ({
+      original,
+      current: original,
+      isDeleted: false,
+    }),
+    [original],
+  );
 }
 
 export function useVisibleEdgeIds(): string[] {

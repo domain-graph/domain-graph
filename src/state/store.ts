@@ -9,6 +9,7 @@ import { factory } from '../tools/factory/factory-3.0';
 import { defaultState } from './graph';
 import { SaveState, SaveStateRepository } from '../persistence';
 import { deindex } from 'flux-standard-functions';
+import { connections } from '../tools/factory/plugins/connections';
 
 const composeEnhancers =
   window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
@@ -36,7 +37,7 @@ export async function getStore(
     enumValues,
     inputs,
     inputFields,
-  } = factory(documentNode);
+  } = factory(documentNode, [connections]);
 
   store.dispatch(
     importState(

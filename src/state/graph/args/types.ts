@@ -1,4 +1,5 @@
 import {
+  array,
   define,
   key,
   required,
@@ -20,6 +21,8 @@ export type Arg = {
   isNotNull: boolean;
   isList: boolean;
   isListElementNotNull?: boolean;
+  hideWith?: string[];
+  showWith?: string[];
 };
 
 export const argDef = define<Arg>({
@@ -33,6 +36,8 @@ export const argDef = define<Arg>({
   isNotNull: required(),
   isList: required(),
   isListElementNotNull: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
 });
 
 export type ArgEdit = Edit & {

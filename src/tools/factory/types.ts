@@ -40,7 +40,7 @@ export interface Simplifier {
 }
 
 export interface V3StateFactory {
-  (document: DocumentNode): V3GraphState;
+  (document: DocumentNode, plugins?: V3StatePlugin[]): V3GraphState;
 }
 
 export interface V3StatePlugin {

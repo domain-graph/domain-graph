@@ -3,6 +3,7 @@ import {
   key,
   required,
   optional,
+  array,
 } from 'flux-standard-functions';
 
 export type EnumValue = {
@@ -12,6 +13,8 @@ export type EnumValue = {
   description?: string;
   isDeprecated: boolean;
   deprecationReason?: string;
+  hideWith?: string[];
+  showWith?: string[];
 };
 
 export const enumValueDef = define<EnumValue>({
@@ -21,4 +24,6 @@ export const enumValueDef = define<EnumValue>({
   description: optional(),
   isDeprecated: required(),
   deprecationReason: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
 });

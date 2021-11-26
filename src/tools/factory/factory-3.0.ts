@@ -39,21 +39,48 @@ import { SpecificFieldType, SpecificInputFieldType } from '../types';
 import { DocumentCache } from './document-cache';
 import { V3StateFactory } from './types';
 
-export const factory: V3StateFactory = (document) => ({
-  nodes: index(buildNodes(document), nodeDef),
-  fields: index(buildFields(document), fieldDef),
-  edges: index(buildEdges(document), edgeDef),
-  args: index(buildArgs(document), argDef),
-  enums: index(buildEnums(document), enumDef),
-  enumValues: index(buildEnumValues(document), enumValueDef),
-  inputs: index(buildInputs(document), inputDef),
-  inputFields: index(buildInputFields(document), inputFieldDef),
-});
+export const factory: V3StateFactory = (document, plugins) =>
+  (plugins || []).reduce((state, plugin) => plugin(state), {
+    nodes: index(buildNodes(document), nodeDef),
+    fields: index(buildFields(document), fieldDef),
+    edges: index(buildEdges(document), edgeDef),
+    args: index(buildArgs(document), argDef),
+    enums: index(buildEnums(document), enumDef),
+    enumValues: index(buildEnumValues(document), enumValueDef),
+    inputs: index(buildInputs(document), inputDef),
+    inputFields: index(buildInputFields(document), inputFieldDef),
+  });
 
 export function buildNodes(document: DocumentNode): Node[] {
+  const cache = new DocumentCache(document);
+
+  const edgeIdsByNodeId = new Map<string, Set<string>>();
+  for (const field of cache.fields()) {
+    const { edgeId, sourceId, targetId } = buildEdgeIdFromDocument(
+      cache,
+      field,
+    );
+    if (!edgeId) continue;
+
+    if (sourceId) {
+      if (!edgeIdsByNodeId.has(sourceId)) {
+        edgeIdsByNodeId.set(sourceId, new Set());
+      }
+      edgeIdsByNodeId.get(sourceId)!.add(edgeId);
+    }
+
+    if (targetId) {
+      if (!edgeIdsByNodeId.has(targetId)) {
+        edgeIdsByNodeId.set(targetId, new Set());
+      }
+      edgeIdsByNodeId.get(targetId)!.add(edgeId);
+    }
+  }
+
   return document.definitions.filter(isNodeSource).map((n) =>
     compact({
       id: buildNodeId(n),
+      edgeIds: Array.from(edgeIdsByNodeId.get(buildNodeId(n)) || []),
       fieldIds: n.fields?.map((f) => buildFieldId(n, f)) || [],
       description: n.description?.value,
     }),
@@ -75,7 +102,7 @@ function* doBuildFields(cache: DocumentCache): Iterable<Field> {
     );
 
     const fieldId = buildFieldId(node, field);
-    const { edgeId, isReverse } = buildEdgeId(cache, field);
+    const { edgeId, isReverse } = buildEdgeIdFromDocument(cache, field);
 
     const legacyTargetTypeKind = toLegacyTypeKind(targetDefinition?.kind);
     if (!legacyTargetTypeKind) continue;
@@ -105,7 +132,10 @@ export function buildEdges(document: DocumentNode): Edge[] {
   const edgesById = new Map<string, Edge>();
 
   for (const field of cache.fields()) {
-    const { edgeId, sourceId, targetId } = buildEdgeId(cache, field);
+    const { edgeId, sourceId, targetId } = buildEdgeIdFromDocument(
+      cache,
+      field,
+    );
     if (!edgeId) continue;
     if (!sourceId) continue;
     if (!targetId) continue;
@@ -139,52 +169,6 @@ export function buildEdges(document: DocumentNode): Edge[] {
 
 export function buildArgs(document: DocumentNode): Arg[] {
   return Array.from(doBuildArgs(new DocumentCache(document)));
-
-  // document.definitions
-  //   .filter(isNodeSource)
-  //   .map((n) => n.fields?.map((f) => ({ n, f })) || [])
-  //   .reduce((a, b) => a.concat(b), [])
-  //   .map(({ n, f }) => f.arguments?.map((a) => ({ n, f, a })) || [])
-  //   .reduce((a, b) => a.concat(b), [])
-  //   .forEach(({ n, f, a }) => {
-  //     console.log({ n, f, a });
-  //   });
-
-  // return document.definitions
-  //   .filter(isNodeSource)
-  //   .map((n) => n.fields?.map((f) => ({ n, f })) || [])
-  //   .reduce((a, b) => a.concat(b), [])
-  //   .map(({ n, f }) => f.arguments?.map((a) => ({ n, f, a })) || [])
-  //   .reduce((a, b) => a.concat(b), [])
-  //   .map(({ n, f, a }) => {
-  //     const {
-  //       namedType,
-  //       isList,
-  //       isNotNull,
-  //       isListElementNotNull,
-  //     } = normalizeTypeNode(a.type);
-  //     const targetDefinition = getTypeDefinition(document, namedType);
-  //     const legacyTargetTypeKind = toLegacyInputTypeKind(
-  //       targetDefinition?.kind,
-  //     );
-
-  //     if (!targetDefinition || !legacyTargetTypeKind) return;
-
-  //     const arg: Arg = {
-  //       id: buildArgId(n, f, a),
-  //       fieldId: buildFieldId(n, f),
-  //       name: a.name.value,
-  //       description: a.description?.value,
-  //       // defaultValue: TODO
-  //       typeKind: legacyTargetTypeKind,
-  //       typeName: namedType.name.value,
-  //       isList,
-  //       isNotNull,
-  //       isListElementNotNull,
-  //     };
-  //     return arg;
-  //   })
-  //   .filter(isTruthy);
 }
 
 function* doBuildArgs(cache: DocumentCache): Iterable<Arg> {
@@ -322,7 +306,7 @@ export function buildFieldId(
   return `${typeNode.name.value}.${fieldNode.name.value}`;
 }
 
-function buildEdgeId(
+function buildEdgeIdFromDocument(
   cache: DocumentCache,
   field: FieldDefinitionNode,
 ): {
@@ -341,12 +325,34 @@ function buildEdgeId(
 
   const node = cache.getDefinitionByField(field)!;
 
-  const a = node.name.value;
-  const b = normalizeTypeNode(field.type).namedType.name.value;
+  return buildEdgeId(
+    node.name.value,
+    normalizeTypeNode(field.type).namedType.name.value,
+  );
+}
 
-  return a.localeCompare(b) <= 0
-    ? { edgeId: `${a}>${b}`, isReverse: false, sourceId: a, targetId: b }
-    : { edgeId: `${b}>${a}`, isReverse: true, sourceId: b, targetId: a };
+export function buildEdgeId(
+  sourceId: string,
+  targetId: string,
+): {
+  edgeId: string;
+  isReverse: boolean;
+  sourceId: string;
+  targetId: string;
+} {
+  return sourceId.localeCompare(targetId) <= 0
+    ? {
+        edgeId: `${sourceId}>${targetId}`,
+        isReverse: false,
+        sourceId,
+        targetId,
+      }
+    : {
+        edgeId: `${targetId}>${sourceId}`,
+        isReverse: true,
+        sourceId: targetId,
+        targetId: sourceId,
+      };
 }
 
 function buildArgId(
