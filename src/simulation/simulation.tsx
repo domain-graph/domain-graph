@@ -12,7 +12,7 @@ import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
 import { Edge, VisibleNode } from '../state/graph';
-import { Edited, useVisibleEdges } from '../state/graph/hooks';
+import { useVisibleEdges } from '../state/graph/hooks';
 import { useDispatch, useSelector } from '../state';
 import { updateNodeLocations } from '../state/graph/graph-actions';
 import { shallowEqual } from 'react-redux';
@@ -109,13 +109,11 @@ export const Simulation: React.FC = ({ children }) => {
   const circularEdgeIdsByNode: Record<string, string[]> = useMemo(
     () =>
       visibleEdges
-        .filter(
-          (edge) => edge.current.sourceNodeId === edge.current.targetNodeId,
-        )
+        .filter((edge) => edge.sourceNodeId === edge.targetNodeId)
         .reduce<Record<string, string[]>>((acc, edge) => {
-          acc[edge.current.sourceNodeId] ||= [];
+          acc[edge.sourceNodeId] ||= [];
 
-          acc[edge.current.sourceNodeId].push(edge.current.id);
+          acc[edge.sourceNodeId].push(edge.id);
 
           return acc;
         }, {}),
@@ -156,20 +154,17 @@ export const Simulation: React.FC = ({ children }) => {
   );
 
   const edgeMapper = useCallback(
-    (edge: Edited<Edge>, simEdge: SimulationEdge | undefined) => {
+    (edge: Edge, simEdge: SimulationEdge | undefined) => {
       return {
-        ...edge.current,
-        source: simEdge?.source || edge.current.sourceNodeId,
-        target: simEdge?.target || edge.current.targetNodeId,
+        ...edge,
+        source: simEdge?.source || edge.sourceNodeId,
+        target: simEdge?.target || edge.targetNodeId,
       };
     },
     [],
   );
 
-  const getCurrentEdgeId = useCallback(
-    (item: Edited<Edge>) => item.current.id,
-    [],
-  );
+  const getCurrentEdgeId = useCallback((item: Edge) => item.id, []);
 
   const clonedEdges: SimulationEdge[] = useStableMap(
     visibleEdges,

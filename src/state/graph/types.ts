@@ -6,20 +6,39 @@ import {
   optional,
   indexOf,
 } from 'flux-standard-functions';
-import { Arg, argDef, ArgEdit, argEditDef } from './args/types';
-import { Enum, enumDef } from './enums/types';
-import { EnumValue, enumValueDef } from './enum-values/types';
-import { Field, fieldDef, FieldEdit, fieldEditDef } from './fields/types';
-import { Node, nodeDef, NodeEdit, nodeEditDef } from './nodes/types';
-import { Input, inputDef } from './inputs/types';
-import { InputField, inputFieldDef } from './input-fields/types';
+import { SpecificFieldType, SpecificInputFieldType } from '../../tools/types';
 
 export type Entity = { id: string };
-export type Edit = Entity & { isNew?: boolean; isDeleted?: boolean };
-export type MutableEntity<T extends Entity> = Pick<T, 'id'> &
-  Partial<Omit<T, keyof Entity>>;
-export type MutableEdit<T extends Edit> = Pick<T, 'id'> &
-  Partial<Omit<T, keyof Edit>>;
+
+export type Arg = {
+  id: string;
+  fieldId: string;
+  name: string;
+  description?: string;
+  defaultValue?: string;
+  typeKind: SpecificInputFieldType['kind'];
+  typeName: SpecificInputFieldType['name'];
+  isNotNull: boolean;
+  isList: boolean;
+  isListElementNotNull?: boolean;
+  hideWith?: string[];
+  showWith?: string[];
+};
+
+export const argDef = define<Arg>({
+  id: key(),
+  fieldId: required(),
+  name: required(),
+  description: optional(),
+  defaultValue: optional(),
+  typeKind: required(),
+  typeName: required(),
+  isNotNull: required(),
+  isList: required(),
+  isListElementNotNull: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
+});
 
 export type Edge = {
   id: string;
@@ -39,24 +58,142 @@ export const edgeDef = define<Edge>({
   showWith: optional(array()),
 });
 
-export type EdgeEdit = {
+export type Enum = {
   id: string;
-  sourceNodeId: string;
-  targetNodeId: string;
-  createdFieldIds?: string[];
-  deletedFieldIds?: string[];
-  isNew?: boolean;
-  isDeleted?: boolean;
+  description?: string;
+  valueIds: string[];
+  hideWith?: string[];
+  showWith?: string[];
 };
 
-export const edgeEditDef = define<EdgeEdit>({
+export const enumDef = define<Enum>({
   id: key(),
-  sourceNodeId: required(),
-  targetNodeId: required(),
-  createdFieldIds: optional(array()),
-  deletedFieldIds: optional(array()),
-  isNew: optional(),
-  isDeleted: optional(),
+  description: optional(),
+  valueIds: required(array()),
+  hideWith: optional(array()),
+  showWith: optional(array()),
+});
+
+export type EnumValue = {
+  id: string;
+  enumId: string;
+  name: string;
+  description?: string;
+  isDeprecated: boolean;
+  deprecationReason?: string;
+  hideWith?: string[];
+  showWith?: string[];
+};
+
+export const enumValueDef = define<EnumValue>({
+  id: key(),
+  enumId: required(),
+  name: required(),
+  description: optional(),
+  isDeprecated: required(),
+  deprecationReason: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
+});
+
+export type Field = {
+  id: string;
+  nodeId: string;
+  edgeId?: string;
+  argIds: string[];
+  isReverse?: boolean;
+  name: string;
+  description?: string;
+  heuristic?: string;
+  typeKind: SpecificFieldType['kind'];
+  typeName: SpecificFieldType['name'];
+  isNotNull: boolean;
+  isList: boolean;
+  isListElementNotNull?: boolean;
+  hideWith?: string[];
+  showWith?: string[];
+};
+
+export const fieldDef = define<Field>({
+  id: key(),
+  nodeId: required(),
+  edgeId: optional(),
+  argIds: required(array()),
+  isReverse: optional(),
+  name: required(),
+  description: optional(),
+  heuristic: optional(),
+  typeKind: required(),
+  typeName: required(),
+  isNotNull: required(),
+  isList: required(),
+  isListElementNotNull: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
+});
+
+export type InputField = {
+  id: string;
+  inputId: string;
+  name: string;
+  description?: string;
+  defaultValue?: string;
+  typeKind: SpecificInputFieldType['kind'];
+  typeName: SpecificInputFieldType['name'];
+  isNotNull: boolean;
+  isList: boolean;
+  isListElementNotNull?: boolean;
+  hideWith?: string[];
+  showWith?: string[];
+};
+
+export const inputFieldDef = define<InputField>({
+  id: key(),
+  inputId: required(),
+  name: required(),
+  description: optional(),
+  defaultValue: optional(),
+  typeKind: required(),
+  typeName: required(),
+  isNotNull: required(),
+  isList: required(),
+  isListElementNotNull: optional(),
+  hideWith: optional(array()),
+  showWith: optional(array()),
+});
+
+export type Input = {
+  id: string;
+  description?: string;
+  inputFieldIds: string[];
+  hideWith?: string[];
+  showWith?: string[];
+};
+
+export const inputDef = define<Input>({
+  id: key(),
+  description: optional(),
+  inputFieldIds: required(array()),
+  hideWith: optional(array()),
+  showWith: optional(array()),
+});
+
+export type Node = {
+  id: string;
+  description?: string;
+  edgeIds: string[];
+  fieldIds: string[];
+  hideWith?: string[];
+  showWith?: string[];
+};
+
+export const nodeDef = define<Node>({
+  id: key(),
+  description: optional(),
+  edgeIds: required(array()),
+  fieldIds: required(array()),
+  hideWith: optional(array()),
+  showWith: optional(array()),
 });
 
 export type VisibleNode = {
@@ -75,13 +212,9 @@ export const visibleNodeDef = define<VisibleNode>({
 
 export type GraphState = {
   args: Record<string, Arg>;
-  argEdits: Record<string, ArgEdit>;
   edges: Record<string, Edge>;
-  edgeEdits: Record<string, EdgeEdit>;
   fields: Record<string, Field>;
-  fieldEdits: Record<string, FieldEdit>;
   nodes: Record<string, Node>;
-  nodeEdits: Record<string, NodeEdit>;
   enums: Record<string, Enum>;
   enumValues: Record<string, EnumValue>;
   inputs: Record<string, Input>;
@@ -95,13 +228,9 @@ export type GraphState = {
 
 export const stateDef = define<GraphState>({
   args: required(indexOf(argDef)),
-  argEdits: required(indexOf(argEditDef)),
   edges: required(indexOf(edgeDef)),
-  edgeEdits: required(indexOf(edgeEditDef)),
   fields: required(indexOf(fieldDef)),
-  fieldEdits: required(indexOf(fieldEditDef)),
   nodes: required(indexOf(nodeDef)),
-  nodeEdits: required(indexOf(nodeEditDef)),
   enums: required(indexOf(enumDef)),
   enumValues: required(indexOf(enumValueDef)),
   inputs: required(indexOf(inputDef)),
@@ -115,13 +244,9 @@ export const stateDef = define<GraphState>({
 
 export const defaultState: GraphState = {
   args: {},
-  argEdits: {},
   edges: {},
-  edgeEdits: {},
   fields: {},
-  fieldEdits: {},
   nodes: {},
-  nodeEdits: {},
   enums: {},
   enumValues: {},
   inputs: {},

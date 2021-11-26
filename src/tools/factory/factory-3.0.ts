@@ -34,7 +34,7 @@ import {
   inputFieldDef,
   Node,
   nodeDef,
-} from '../../state/types';
+} from '../../state/graph';
 import { SpecificFieldType, SpecificInputFieldType } from '../types';
 import { DocumentCache } from './document-cache';
 import { V3StateFactory } from './types';

@@ -97,7 +97,7 @@ const SearchResult: React.VFC<Result> = (props) => {
 const NodeResult: React.VFC<Omit<Result, 'kind'>> = ({ id }) => {
   const dispatch = useDispatch();
 
-  const node = useNode(id)?.current;
+  const node = useNode(id);
 
   const handleClick = useCallback(() => {
     dispatch(selectNode(node?.id || ''));
@@ -115,8 +115,8 @@ const NodeResult: React.VFC<Omit<Result, 'kind'>> = ({ id }) => {
 const FieldResult: React.VFC<{ id: string }> = ({ id }) => {
   const dispatch = useDispatch();
 
-  const field = useField(id)?.current;
-  const node = useNode(field?.nodeId || '')?.current;
+  const field = useField(id);
+  const node = useNode(field?.nodeId || '');
   const e = useEnum(field?.typeName || '');
   const input = useInput(field?.typeName || '');
 
@@ -157,9 +157,9 @@ const FieldResult: React.VFC<{ id: string }> = ({ id }) => {
 const ArgResult: React.VFC<{ id: string }> = ({ id }) => {
   const dispatch = useDispatch();
 
-  const arg = useArg(id)?.current;
-  const field = useField(arg?.fieldId || '')?.current;
-  const node = useNode(field?.nodeId || '')?.current;
+  const arg = useArg(id);
+  const field = useField(arg?.fieldId || '');
+  const node = useNode(field?.nodeId || '');
   const e = useEnum(arg?.typeName || '');
   const input = useInput(arg?.typeName || '');
 
