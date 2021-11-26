@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { IntrospectionQuery } from 'graphql';
+import { DocumentNode } from 'graphql';
 import { Provider as StoreProvider } from 'react-redux';
 import { Graph } from './graph';
 import { ApplicationStore, getStore } from './state/store';
@@ -10,7 +10,7 @@ import { useIndexBuilder } from './search';
 
 export interface DomainGraphProps {
   graphId: string;
-  introspection: IntrospectionQuery;
+  documentNode: DocumentNode;
   repository: SaveStateRepository;
   saveState?: SaveState;
   onSaveState?(graphId: string, saveState: SaveState): void;
@@ -18,7 +18,7 @@ export interface DomainGraphProps {
 
 export const DomainGraph: React.VFC<DomainGraphProps> = ({
   graphId,
-  introspection,
+  documentNode,
   repository,
   saveState,
   onSaveState,
@@ -53,7 +53,7 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
     };
     getStore(
       graphId,
-      introspection,
+      documentNode,
       subscribedRepository,
       saveStateRef.current,
     ).then((result) => {
@@ -65,7 +65,7 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
     return () => {
       unsubscribe();
     };
-  }, [graphId, introspection, subscribedRepository, buildIndex]);
+  }, [graphId, documentNode, subscribedRepository, buildIndex]);
 
   useEffect(() => {
     if (saveState) store?.dispatch(importSaveState(saveState));

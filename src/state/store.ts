@@ -1,16 +1,14 @@
-import { IntrospectionQuery } from 'graphql';
+import { DocumentNode } from 'graphql';
 import { applyMiddleware, compose, createStore, Store } from 'redux';
 import thunk from 'redux-thunk';
 
 import { reducers } from '.';
-// import { getRegistry } from '../registry';
-import { interospectionHeuristic } from '../tools/factory/heuristics/introspection';
-import { connectionHeuristic } from '../tools/factory/heuristics/relay-connection';
 
 import { importSaveState, importState } from './graph/graph-actions';
-import { getInitialState } from '../tools/factory/factory-2.0';
+import { factory } from '../tools/factory/factory-3.0';
 import { defaultState } from './graph';
 import { SaveState, SaveStateRepository } from '../persistence';
+import { deindex } from 'flux-standard-functions';
 
 const composeEnhancers =
   window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
@@ -19,7 +17,7 @@ export type ApplicationStore = Store<ReturnType<typeof reducers>>;
 
 export async function getStore(
   graphId: string,
-  introspection: IntrospectionQuery,
+  documentNode: DocumentNode,
   repository: SaveStateRepository,
   initialSaveState?: SaveState,
 ): Promise<{ store: ApplicationStore; unsubscribe: () => void }> {
@@ -38,21 +36,18 @@ export async function getStore(
     enumValues,
     inputs,
     inputFields,
-  } = getInitialState(introspection, [
-    connectionHeuristic,
-    interospectionHeuristic,
-  ]);
+  } = factory(documentNode);
 
   store.dispatch(
     importState(
-      nodes,
-      edges,
-      fields,
-      args,
-      enums,
-      enumValues,
-      inputs,
-      inputFields,
+      deindex(nodes),
+      deindex(edges),
+      deindex(fields),
+      deindex(args),
+      deindex(enums),
+      deindex(enumValues),
+      deindex(inputs),
+      deindex(inputFields),
       [],
     ),
   );
