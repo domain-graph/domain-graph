@@ -34,12 +34,15 @@ import {
   inputFieldDef,
   Node,
   nodeDef,
-} from '../../state/graph';
-import { SpecificFieldType, SpecificInputFieldType } from '../types';
+} from '../state/graph';
+import {
+  SpecificFieldType,
+  SpecificInputFieldType,
+  StateFactory,
+} from './types';
 import { DocumentCache } from './document-cache';
-import { V3StateFactory } from './types';
 
-export const factory: V3StateFactory = (document, plugins) =>
+export const factory: StateFactory = (document, plugins) =>
   (plugins || []).reduce((state, plugin) => plugin(state), {
     nodes: index(buildNodes(document), nodeDef),
     fields: index(buildFields(document), fieldDef),
@@ -125,7 +128,6 @@ function* doBuildFields(cache: DocumentCache): Iterable<Field> {
 }
 
 export function buildEdges(document: DocumentNode): Edge[] {
-  // return Array.from(doBuildEdges(new DocumentCache(document)));
   const cache = new DocumentCache(document);
 
   const fieldIdsByEdgeId = new Map<string, Set<string>>();

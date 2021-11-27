@@ -9,9 +9,9 @@ import {
   buildInputs,
   buildNodes,
   factory,
-} from './factory-3.0';
+} from './factory';
 
-describe('factory 3.0', () => {
+describe('factory', () => {
   describe(factory, () => {
     it('works', () => {
       // ARRANGE

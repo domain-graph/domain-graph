@@ -1,10 +1,10 @@
-import { Edge, Field } from '../../../state/graph';
-import { buildEdgeId } from '../factory-3.0';
-import { V3StatePlugin } from '../types';
+import { Edge, Field } from '../../state/graph';
+import { buildEdgeId } from '../factory';
+import { StateFactoryPlugin } from '../types';
 
 export const pluginName = 'simple-connections';
 
-export const connections: V3StatePlugin = (state) => {
+export const connections: StateFactoryPlugin = (state) => {
   for (const nodeId in state.nodes) {
     if (nodeId.endsWith('Connection')) {
       const name = nodeId.substr(0, nodeId.length - 'Connection'.length);
