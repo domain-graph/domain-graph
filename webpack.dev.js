@@ -9,7 +9,9 @@ const common = require('./webpack.common.js');
 module.exports = merge(common, {
   mode: 'development',
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
+    static: {
+      directory: path.join(__dirname, 'dist'),
+    },
     port: 9999,
     hot: true,
   },
@@ -31,10 +33,7 @@ module.exports = merge(common, {
       },
     ],
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    new MiniCssExtractPlugin({ filename: '[name].css' }),
-  ],
+  plugins: [new MiniCssExtractPlugin({ filename: '[name].css' })],
   output: {
     filename: '[name].js',
   },
