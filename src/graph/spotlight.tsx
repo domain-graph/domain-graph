@@ -24,7 +24,7 @@ import {
   useSelectedTargetNodeId,
 } from '../state/graph/hooks';
 import { InputField } from '../state/graph';
-import { pluginName } from '../tools/factory/plugins/connections';
+import { pluginName } from '../tools/plugins/connections';
 
 export const Spotlight: React.VFC = () => {
   const sourceId = useSelectedSourceNodeId();
