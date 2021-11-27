@@ -41,6 +41,7 @@ import {
   StateFactory,
 } from './types';
 import { DocumentCache } from './document-cache';
+import { compact } from './utils';
 
 export const factory: StateFactory = (document, plugins) =>
   (plugins || []).reduce((state, plugin) => plugin(state), {
@@ -520,16 +521,4 @@ export function getTypeDefinition(
   return namedDefinitionByNameByDocument
     .get(document)
     ?.get(namedType.name.value);
-}
-
-function compact<T extends Object>(obj: T): T {
-  const compacted: T = {} as any;
-
-  for (const key of Object.keys(obj)) {
-    if (typeof obj[key] !== 'undefined') {
-      compacted[key] = obj[key];
-    }
-  }
-
-  return compacted;
 }
