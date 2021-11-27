@@ -1,0 +1,989 @@
+{
+  "nodes": {
+    "PageInfo": {
+      "id": "PageInfo",
+      "edgeIds": [
+        "GizmoConnection>PageInfo",
+        "PageInfo>SomethingElseConnection",
+        "MyInterfaceConnection>PageInfo",
+        "PageInfo>ThingConnection"
+      ],
+      "fieldIds": [
+        "PageInfo.endCursor",
+        "PageInfo.hasNextPage",
+        "PageInfo.hasPreviousPage",
+        "PageInfo.startCursor"
+      ],
+      "description": "Required relay connection type",
+      "hideWith": ["simple-connections"]
+    },
+    "Widget": {
+      "id": "Widget",
+      "edgeIds": [
+        "GizmoConnection>Widget",
+        "MyInterfaceConnection>Widget",
+        "ThingConnection>Widget",
+        "SomethingElseConnection>Widget",
+        "Gizmo>Widget",
+        "MyInterface>Widget"
+      ],
+      "fieldIds": [
+        "Widget.id",
+        "Widget.gizmos",
+        "Widget.moreGizmos",
+        "Widget.stuff",
+        "Widget.things",
+        "Widget.somethingElse",
+        "Widget.gizmos~simple-connections",
+        "Widget.moreGizmos~simple-connections",
+        "Widget.somethingElse~simple-connections",
+        "Widget.stuff~simple-connections"
+      ]
+    },
+    "Gizmo": {
+      "id": "Gizmo",
+      "edgeIds": [
+        "Gizmo>GizmoConnection",
+        "Gizmo>GizmoEdge",
+        "Gizmo>SomethingElseConnection",
+        "Gizmo>SomethingOtherEdge"
+      ],
+      "fieldIds": ["Gizmo.id"]
+    },
+    "GizmoConnection": {
+      "id": "GizmoConnection",
+      "edgeIds": [
+        "GizmoConnection>Widget",
+        "Gizmo>GizmoConnection",
+        "GizmoConnection>GizmoEdge",
+        "GizmoConnection>PageInfo"
+      ],
+      "fieldIds": [
+        "GizmoConnection.nodes",
+        "GizmoConnection.edges",
+        "GizmoConnection.pageInfo"
+      ],
+      "hideWith": ["simple-connections"]
+    },
+    "GizmoEdge": {
+      "id": "GizmoEdge",
+      "edgeIds": ["GizmoConnection>GizmoEdge", "Gizmo>GizmoEdge"],
+      "fieldIds": ["GizmoEdge.node", "GizmoEdge.cursor"],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingElseConnection": {
+      "id": "SomethingElseConnection",
+      "edgeIds": [
+        "SomethingElseConnection>Widget",
+        "Gizmo>SomethingElseConnection",
+        "SomethingElseConnection>SomethingOtherEdge",
+        "PageInfo>SomethingElseConnection"
+      ],
+      "fieldIds": [
+        "SomethingElseConnection.nodes",
+        "SomethingElseConnection.edges",
+        "SomethingElseConnection.pageInfo"
+      ],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingOtherEdge": {
+      "id": "SomethingOtherEdge",
+      "edgeIds": [
+        "SomethingElseConnection>SomethingOtherEdge",
+        "Gizmo>SomethingOtherEdge"
+      ],
+      "fieldIds": ["SomethingOtherEdge.node", "SomethingOtherEdge.cursor"],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceConnection": {
+      "id": "MyInterfaceConnection",
+      "edgeIds": [
+        "MyInterfaceConnection>Widget",
+        "MyInterface>MyInterfaceConnection",
+        "MyInterfaceConnection>MyInterfaceEdge",
+        "MyInterfaceConnection>PageInfo"
+      ],
+      "fieldIds": [
+        "MyInterfaceConnection.nodes",
+        "MyInterfaceConnection.edges",
+        "MyInterfaceConnection.pageInfo"
+      ],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceEdge": {
+      "id": "MyInterfaceEdge",
+      "edgeIds": [
+        "MyInterfaceConnection>MyInterfaceEdge",
+        "MyInterface>MyInterfaceEdge"
+      ],
+      "fieldIds": ["MyInterfaceEdge.node", "MyInterfaceEdge.cursor"],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterface": {
+      "id": "MyInterface",
+      "edgeIds": [
+        "MyInterface>MyInterfaceConnection",
+        "MyInterface>MyInterfaceEdge"
+      ],
+      "fieldIds": ["MyInterface.id", "MyInterface.name"]
+    },
+    "ThingConnection": {
+      "id": "ThingConnection",
+      "edgeIds": [
+        "ThingConnection>Widget",
+        "ThingConnection>ThingEdge",
+        "PageInfo>ThingConnection"
+      ],
+      "fieldIds": [
+        "ThingConnection.nodes",
+        "ThingConnection.edges",
+        "ThingConnection.pageInfo"
+      ]
+    },
+    "ThingEdge": {
+      "id": "ThingEdge",
+      "edgeIds": ["ThingConnection>ThingEdge"],
+      "fieldIds": ["ThingEdge.node", "ThingEdge.cursor"]
+    }
+  },
+  "fields": {
+    "PageInfo.endCursor": {
+      "id": "PageInfo.endCursor",
+      "name": "endCursor",
+      "isList": false,
+      "isNotNull": false,
+      "nodeId": "PageInfo",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isReverse": false,
+      "argIds": []
+    },
+    "PageInfo.hasNextPage": {
+      "id": "PageInfo.hasNextPage",
+      "name": "hasNextPage",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "PageInfo",
+      "typeKind": "SCALAR",
+      "typeName": "Boolean",
+      "isReverse": false,
+      "argIds": []
+    },
+    "PageInfo.hasPreviousPage": {
+      "id": "PageInfo.hasPreviousPage",
+      "name": "hasPreviousPage",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "PageInfo",
+      "typeKind": "SCALAR",
+      "typeName": "Boolean",
+      "isReverse": false,
+      "argIds": []
+    },
+    "PageInfo.startCursor": {
+      "id": "PageInfo.startCursor",
+      "name": "startCursor",
+      "isList": false,
+      "isNotNull": false,
+      "nodeId": "PageInfo",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isReverse": false,
+      "argIds": []
+    },
+    "Widget.id": {
+      "id": "Widget.id",
+      "name": "id",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "Widget",
+      "typeKind": "SCALAR",
+      "typeName": "ID",
+      "isReverse": false,
+      "argIds": []
+    },
+    "Widget.gizmos": {
+      "id": "Widget.gizmos",
+      "name": "gizmos",
+      "edgeId": "GizmoConnection>Widget",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "GizmoConnection",
+      "isReverse": true,
+      "argIds": [
+        "Widget.gizmos(filter)",
+        "Widget.gizmos(after)",
+        "Widget.gizmos(before)",
+        "Widget.gizmos(first)",
+        "Widget.gizmos(last)"
+      ],
+      "hideWith": ["simple-connections"]
+    },
+    "Widget.moreGizmos": {
+      "id": "Widget.moreGizmos",
+      "name": "moreGizmos",
+      "edgeId": "GizmoConnection>Widget",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "GizmoConnection",
+      "isReverse": true,
+      "argIds": [
+        "Widget.moreGizmos(after)",
+        "Widget.moreGizmos(before)",
+        "Widget.moreGizmos(first)",
+        "Widget.moreGizmos(last)"
+      ],
+      "hideWith": ["simple-connections"]
+    },
+    "Widget.stuff": {
+      "id": "Widget.stuff",
+      "name": "stuff",
+      "edgeId": "MyInterfaceConnection>Widget",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "MyInterfaceConnection",
+      "isReverse": true,
+      "argIds": [
+        "Widget.stuff(after)",
+        "Widget.stuff(before)",
+        "Widget.stuff(first)",
+        "Widget.stuff(last)"
+      ],
+      "hideWith": ["simple-connections"]
+    },
+    "Widget.things": {
+      "id": "Widget.things",
+      "name": "things",
+      "edgeId": "ThingConnection>Widget",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "ThingConnection",
+      "isReverse": true,
+      "argIds": [
+        "Widget.things(after)",
+        "Widget.things(before)",
+        "Widget.things(first)",
+        "Widget.things(last)"
+      ]
+    },
+    "Widget.somethingElse": {
+      "id": "Widget.somethingElse",
+      "name": "somethingElse",
+      "edgeId": "SomethingElseConnection>Widget",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "SomethingElseConnection",
+      "isReverse": true,
+      "argIds": [
+        "Widget.somethingElse(after)",
+        "Widget.somethingElse(before)",
+        "Widget.somethingElse(first)",
+        "Widget.somethingElse(last)"
+      ],
+      "hideWith": ["simple-connections"]
+    },
+    "Gizmo.id": {
+      "id": "Gizmo.id",
+      "name": "id",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "Gizmo",
+      "typeKind": "SCALAR",
+      "typeName": "ID",
+      "isReverse": false,
+      "argIds": []
+    },
+    "GizmoConnection.nodes": {
+      "id": "GizmoConnection.nodes",
+      "name": "nodes",
+      "edgeId": "Gizmo>GizmoConnection",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "GizmoConnection",
+      "typeKind": "OBJECT",
+      "typeName": "Gizmo",
+      "isReverse": true,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "GizmoConnection.edges": {
+      "id": "GizmoConnection.edges",
+      "name": "edges",
+      "edgeId": "GizmoConnection>GizmoEdge",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "GizmoConnection",
+      "typeKind": "OBJECT",
+      "typeName": "GizmoEdge",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "GizmoConnection.pageInfo": {
+      "id": "GizmoConnection.pageInfo",
+      "name": "pageInfo",
+      "edgeId": "GizmoConnection>PageInfo",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "GizmoConnection",
+      "typeKind": "OBJECT",
+      "typeName": "PageInfo",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "GizmoEdge.node": {
+      "id": "GizmoEdge.node",
+      "name": "node",
+      "edgeId": "Gizmo>GizmoEdge",
+      "isList": false,
+      "isNotNull": false,
+      "nodeId": "GizmoEdge",
+      "typeKind": "OBJECT",
+      "typeName": "Gizmo",
+      "isReverse": true,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "GizmoEdge.cursor": {
+      "id": "GizmoEdge.cursor",
+      "name": "cursor",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "GizmoEdge",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingElseConnection.nodes": {
+      "id": "SomethingElseConnection.nodes",
+      "name": "nodes",
+      "edgeId": "Gizmo>SomethingElseConnection",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "SomethingElseConnection",
+      "typeKind": "OBJECT",
+      "typeName": "Gizmo",
+      "isReverse": true,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingElseConnection.edges": {
+      "id": "SomethingElseConnection.edges",
+      "name": "edges",
+      "edgeId": "SomethingElseConnection>SomethingOtherEdge",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "SomethingElseConnection",
+      "typeKind": "OBJECT",
+      "typeName": "SomethingOtherEdge",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingElseConnection.pageInfo": {
+      "id": "SomethingElseConnection.pageInfo",
+      "name": "pageInfo",
+      "edgeId": "PageInfo>SomethingElseConnection",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "SomethingElseConnection",
+      "typeKind": "OBJECT",
+      "typeName": "PageInfo",
+      "isReverse": true,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingOtherEdge.node": {
+      "id": "SomethingOtherEdge.node",
+      "name": "node",
+      "edgeId": "Gizmo>SomethingOtherEdge",
+      "isList": false,
+      "isNotNull": false,
+      "nodeId": "SomethingOtherEdge",
+      "typeKind": "OBJECT",
+      "typeName": "Gizmo",
+      "isReverse": true,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingOtherEdge.cursor": {
+      "id": "SomethingOtherEdge.cursor",
+      "name": "cursor",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "SomethingOtherEdge",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceConnection.nodes": {
+      "id": "MyInterfaceConnection.nodes",
+      "name": "nodes",
+      "edgeId": "MyInterface>MyInterfaceConnection",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "MyInterfaceConnection",
+      "typeKind": "INTERFACE",
+      "typeName": "MyInterface",
+      "isReverse": true,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceConnection.edges": {
+      "id": "MyInterfaceConnection.edges",
+      "name": "edges",
+      "edgeId": "MyInterfaceConnection>MyInterfaceEdge",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "MyInterfaceConnection",
+      "typeKind": "OBJECT",
+      "typeName": "MyInterfaceEdge",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceConnection.pageInfo": {
+      "id": "MyInterfaceConnection.pageInfo",
+      "name": "pageInfo",
+      "edgeId": "MyInterfaceConnection>PageInfo",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "MyInterfaceConnection",
+      "typeKind": "OBJECT",
+      "typeName": "PageInfo",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceEdge.node": {
+      "id": "MyInterfaceEdge.node",
+      "name": "node",
+      "edgeId": "MyInterface>MyInterfaceEdge",
+      "isList": false,
+      "isNotNull": false,
+      "nodeId": "MyInterfaceEdge",
+      "typeKind": "INTERFACE",
+      "typeName": "MyInterface",
+      "isReverse": true,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceEdge.cursor": {
+      "id": "MyInterfaceEdge.cursor",
+      "name": "cursor",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "MyInterfaceEdge",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isReverse": false,
+      "argIds": [],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterface.id": {
+      "id": "MyInterface.id",
+      "name": "id",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "MyInterface",
+      "typeKind": "SCALAR",
+      "typeName": "ID",
+      "isReverse": false,
+      "argIds": []
+    },
+    "MyInterface.name": {
+      "id": "MyInterface.name",
+      "name": "name",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "MyInterface",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isReverse": false,
+      "argIds": []
+    },
+    "ThingConnection.nodes": {
+      "id": "ThingConnection.nodes",
+      "name": "nodes",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "ThingConnection",
+      "typeKind": "UNION",
+      "typeName": "Thing",
+      "isReverse": false,
+      "argIds": []
+    },
+    "ThingConnection.edges": {
+      "id": "ThingConnection.edges",
+      "name": "edges",
+      "edgeId": "ThingConnection>ThingEdge",
+      "isList": true,
+      "isNotNull": false,
+      "isListElementNotNull": false,
+      "nodeId": "ThingConnection",
+      "typeKind": "OBJECT",
+      "typeName": "ThingEdge",
+      "isReverse": false,
+      "argIds": []
+    },
+    "ThingConnection.pageInfo": {
+      "id": "ThingConnection.pageInfo",
+      "name": "pageInfo",
+      "edgeId": "PageInfo>ThingConnection",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "ThingConnection",
+      "typeKind": "OBJECT",
+      "typeName": "PageInfo",
+      "isReverse": true,
+      "argIds": []
+    },
+    "ThingEdge.node": {
+      "id": "ThingEdge.node",
+      "name": "node",
+      "isList": false,
+      "isNotNull": false,
+      "nodeId": "ThingEdge",
+      "typeKind": "UNION",
+      "typeName": "Thing",
+      "isReverse": false,
+      "argIds": []
+    },
+    "ThingEdge.cursor": {
+      "id": "ThingEdge.cursor",
+      "name": "cursor",
+      "isList": false,
+      "isNotNull": true,
+      "nodeId": "ThingEdge",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isReverse": false,
+      "argIds": []
+    },
+    "Widget.gizmos~simple-connections": {
+      "id": "Widget.gizmos~simple-connections",
+      "name": "gizmos",
+      "edgeId": "Gizmo>Widget",
+      "isList": true,
+      "isNotNull": true,
+      "isListElementNotNull": false,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "Gizmo",
+      "isReverse": true,
+      "argIds": ["Widget.gizmos(filter)~simple-connections"],
+      "showWith": ["simple-connections"]
+    },
+    "Widget.moreGizmos~simple-connections": {
+      "id": "Widget.moreGizmos~simple-connections",
+      "name": "moreGizmos",
+      "edgeId": "Gizmo>Widget",
+      "isList": true,
+      "isNotNull": true,
+      "isListElementNotNull": false,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "Gizmo",
+      "isReverse": true,
+      "argIds": [],
+      "showWith": ["simple-connections"]
+    },
+    "Widget.somethingElse~simple-connections": {
+      "id": "Widget.somethingElse~simple-connections",
+      "name": "somethingElse",
+      "edgeId": "Gizmo>Widget",
+      "isList": true,
+      "isNotNull": true,
+      "isListElementNotNull": false,
+      "nodeId": "Widget",
+      "typeKind": "OBJECT",
+      "typeName": "Gizmo",
+      "isReverse": true,
+      "argIds": [],
+      "showWith": ["simple-connections"]
+    },
+    "Widget.stuff~simple-connections": {
+      "id": "Widget.stuff~simple-connections",
+      "name": "stuff",
+      "edgeId": "MyInterface>Widget",
+      "isList": true,
+      "isNotNull": true,
+      "isListElementNotNull": false,
+      "nodeId": "Widget",
+      "typeKind": "INTERFACE",
+      "typeName": "MyInterface",
+      "isReverse": true,
+      "argIds": [],
+      "showWith": ["simple-connections"]
+    }
+  },
+  "edges": {
+    "GizmoConnection>Widget": {
+      "id": "GizmoConnection>Widget",
+      "sourceNodeId": "GizmoConnection",
+      "targetNodeId": "Widget",
+      "fieldIds": ["Widget.gizmos", "Widget.moreGizmos"],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceConnection>Widget": {
+      "id": "MyInterfaceConnection>Widget",
+      "sourceNodeId": "MyInterfaceConnection",
+      "targetNodeId": "Widget",
+      "fieldIds": ["Widget.stuff"],
+      "hideWith": ["simple-connections"]
+    },
+    "ThingConnection>Widget": {
+      "id": "ThingConnection>Widget",
+      "sourceNodeId": "ThingConnection",
+      "targetNodeId": "Widget",
+      "fieldIds": ["Widget.things"]
+    },
+    "SomethingElseConnection>Widget": {
+      "id": "SomethingElseConnection>Widget",
+      "sourceNodeId": "SomethingElseConnection",
+      "targetNodeId": "Widget",
+      "fieldIds": ["Widget.somethingElse"],
+      "hideWith": ["simple-connections"]
+    },
+    "Gizmo>GizmoConnection": {
+      "id": "Gizmo>GizmoConnection",
+      "sourceNodeId": "Gizmo",
+      "targetNodeId": "GizmoConnection",
+      "fieldIds": ["GizmoConnection.nodes"],
+      "hideWith": ["simple-connections"]
+    },
+    "GizmoConnection>GizmoEdge": {
+      "id": "GizmoConnection>GizmoEdge",
+      "sourceNodeId": "GizmoConnection",
+      "targetNodeId": "GizmoEdge",
+      "fieldIds": ["GizmoConnection.edges"],
+      "hideWith": ["simple-connections"]
+    },
+    "GizmoConnection>PageInfo": {
+      "id": "GizmoConnection>PageInfo",
+      "sourceNodeId": "GizmoConnection",
+      "targetNodeId": "PageInfo",
+      "fieldIds": ["GizmoConnection.pageInfo"],
+      "hideWith": ["simple-connections"]
+    },
+    "Gizmo>GizmoEdge": {
+      "id": "Gizmo>GizmoEdge",
+      "sourceNodeId": "Gizmo",
+      "targetNodeId": "GizmoEdge",
+      "fieldIds": ["GizmoEdge.node"],
+      "hideWith": ["simple-connections"]
+    },
+    "Gizmo>SomethingElseConnection": {
+      "id": "Gizmo>SomethingElseConnection",
+      "sourceNodeId": "Gizmo",
+      "targetNodeId": "SomethingElseConnection",
+      "fieldIds": ["SomethingElseConnection.nodes"],
+      "hideWith": ["simple-connections"]
+    },
+    "SomethingElseConnection>SomethingOtherEdge": {
+      "id": "SomethingElseConnection>SomethingOtherEdge",
+      "sourceNodeId": "SomethingElseConnection",
+      "targetNodeId": "SomethingOtherEdge",
+      "fieldIds": ["SomethingElseConnection.edges"],
+      "hideWith": ["simple-connections"]
+    },
+    "PageInfo>SomethingElseConnection": {
+      "id": "PageInfo>SomethingElseConnection",
+      "sourceNodeId": "PageInfo",
+      "targetNodeId": "SomethingElseConnection",
+      "fieldIds": ["SomethingElseConnection.pageInfo"],
+      "hideWith": ["simple-connections"]
+    },
+    "Gizmo>SomethingOtherEdge": {
+      "id": "Gizmo>SomethingOtherEdge",
+      "sourceNodeId": "Gizmo",
+      "targetNodeId": "SomethingOtherEdge",
+      "fieldIds": ["SomethingOtherEdge.node"],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterface>MyInterfaceConnection": {
+      "id": "MyInterface>MyInterfaceConnection",
+      "sourceNodeId": "MyInterface",
+      "targetNodeId": "MyInterfaceConnection",
+      "fieldIds": ["MyInterfaceConnection.nodes"],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceConnection>MyInterfaceEdge": {
+      "id": "MyInterfaceConnection>MyInterfaceEdge",
+      "sourceNodeId": "MyInterfaceConnection",
+      "targetNodeId": "MyInterfaceEdge",
+      "fieldIds": ["MyInterfaceConnection.edges"],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterfaceConnection>PageInfo": {
+      "id": "MyInterfaceConnection>PageInfo",
+      "sourceNodeId": "MyInterfaceConnection",
+      "targetNodeId": "PageInfo",
+      "fieldIds": ["MyInterfaceConnection.pageInfo"],
+      "hideWith": ["simple-connections"]
+    },
+    "MyInterface>MyInterfaceEdge": {
+      "id": "MyInterface>MyInterfaceEdge",
+      "sourceNodeId": "MyInterface",
+      "targetNodeId": "MyInterfaceEdge",
+      "fieldIds": ["MyInterfaceEdge.node"],
+      "hideWith": ["simple-connections"]
+    },
+    "ThingConnection>ThingEdge": {
+      "id": "ThingConnection>ThingEdge",
+      "sourceNodeId": "ThingConnection",
+      "targetNodeId": "ThingEdge",
+      "fieldIds": ["ThingConnection.edges"]
+    },
+    "PageInfo>ThingConnection": {
+      "id": "PageInfo>ThingConnection",
+      "sourceNodeId": "PageInfo",
+      "targetNodeId": "ThingConnection",
+      "fieldIds": ["ThingConnection.pageInfo"]
+    },
+    "Gizmo>Widget": {
+      "id": "Gizmo>Widget",
+      "fieldIds": [
+        "Widget.gizmos~simple-connections",
+        "Widget.moreGizmos~simple-connections",
+        "Widget.somethingElse~simple-connections"
+      ],
+      "sourceNodeId": "Gizmo",
+      "targetNodeId": "Widget"
+    },
+    "MyInterface>Widget": {
+      "id": "MyInterface>Widget",
+      "fieldIds": ["Widget.stuff~simple-connections"],
+      "sourceNodeId": "MyInterface",
+      "targetNodeId": "Widget",
+      "showWith": ["simple-connections"]
+    }
+  },
+  "args": {
+    "Widget.gizmos(filter)": {
+      "id": "Widget.gizmos(filter)",
+      "fieldId": "Widget.gizmos",
+      "name": "filter",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.gizmos(after)": {
+      "id": "Widget.gizmos(after)",
+      "fieldId": "Widget.gizmos",
+      "name": "after",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.gizmos(before)": {
+      "id": "Widget.gizmos(before)",
+      "fieldId": "Widget.gizmos",
+      "name": "before",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.gizmos(first)": {
+      "id": "Widget.gizmos(first)",
+      "fieldId": "Widget.gizmos",
+      "name": "first",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.gizmos(last)": {
+      "id": "Widget.gizmos(last)",
+      "fieldId": "Widget.gizmos",
+      "name": "last",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.moreGizmos(after)": {
+      "id": "Widget.moreGizmos(after)",
+      "fieldId": "Widget.moreGizmos",
+      "name": "after",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.moreGizmos(before)": {
+      "id": "Widget.moreGizmos(before)",
+      "fieldId": "Widget.moreGizmos",
+      "name": "before",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.moreGizmos(first)": {
+      "id": "Widget.moreGizmos(first)",
+      "fieldId": "Widget.moreGizmos",
+      "name": "first",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.moreGizmos(last)": {
+      "id": "Widget.moreGizmos(last)",
+      "fieldId": "Widget.moreGizmos",
+      "name": "last",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.stuff(after)": {
+      "id": "Widget.stuff(after)",
+      "fieldId": "Widget.stuff",
+      "name": "after",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.stuff(before)": {
+      "id": "Widget.stuff(before)",
+      "fieldId": "Widget.stuff",
+      "name": "before",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.stuff(first)": {
+      "id": "Widget.stuff(first)",
+      "fieldId": "Widget.stuff",
+      "name": "first",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.stuff(last)": {
+      "id": "Widget.stuff(last)",
+      "fieldId": "Widget.stuff",
+      "name": "last",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.things(after)": {
+      "id": "Widget.things(after)",
+      "fieldId": "Widget.things",
+      "name": "after",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.things(before)": {
+      "id": "Widget.things(before)",
+      "fieldId": "Widget.things",
+      "name": "before",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.things(first)": {
+      "id": "Widget.things(first)",
+      "fieldId": "Widget.things",
+      "name": "first",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.things(last)": {
+      "id": "Widget.things(last)",
+      "fieldId": "Widget.things",
+      "name": "last",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.somethingElse(after)": {
+      "id": "Widget.somethingElse(after)",
+      "fieldId": "Widget.somethingElse",
+      "name": "after",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.somethingElse(before)": {
+      "id": "Widget.somethingElse(before)",
+      "fieldId": "Widget.somethingElse",
+      "name": "before",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.somethingElse(first)": {
+      "id": "Widget.somethingElse(first)",
+      "fieldId": "Widget.somethingElse",
+      "name": "first",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.somethingElse(last)": {
+      "id": "Widget.somethingElse(last)",
+      "fieldId": "Widget.somethingElse",
+      "name": "last",
+      "typeKind": "SCALAR",
+      "typeName": "Int",
+      "isList": false,
+      "isNotNull": false
+    },
+    "Widget.gizmos(filter)~simple-connections": {
+      "id": "Widget.gizmos(filter)~simple-connections",
+      "fieldId": "Widget.gizmos~simple-connections",
+      "name": "filter",
+      "typeKind": "SCALAR",
+      "typeName": "String",
+      "isList": false,
+      "isNotNull": false,
+      "showWith": ["simple-connections"]
+    }
+  },
+  "enums": {},
+  "enumValues": {},
+  "inputs": {},
+  "inputFields": {}
+}
