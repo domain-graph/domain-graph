@@ -33,6 +33,8 @@ export function reducer(
           inputs,
           inputFields,
           visibleNodes,
+          plugins,
+          activePlugins,
         },
       } = action;
 
@@ -91,6 +93,8 @@ export function reducer(
         inputFields: fsf.index(inputFields, inputFieldDef),
         visibleNodes: fsf.index(visibleNodes, visibleNodeDef),
         visibleEdgeIds,
+        plugins,
+        activePlugins,
       };
     }
     // TODO: deprecate in favor of passing visible nodes in graph/import_state

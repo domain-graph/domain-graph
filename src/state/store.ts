@@ -9,7 +9,7 @@ import { factory } from '../tools/factory/factory-3.0';
 import { defaultState } from './graph';
 import { SaveState, SaveStateRepository } from '../persistence';
 import { deindex } from 'flux-standard-functions';
-import { connections } from '../tools/factory/plugins/connections';
+import { connections, pluginName } from '../tools/factory/plugins/connections';
 
 const composeEnhancers =
   window['__REDUX_DEVTOOLS_EXTENSION_COMPOSE__'] || compose;
@@ -50,6 +50,8 @@ export async function getStore(
       deindex(inputs),
       deindex(inputFields),
       [],
+      [pluginName],
+      [pluginName],
     ),
   );
 

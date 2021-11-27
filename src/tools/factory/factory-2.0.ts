@@ -170,7 +170,6 @@ export function getInitialState(
         isReverse: edgeId === undefined ? undefined : edgeId === reverseEdgeId,
         name: field.name,
         description: field.description || undefined,
-        heuristic: hueristicResult?.heuristicName,
         typeKind: targetType.kind,
         typeName: targetType.name,
         isNotNull: fieldType.isNotNull,

@@ -473,7 +473,7 @@ describe('factory 3.0', () => {
   });
 
   describe(buildInputFields, () => {
-    it('builds inputs', () => {
+    it('builds input fields', () => {
       // ARRANGE
       const document = parse(`
         input InputA {
@@ -500,7 +500,7 @@ describe('factory 3.0', () => {
       expect(result).toStrictEqual([
         {
           id: 'InputA.foo',
-          name: 'InputA',
+          name: 'foo',
           isList: false,
           isNotNull: true,
           inputId: 'InputA',
@@ -509,7 +509,7 @@ describe('factory 3.0', () => {
         },
         {
           id: 'InputA.bar',
-          name: 'InputA',
+          name: 'bar',
           isList: false,
           isNotNull: false,
           inputId: 'InputA',
@@ -518,7 +518,7 @@ describe('factory 3.0', () => {
         },
         {
           id: 'InputA.child',
-          name: 'InputA',
+          name: 'child',
           isList: false,
           isNotNull: true,
           inputId: 'InputA',
@@ -527,7 +527,7 @@ describe('factory 3.0', () => {
         },
         {
           id: 'InputB.foo',
-          name: 'InputB',
+          name: 'foo',
           isList: false,
           isNotNull: true,
           inputId: 'InputB',
@@ -536,7 +536,7 @@ describe('factory 3.0', () => {
         },
         {
           id: 'InputB.bar',
-          name: 'InputB',
+          name: 'bar',
           isList: false,
           isNotNull: false,
           inputId: 'InputB',

@@ -19,6 +19,8 @@ export interface SaveState {
     | 'inputs'
     | 'inputFields'
     | 'visibleEdgeIds'
+    | 'plugins'
+    | 'activePlugins'
   >;
   canvas: CanvasState;
 }

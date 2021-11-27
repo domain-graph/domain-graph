@@ -21,6 +21,8 @@ export const importState = (
   inputs: Input[],
   inputFields: InputField[],
   visibleNodes: VisibleNode[],
+  plugins: string[],
+  activePlugins: string[],
 ) => ({
   type: 'graph/import_state' as const,
   payload: {
@@ -33,6 +35,8 @@ export const importState = (
     inputs,
     inputFields,
     visibleNodes,
+    plugins,
+    activePlugins,
   },
 });
 

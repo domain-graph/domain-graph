@@ -104,7 +104,6 @@ export type Field = {
   isReverse?: boolean;
   name: string;
   description?: string;
-  heuristic?: string;
   typeKind: SpecificFieldType['kind'];
   typeName: SpecificFieldType['name'];
   isNotNull: boolean;
@@ -122,7 +121,6 @@ export const fieldDef = define<Field>({
   isReverse: optional(),
   name: required(),
   description: optional(),
-  heuristic: optional(),
   typeKind: required(),
   typeName: required(),
   isNotNull: required(),
@@ -224,6 +222,8 @@ export type GraphState = {
   selectedSourceNodeId?: string;
   selectedFieldId?: string;
   selectedTargetNodeId?: string;
+  plugins: string[];
+  activePlugins: string[];
 };
 
 export const stateDef = define<GraphState>({
@@ -240,6 +240,8 @@ export const stateDef = define<GraphState>({
   selectedSourceNodeId: optional(),
   selectedFieldId: optional(),
   selectedTargetNodeId: optional(),
+  plugins: required(array()),
+  activePlugins: required(array()),
 });
 
 export const defaultState: GraphState = {
@@ -253,4 +255,6 @@ export const defaultState: GraphState = {
   inputFields: {},
   visibleNodes: {},
   visibleEdgeIds: [],
+  plugins: [],
+  activePlugins: [],
 };
