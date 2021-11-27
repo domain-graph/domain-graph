@@ -113,6 +113,8 @@ export function useDrag(
 
       element.addEventListener('mousedown', onMouseDown);
       return () => {
+        // This is fine
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         state.current.element = null;
         element.removeEventListener('mousedown', onMouseDown);
         element.removeEventListener('mouseup', onMouseUp);

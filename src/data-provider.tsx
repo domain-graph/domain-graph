@@ -113,9 +113,10 @@ type ParseError = {
   message: string;
 };
 
-function parse(
-  str: string,
-): { documentNode: DocumentNode | null; errors: readonly ParseError[] } {
+function parse(str: string): {
+  documentNode: DocumentNode | null;
+  errors: readonly ParseError[];
+} {
   const errors: ParseError[] = [];
 
   let documentNode: DocumentNode | null = null;

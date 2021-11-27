@@ -4,9 +4,8 @@ export function useResize(
   element: HTMLElement | null,
   onSize: (values: { width: number; height: number }) => void,
 ) {
-  const callback = useRef<(values: { width: number; height: number }) => void>(
-    onSize,
-  );
+  const callback =
+    useRef<(values: { width: number; height: number }) => void>(onSize);
   useEffect(() => {
     callback.current = onSize;
   }, [onSize]);

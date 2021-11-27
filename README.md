@@ -92,6 +92,7 @@ config = {
 ```
 
 Note that if you _don't_ include a theme file, you'll see an error message such as:
+
 > Variable @color-some-color-description is undefined
 
 ## How To:

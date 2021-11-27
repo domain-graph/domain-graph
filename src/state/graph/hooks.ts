@@ -196,10 +196,10 @@ export function useVisibleEdges(): Edge[] {
   const { visibleEdgeIds, edges } = useSelector((state) => state.graph);
 
   // TODO: respect plugins
-  return useMemo(() => visibleEdgeIds.map((id) => edges[id]), [
-    visibleEdgeIds,
-    edges,
-  ]);
+  return useMemo(
+    () => visibleEdgeIds.map((id) => edges[id]),
+    [visibleEdgeIds, edges],
+  );
 }
 
 export function useVisibleNodeIds(): string[] {

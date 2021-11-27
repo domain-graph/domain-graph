@@ -30,20 +30,20 @@ export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
   const dragStart = useRef<{ x: number; y: number }>();
   const location = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-  const handleClickHide = useCallback(() => dispatch(hideNode(nodeId)), [
-    nodeId,
-    dispatch,
-  ]);
+  const handleClickHide = useCallback(
+    () => dispatch(hideNode(nodeId)),
+    [nodeId, dispatch],
+  );
 
   const handleClickPin = useCallback(() => {
     const { x, y } = location.current;
     dispatch(isPinned ? unpinNode(nodeId) : pinNode(nodeId, x, y));
   }, [nodeId, isPinned, dispatch]);
 
-  const handleClickExpand = useCallback(() => dispatch(expandNode(nodeId)), [
-    nodeId,
-    dispatch,
-  ]);
+  const handleClickExpand = useCallback(
+    () => dispatch(expandNode(nodeId)),
+    [nodeId, dispatch],
+  );
 
   const handleClickSelect = useCallback(() => {
     if (targetId || nodeId !== sourceId) dispatch(selectNode(nodeId));
