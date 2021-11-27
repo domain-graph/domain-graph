@@ -1,6 +1,7 @@
 import { Edge, Field } from '../../state/graph';
 import { buildEdgeId } from '../factory';
 import { StateFactoryPlugin } from '../types';
+import { compact } from '../utils';
 
 export const pluginName = 'simple-connections';
 
@@ -98,12 +99,14 @@ export const connections: StateFactoryPlugin = (state) => {
 
           const isNewEdge = !state.edges[edgeId];
 
-          const edge: Edge = state.edges[edgeId] || {
-            id: edgeId,
-            fieldIds: [],
-            sourceNodeId: edgeSourceId,
-            targetNodeId: edgeTargetId,
-          };
+          const edge: Edge =
+            state.edges[edgeId] ||
+            compact({
+              id: edgeId,
+              fieldIds: [],
+              sourceNodeId: edgeSourceId,
+              targetNodeId: edgeTargetId,
+            });
           edge.fieldIds.push(newFieldId);
 
           if (isNewEdge) {
@@ -111,19 +114,23 @@ export const connections: StateFactoryPlugin = (state) => {
           } else {
             edge.hideWith = remove(edge.hideWith, pluginName);
             edge.showWith = remove(edge.showWith, pluginName);
+            if (typeof edge.hideWith === 'undefined') delete edge.hideWith;
+            if (typeof edge.showWith === 'undefined') delete edge.showWith;
           }
 
           const newArgs = fieldToRewrite.argIds
-            .map((argId) => ({
-              ...state.args[argId],
-              id: `${argId}~${pluginName}`,
-              fieldId: newFieldId,
-              hideWith: undefined,
-              showWith: [pluginName],
-            }))
+            .map((argId) =>
+              compact({
+                ...state.args[argId],
+                id: `${argId}~${pluginName}`,
+                fieldId: newFieldId,
+                hideWith: undefined,
+                showWith: [pluginName],
+              }),
+            )
             .filter((arg) => !pagingArgs.has(arg.name));
 
-          const newField: Field = {
+          const newField: Field = compact({
             ...connectionNodesField,
             isNotNull: fieldToRewrite.isNotNull,
             id: newFieldId,
@@ -135,7 +142,7 @@ export const connections: StateFactoryPlugin = (state) => {
             isReverse,
             hideWith: undefined,
             showWith: [pluginName],
-          };
+          });
 
           sourceNode.fieldIds.push(newFieldId);
           if (isNewEdge) sourceNode.edgeIds.push(edgeId);
@@ -160,6 +167,8 @@ function show<T extends { hideWith?: string[]; showWith?: string[] }>(
 ): T {
   item.hideWith = remove(item.hideWith, pluginName);
   item.showWith = add(item.showWith, pluginName);
+  if (typeof item.hideWith === 'undefined') delete item.hideWith;
+  if (typeof item.showWith === 'undefined') delete item.showWith;
   return item;
 }
 
@@ -168,6 +177,8 @@ function hide<T extends { hideWith?: string[]; showWith?: string[] }>(
 ): T {
   item.hideWith = add(item.hideWith, pluginName);
   item.showWith = remove(item.showWith, pluginName);
+  if (typeof item.hideWith === 'undefined') delete item.hideWith;
+  if (typeof item.showWith === 'undefined') delete item.showWith;
   return item;
 }
 
