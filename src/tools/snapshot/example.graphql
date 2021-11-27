@@ -1,0 +1,91 @@
+"""
+Required relay connection type
+"""
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+}
+
+type Widget {
+  id: ID!
+  gizmos(
+    filter: String
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): GizmoConnection!
+  moreGizmos(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): GizmoConnection! # duplicated use of connection type
+  stuff(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): MyInterfaceConnection!
+  things(after: String, before: String, first: Int, last: Int): ThingConnection! # connection to union type
+  somethingElse(
+    after: String
+    before: String
+    first: Int
+    last: Int
+  ): SomethingElseConnection!
+}
+
+# Gizmo connection and edge use the {type}Connection and {type}Edge naming convention
+type Gizmo {
+  id: ID!
+}
+type GizmoConnection {
+  nodes: [Gizmo]
+  edges: [GizmoEdge]
+  pageInfo: PageInfo!
+}
+type GizmoEdge {
+  node: Gizmo
+  cursor: String!
+}
+
+# Connection to Gizmo type but using different base names
+type SomethingElseConnection {
+  nodes: [Gizmo]
+  edges: [SomethingOtherEdge]
+  pageInfo: PageInfo!
+}
+type SomethingOtherEdge {
+  node: Gizmo
+  cursor: String!
+}
+
+# MyInterface connection and edge use the {interface}Connection and {interface}Edge naming convention
+type MyInterfaceConnection {
+  nodes: [MyInterface]
+  edges: [MyInterfaceEdge]
+  pageInfo: PageInfo!
+}
+type MyInterfaceEdge {
+  node: MyInterface
+  cursor: String!
+}
+interface MyInterface {
+  id: ID!
+  name: String!
+}
+
+# Thing connection and edge use the {union}Connection and {union}Edge naming convention
+union Thing = Widget | Gizmo
+type ThingConnection {
+  nodes: [Thing]
+  edges: [ThingEdge]
+  pageInfo: PageInfo!
+}
+type ThingEdge {
+  node: Thing
+  cursor: String!
+}
