@@ -269,7 +269,7 @@ function* doBuildInputFields(cache: DocumentCache): Iterable<InputField> {
 
       yield compact({
         id: inputFieldId,
-        name: input.name.value,
+        name: inputField.name.value,
         isList: target.isList,
         isNotNull: target.isNotNull,
         isListElementNotNull: target.isListElementNotNull,

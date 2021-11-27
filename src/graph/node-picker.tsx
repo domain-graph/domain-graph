@@ -1,14 +1,14 @@
 import './node-picker.less';
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { deindex } from 'flux-standard-functions';
 import { Eye, EyeOff } from '../icons';
 
-import { useDispatch, useSelector } from '../state';
+import { useDispatch } from '../state';
 import { hideNode, showNode } from '../state/graph/graph-actions';
+import { useAllNodes, useIsVisible } from '../state/graph/hooks';
 
 export const NodePicker: React.VFC = () => {
-  const nodes = useSelector((state) => deindex(state.graph.nodes));
+  const nodes = useAllNodes();
   const [filter, setFilter] = useState<string>('');
   const sortedNodes = useMemo(
     () =>
@@ -43,7 +43,7 @@ export const NodePicker: React.VFC = () => {
 
 const Item: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
   const dispatch = useDispatch();
-  const isVisible = useSelector((state) => !!state.graph.visibleNodes[nodeId]);
+  const isVisible = useIsVisible(nodeId);
 
   const handleClick = useCallback(() => {
     dispatch(isVisible ? hideNode(nodeId) : showNode(nodeId));

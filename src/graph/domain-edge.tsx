@@ -1,37 +1,24 @@
 import './domain-edge.less';
 
-import React, { useLayoutEffect, useMemo, useRef } from 'react';
-import { shallowEqual } from 'react-redux';
+import React, { useLayoutEffect, useRef } from 'react';
 
 import { useEdgeSubscriber } from '../simulation';
 
 import { ChevronDown, ChevronsDown, ChevronsUp, ChevronUp } from '../icons';
-import { useDispatch, useSelector } from '../state';
-import { Field } from '../state/graph';
+import { useDispatch } from '../state';
 import { selectField } from '../state/graph/graph-actions';
+import {
+  useEdge,
+  useFieldsByEdge,
+  useSelectedFieldId,
+} from '../state/graph/hooks';
 
 const handleSize = 20;
 
-function useFieldIdsByEdge(edgeId: string): string[] {
-  return useSelector(
-    (state) => state.graph.edges[edgeId]?.fieldIds || [],
-    shallowEqual,
-  );
-}
-
-function useFieldsByEdge(edgeId: string): Field[] {
-  const fieldIds = useFieldIdsByEdge(edgeId);
-  const { fields } = useSelector((state) => state.graph);
-
-  return useMemo(() => {
-    return fieldIds.map((x) => fields[x]);
-  }, [fieldIds, fields]);
-}
-
 export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
   const dispatch = useDispatch();
-  const edge = useSelector((state) => state.graph.edges[edgeId]);
-  const { selectedFieldId } = useSelector((state) => state.graph);
+  const edge = useEdge(edgeId);
+  const selectedFieldId = useSelectedFieldId();
 
   const fields = useFieldsByEdge(edgeId);
 
@@ -108,6 +95,9 @@ export const DomainEdge: React.VFC<{ edgeId: string }> = ({ edgeId }) => {
       }
     }
   });
+
+  // TODO: verify this won't break the simulation
+  if (!edge) return null;
 
   return (
     <g id={edgeId} className="c-domain-edge edge" ref={g}>

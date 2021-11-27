@@ -3,14 +3,15 @@ import './spotlight.less';
 import React, { useCallback, useEffect, useState } from 'react';
 
 import { IconButton } from '../components/icon-button';
-import { Maximize2, Minimize2, X } from '../icons';
-import { useSelector, useDispatch } from '../state';
+import { Maximize2, Minimize2, Relay, X } from '../icons';
+import { useDispatch } from '../state';
 import {
   deselectNode,
   hideNode,
   selectField,
 } from '../state/graph/graph-actions';
 import {
+  useArg,
   useEnum,
   useEnumValues,
   useField,
@@ -18,13 +19,17 @@ import {
   useInput,
   useInputFields,
   useNode,
+  useSelectedFieldId,
+  useSelectedSourceNodeId,
+  useSelectedTargetNodeId,
 } from '../state/graph/hooks';
 import { InputField } from '../state/graph';
+import { pluginName } from '../tools/factory/plugins/connections';
 
 export const Spotlight: React.VFC = () => {
-  const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
-  const fieldId = useSelector((state) => state.graph.selectedFieldId);
-  const targetId = useSelector((state) => state.graph.selectedTargetNodeId);
+  const sourceId = useSelectedSourceNodeId();
+  const fieldId = useSelectedFieldId();
+  const targetId = useSelectedTargetNodeId();
 
   if (!sourceId) return null;
 
@@ -38,16 +43,15 @@ export const Spotlight: React.VFC = () => {
 };
 
 const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
-  const { name, description, heuristic, argIds } = useSelector(
-    (state) => state.graph.fields[fieldId],
-  );
+  const field = useField(fieldId);
+  const { name, description, argIds, showWith } = field || {};
   const [isExpanded, setIsExpanded] = useState(true);
   useEffect(() => {
     setIsExpanded(true);
   }, [fieldId]);
   return (
     <div className="edge-spotlight">
-      {!!argIds.length && (
+      {!!argIds?.length && (
         <div className="controls">
           <IconButton
             Icon={isExpanded ? Minimize2 : Maximize2}
@@ -56,10 +60,17 @@ const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
           />
         </div>
       )}
-      <h1>{name}</h1>
-      {heuristic && <div>({heuristic})</div>}
+      <h1>
+        {!!showWith && !!showWith.includes(pluginName) && (
+          <span title="Relay connection">
+            <Relay />
+          </span>
+        )}
+        {name}
+      </h1>
+
       {description && <div>{description}</div>}
-      {!!argIds.length && isExpanded && (
+      {!!argIds?.length && isExpanded && (
         <ul>
           {argIds.map((argId) => (
             <ResolverArg key={argId} argId={argId} />
@@ -71,9 +82,9 @@ const EdgeSpotlight: React.FC<{ fieldId: string }> = ({ fieldId }) => {
 };
 
 const ResolverArg: React.VFC<{ argId: string }> = ({ argId }) => {
-  const arg = useSelector((state) => state.graph.args[argId]);
-  const e = useEnum(arg.typeName);
-  const input = useInput(arg.typeName);
+  const arg = useArg(argId);
+  const e = useEnum(arg?.typeName);
+  const input = useInput(arg?.typeName); // TODO: don't match on typename
 
   if (!arg) return null;
 
@@ -149,12 +160,14 @@ const Controls: React.VFC<{
 const NodeSpotlight: React.VFC<{ nodeId: string }> = ({ nodeId }) => {
   const node = useNode(nodeId);
 
-  const fields = useFields(nodeId);
+  const fields = [...useFields(nodeId)].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
   const ids = fields.filter((f) => f.typeName === 'ID');
   const scalars = fields.filter((f) => f.typeName !== 'ID' && !f.edgeId);
   const edges = fields.filter((f) => f.edgeId);
 
-  const { selectedFieldId } = useSelector((state) => state.graph);
+  const selectedFieldId = useSelectedFieldId();
 
   const [isExpanded, setIsExpanded] = useState(!selectedFieldId);
 
@@ -216,7 +229,7 @@ const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
     dispatch(selectField(fieldId));
   }, [fieldId, dispatch]);
 
-  const { selectedFieldId } = useSelector((state) => state.graph);
+  const selectedFieldId = useSelectedFieldId();
 
   const isSelected = selectedFieldId === fieldId;
 
@@ -228,6 +241,7 @@ const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
     typeName,
     isListElementNotNull,
     isNotNull,
+    showWith,
   } = field;
 
   const typeDescription = undefined; // TODO:
@@ -240,6 +254,11 @@ const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
     >
       <span className="name">{name}</span>
       {': '}
+      {showWith?.includes(pluginName) && (
+        <span title="Relay connection">
+          <Relay />
+        </span>
+      )}
       <TypeDisplayName
         typeName={typeName}
         typeDescription={typeDescription}
@@ -253,6 +272,10 @@ const EdgeField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
 };
 
 const ScalarField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
+  const field = useField(fieldId);
+  const e = useEnum(field?.typeName);
+  if (!field) return null;
+
   const {
     name,
     description,
@@ -260,8 +283,8 @@ const ScalarField: React.VFC<{ fieldId: string }> = ({ fieldId }) => {
     isNotNull,
     isList,
     isListElementNotNull,
-  } = useSelector((state) => state.graph.fields[fieldId]);
-  const e = useEnum(typeName);
+  } = field;
+
   return (
     <li className="scalar field">
       <div>
@@ -318,7 +341,7 @@ const InputFieldsInfo: React.VFC<{ inputId: string }> = ({ inputId }) => {
   return (
     <ul className="input-fields">
       {fields.map((field) => (
-        <InputFieldInfo key={inputId} field={field} />
+        <InputFieldInfo key={field.id} field={field} />
       ))}
     </ul>
   );

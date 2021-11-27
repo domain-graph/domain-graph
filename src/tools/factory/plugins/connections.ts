@@ -2,7 +2,7 @@ import { Edge, Field } from '../../../state/graph';
 import { buildEdgeId } from '../factory-3.0';
 import { V3StatePlugin } from '../types';
 
-const pluginName = 'relay-connection';
+export const pluginName = 'simple-connections';
 
 export const connections: V3StatePlugin = (state) => {
   for (const nodeId in state.nodes) {
@@ -10,22 +10,21 @@ export const connections: V3StatePlugin = (state) => {
       const name = nodeId.substr(0, nodeId.length - 'Connection'.length);
 
       const connectionNode = state.nodes[`${name}Connection`];
-      const edgeNode = state.nodes[`${name}Edge`];
       const pageInfoNode = state.nodes['PageInfo'];
 
-      if (!connectionNode || !edgeNode || !pageInfoNode) continue;
+      if (!connectionNode || !pageInfoNode) continue;
 
       const connectionFields = connectionNode.fieldIds
         .map((fieldId) => state.fields[fieldId])
         .filter((x) => x);
 
       const connectionEdgesField = connectionFields.find(
-        (f) =>
-          f.name === 'edges' &&
-          f.typeKind !== 'SCALAR' &&
-          f.typeName === edgeNode.id,
+        (f) => f.name === 'edges' && f.typeKind !== 'SCALAR',
       );
       if (!connectionEdgesField) continue;
+
+      const edgeNode = state.nodes[connectionEdgesField.typeName];
+      if (!edgeNode) continue;
 
       const connectionNodesField = connectionFields.find(
         (f) =>
@@ -90,18 +89,29 @@ export const connections: V3StatePlugin = (state) => {
           if (!fieldToRewrite) continue;
 
           const newFieldId = `${fieldToRewrite.id}~${pluginName}`;
-          const { edgeId, isReverse } = buildEdgeId(sourceId, targetNode.id);
+          const {
+            edgeId,
+            isReverse,
+            sourceId: edgeSourceId,
+            targetId: edgeTargetId,
+          } = buildEdgeId(sourceId, targetNode.id);
 
           const isNewEdge = !state.edges[edgeId];
 
           const edge: Edge = state.edges[edgeId] || {
             id: edgeId,
             fieldIds: [],
-            sourceNodeId: sourceId,
-            targetNodeId: targetNode.id,
-            showWith: [pluginName],
+            sourceNodeId: edgeSourceId,
+            targetNodeId: edgeTargetId,
           };
           edge.fieldIds.push(newFieldId);
+
+          if (isNewEdge) {
+            show(edge);
+          } else {
+            edge.hideWith = remove(edge.hideWith, pluginName);
+            edge.showWith = remove(edge.showWith, pluginName);
+          }
 
           const newArgs = fieldToRewrite.argIds
             .map((argId) => ({
@@ -145,9 +155,33 @@ export const connections: V3StatePlugin = (state) => {
 
 const pagingArgs = new Set(['first', 'after', 'last', 'before']);
 
-function hide<T extends { hideWith?: string[] }>(item: T): T {
-  item.hideWith = add(item.hideWith, pluginName);
+function show<T extends { hideWith?: string[]; showWith?: string[] }>(
+  item: T,
+): T {
+  item.hideWith = remove(item.hideWith, pluginName);
+  item.showWith = add(item.showWith, pluginName);
   return item;
+}
+
+function hide<T extends { hideWith?: string[]; showWith?: string[] }>(
+  item: T,
+): T {
+  item.hideWith = add(item.hideWith, pluginName);
+  item.showWith = remove(item.showWith, pluginName);
+  return item;
+}
+
+function remove(
+  values: string[] | undefined,
+  value: string,
+): string[] | undefined {
+  if (!values?.length) return undefined;
+
+  if (!values.includes(value)) return values;
+
+  if (values.length === 1) return undefined;
+
+  return values.filter((v) => v !== value);
 }
 
 function add(values: string[] | undefined, value: string): string[] {

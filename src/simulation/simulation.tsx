@@ -12,8 +12,8 @@ import { NodeEvent, NodeSubscriber } from './node-subscriber';
 import { context } from './context';
 import { EdgeEvent, EdgeSubscriber } from './edge-subscriber';
 import { Edge, VisibleNode } from '../state/graph';
-import { useVisibleEdges } from '../state/graph/hooks';
-import { useDispatch, useSelector } from '../state';
+import { useVisibleEdges, useVisibleNodes } from '../state/graph/hooks';
+import { useDispatch } from '../state';
 import { updateNodeLocations } from '../state/graph/graph-actions';
 import { shallowEqual } from 'react-redux';
 
@@ -82,7 +82,7 @@ function useVisiblePartialNodes(): PartialNode[] {
       })),
     [],
   );
-  const { visibleNodes } = useSelector((state) => state.graph);
+  const visibleNodes = useVisibleNodes();
 
   const pinMap = selector(visibleNodes);
   const pinMapRef = useRef(pinMap);
@@ -120,7 +120,7 @@ export const Simulation: React.FC = ({ children }) => {
     [visibleEdges],
   );
 
-  const fullVisibleNodes = useSelector((state) => state.graph.visibleNodes);
+  const fullVisibleNodes = useVisibleNodes();
   const fullVisibleNodesRef = useRef(fullVisibleNodes);
   fullVisibleNodesRef.current = fullVisibleNodes;
 

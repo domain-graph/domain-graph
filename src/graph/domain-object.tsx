@@ -6,7 +6,7 @@ import { useNodeSubscriber } from '../simulation';
 import { EyeOff, Graph, Lock, Unlock } from '../icons';
 import { CircleButton } from '../svg-button';
 import { RadialMenu } from './radial-menu';
-import { useDispatch, useSelector } from '../state';
+import { useDispatch } from '../state';
 import {
   expandNode,
   hideNode,
@@ -15,14 +15,17 @@ import {
   selectNode,
   unpinNode,
 } from '../state/graph/graph-actions';
+import {
+  useIsPinned,
+  useSelectedSourceNodeId,
+  useSelectedTargetNodeId,
+} from '../state/graph/hooks';
 
 export const DomainObject: React.FC<{ nodeId: string }> = ({ nodeId }) => {
   const dispatch = useDispatch();
-  const isPinned = useSelector(
-    (state) => state.graph.visibleNodes[nodeId]?.isPinned === true,
-  );
-  const sourceId = useSelector((state) => state.graph.selectedSourceNodeId);
-  const targetId = useSelector((state) => state.graph.selectedTargetNodeId);
+  const isPinned = useIsPinned(nodeId);
+  const sourceId = useSelectedSourceNodeId();
+  const targetId = useSelectedTargetNodeId();
 
   const dragStart = useRef<{ x: number; y: number }>();
   const location = useRef<{ x: number; y: number }>({ x: 0, y: 0 });

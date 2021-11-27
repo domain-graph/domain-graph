@@ -15,24 +15,177 @@ import {
 } from './types';
 import { useSelector } from '..';
 
-export function useArg(argId: string): Arg | undefined {
-  // TODO: respect plugins
-  return useSelector((state) => state.graph.args[argId]);
+function respectPlugins<T extends { hideWith?: string[]; showWith?: string[] }>(
+  entity: T | undefined,
+  activePlugins: Set<string>,
+): T | undefined {
+  if (!entity) {
+    return undefined;
+  } else if (!entity.hideWith?.length && !entity.showWith?.length) {
+    return entity;
+  } else if (
+    entity.hideWith &&
+    entity.hideWith.some((plugin) => activePlugins.has(plugin))
+  ) {
+    return undefined;
+  } else if (
+    entity.showWith &&
+    !entity.showWith.some((plugin) => activePlugins.has(plugin))
+  ) {
+    return undefined;
+  } else {
+    return entity;
+  }
+}
+
+function useActivePlugins(): Set<string> {
+  const activePlugins = useSelector((state) => state.graph.activePlugins);
+  return useMemo(() => new Set(activePlugins), [activePlugins]);
+}
+
+const isTruthy = <T>(x: T | undefined): x is T => typeof x !== 'undefined';
+
+export function useArg(argId: string | undefined): Arg | undefined {
+  const arg = useSelector((state) => state.graph.args[argId || '']);
+  const activePlugins = useActivePlugins();
+  return respectPlugins(arg, activePlugins);
+}
+
+export function useEdge(edgeId: string | undefined): Edge | undefined {
+  const edge = useSelector((state) => state.graph.edges[edgeId || '']);
+  const activePlugins = useActivePlugins();
+  return respectPlugins(edge, activePlugins);
 }
 
 export function useField(fieldId: string): Field | undefined {
-  // TODO: respect plugins
-  return useSelector((state) => state.graph.fields[fieldId]);
+  const field = useSelector((state) => state.graph.fields[fieldId]);
+  const activePlugins = useActivePlugins();
+  return respectPlugins(field, activePlugins);
 }
 
-export function useEdge(edgeId: string): Edge | undefined {
+export function useFieldIds(nodeId: string): string[] {
   // TODO: respect plugins
-  return useSelector((state) => state.graph.edges[edgeId]);
+  return useSelector(
+    (state) => state.graph.nodes[nodeId]?.fieldIds || [],
+    shallowEqual,
+  );
 }
 
-export function useNode(nodeId: string): Node | undefined {
+export function useFieldIdsByEdge(edgeId: string): string[] {
   // TODO: respect plugins
-  return useSelector((state) => state.graph.nodes[nodeId]);
+  return useSelector(
+    (state) => state.graph.edges[edgeId]?.fieldIds || [],
+    shallowEqual,
+  );
+}
+
+export function useFields(nodeId: string): Field[] {
+  const fieldIds = useFieldIds(nodeId);
+  const allFields = useSelector((state) => state.graph.fields);
+  const activePlugins = useActivePlugins();
+
+  return useMemo(
+    () =>
+      fieldIds
+        .map((fieldId) => {
+          const field = allFields[fieldId];
+
+          if (!field) console.error('Cannot find field by ID:', fieldId);
+
+          return respectPlugins(field, activePlugins);
+        })
+        .filter(isTruthy),
+    [allFields, fieldIds, activePlugins],
+  );
+}
+
+export function useFieldsByEdge(edgeId: string): Field[] {
+  const fieldIds = useFieldIdsByEdge(edgeId);
+  const allFields = useSelector((state) => state.graph.fields);
+  const activePlugins = useActivePlugins();
+
+  return useMemo(
+    () =>
+      fieldIds
+        .map((fieldId) => {
+          const field = allFields[fieldId];
+
+          if (!field) console.error('Cannot find field by ID:', fieldId);
+
+          return respectPlugins(field, activePlugins);
+        })
+        .filter(isTruthy),
+    [allFields, fieldIds, activePlugins],
+  );
+}
+
+export function useNode(nodeId: string | undefined): Node | undefined {
+  const node = useSelector((state) => state.graph.nodes[nodeId || '']);
+  const activePlugins = useActivePlugins();
+  return respectPlugins(node, activePlugins);
+}
+
+export function useAllNodes(): Node[] {
+  const allNodes = useSelector((state) => fsf.deindex(state.graph.nodes));
+  const activePlugins = useActivePlugins();
+
+  return useMemo(
+    () =>
+      allNodes
+        .map((node) => respectPlugins(node, activePlugins))
+        .filter(isTruthy),
+    [allNodes, activePlugins],
+  );
+}
+
+export function useEnum(enumId: string | undefined): Enum | undefined {
+  const e = useSelector((state) => state.graph.enums[enumId || '']);
+  const activePlugins = useActivePlugins();
+  return respectPlugins(e, activePlugins);
+}
+
+export function useEnumValue(enumValueId: string): EnumValue | undefined {
+  const enumValue = useSelector((state) => state.graph.enumValues[enumValueId]);
+  const activePlugins = useActivePlugins();
+  return respectPlugins(enumValue, activePlugins);
+}
+
+export function useEnumValues(enumId: string): EnumValue[] {
+  const enumValueIds = useEnum(enumId)?.valueIds;
+  const enumValues = useSelector((state) => state.graph.enumValues);
+  const activePlugins = useActivePlugins();
+
+  return useMemo(() => {
+    return (enumValueIds || [])
+      .map((id) => respectPlugins(enumValues[id], activePlugins))
+      .filter(isTruthy);
+  }, [enumValueIds, enumValues, activePlugins]);
+}
+
+export function useInput(inputId: string | undefined): Input | undefined {
+  const input = useSelector((state) => state.graph.inputs[inputId || '']);
+  const activePlugins = useActivePlugins();
+  return respectPlugins(input, activePlugins);
+}
+
+export function useInputField(inputFieldId: string): InputField | undefined {
+  const inputField = useSelector(
+    (state) => state.graph.inputFields[inputFieldId],
+  );
+  const activePlugins = useActivePlugins();
+  return respectPlugins(inputField, activePlugins);
+}
+
+export function useInputFields(inputId: string): InputField[] {
+  const inputFieldIds = useInput(inputId)?.inputFieldIds;
+  const inputFields = useSelector((state) => state.graph.inputFields);
+  const activePlugins = useActivePlugins();
+
+  return useMemo(() => {
+    return (inputFieldIds || [])
+      .map((id) => respectPlugins(inputFields[id], activePlugins))
+      .filter(isTruthy);
+  }, [inputFieldIds, inputFields, activePlugins]);
 }
 
 export function useVisibleEdgeIds(): string[] {
@@ -57,67 +210,43 @@ export function useVisibleNodeIds(): string[] {
   );
 }
 
-export function useVisibleNodes(): VisibleNode[] {
+export function useAllVisibleNodes(): VisibleNode[] {
   const { visibleNodes } = useSelector((state) => state.graph);
   // TODO: respect plugins
   return useMemo(() => fsf.deindex(visibleNodes), [visibleNodes]);
 }
 
-export function useFieldIds(nodeId: string): string[] {
+export function useVisibleNodes(): Record<string, VisibleNode> {
+  // TODO: respect plugins
+  return useSelector((state) => state.graph.visibleNodes);
+}
+
+export function useIsPinned(nodeId: string): boolean {
   // TODO: respect plugins
   return useSelector(
-    (state) => state.graph.nodes[nodeId]?.fieldIds || [],
-    shallowEqual,
+    (state) => state.graph.visibleNodes[nodeId]?.isPinned === true,
   );
 }
 
-export function useFields(nodeId: string): Field[] {
-  const fieldIds = useFieldIds(nodeId);
-  const allFields = useSelector((state) => state.graph.fields);
-
-  return useMemo(
-    () =>
-      fieldIds
-        .map((fieldId) => {
-          const field = allFields[fieldId];
-
-          if (!field) console.error('Cannot find field by ID:', fieldId);
-
-          return field;
-        })
-        .filter((x) => x),
-    [allFields, fieldIds],
-  );
+export function useIsVisible(nodeId: string): boolean {
+  // TODO: respect plugins
+  return useSelector((state) => !!state.graph.visibleNodes[nodeId]);
 }
 
-export function useEnum(enumId: string): Enum | undefined {
-  return useSelector((state) => state.graph.enums[enumId]);
+export function useSelectedFieldId(): string | undefined {
+  return useSelector((state) => state.graph.selectedFieldId);
 }
 
-export function useEnumValues(enumId: string): EnumValue[] {
-  const enumValueIds = useEnum(enumId)?.valueIds;
-  const enumValues = useSelector((state) => state.graph.enumValues);
-
-  return useMemo(() => {
-    return (enumValueIds || []).map((id) => enumValues[id]).filter((x) => x);
-  }, [enumValueIds, enumValues]);
+export function useSelectedSourceNodeId(): string | undefined {
+  return useSelector((state) => state.graph.selectedSourceNodeId);
 }
 
-export function useInput(inputId: string): Input | undefined {
-  return useSelector((state) => state.graph.inputs[inputId]);
-}
-
-export function useInputFields(inputId: string): InputField[] {
-  const inputFieldIds = useInput(inputId)?.inputFieldIds;
-  const inputFields = useSelector((state) => state.graph.inputFields);
-
-  return useMemo(() => {
-    return (inputFieldIds || []).map((id) => inputFields[id]).filter((x) => x);
-  }, [inputFieldIds, inputFields]);
+export function useSelectedTargetNodeId(): string | undefined {
+  return useSelector((state) => state.graph.selectedTargetNodeId);
 }
 
 export function useVisibleNodeBounds() {
-  const visibleNodes = useVisibleNodes();
+  const visibleNodes = useAllVisibleNodes();
 
   let minX = 0;
   let maxX = 0;
