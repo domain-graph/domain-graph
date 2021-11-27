@@ -10,7 +10,7 @@ import { reducer } from './graph/reducer';
 export type FluxStandardAction<
   TType extends string = string,
   TPayload = void,
-  TMeta = void
+  TMeta = void,
 > = {
   type: TType;
   payload: TPayload;
@@ -30,7 +30,7 @@ export function useDispatch<ThunkResult>(): Dispatch<ThunkResult> {
 }
 
 export type Dispatch<ThunkResult> = <
-  Action extends FluxStandardAction<any, any, any> | Thunk<ThunkResult>
+  Action extends FluxStandardAction<any, any, any> | Thunk<ThunkResult>,
 >(
   action: Action,
 ) => Action extends FluxStandardAction<any, any, any>

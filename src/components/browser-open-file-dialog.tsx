@@ -33,14 +33,14 @@ export const BrowserOpenFileDialog = forwardRef(
       const delay = 100;
 
       if (isOpen.current) {
-        timer.current = (setTimeout(() => {
+        timer.current = setTimeout(() => {
           resolver.current?.({
             canceled: true,
             files: [],
           });
           isOpen.current = false;
           resolver.current = undefined;
-        }, delay) as unknown) as NodeJS.Timeout;
+        }, delay) as unknown as NodeJS.Timeout;
       }
     }, []);
 

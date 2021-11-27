@@ -182,12 +182,8 @@ function* doBuildArgs(cache: DocumentCache): Iterable<Arg> {
     const node = cache.getDefinitionByField(field);
     if (!node) continue;
 
-    const {
-      namedType,
-      isList,
-      isNotNull,
-      isListElementNotNull,
-    } = normalizeTypeNode(arg.type);
+    const { namedType, isList, isNotNull, isListElementNotNull } =
+      normalizeTypeNode(arg.type);
     const targetDefinition = cache.getTypeDefinition(namedType.name.value);
 
     const legacyTargetTypeKind = toLegacyInputTypeKind(targetDefinition?.kind);

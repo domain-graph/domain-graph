@@ -5,7 +5,7 @@ import { IconProps } from '../icons/base';
 
 export interface PillButtonProps
   extends React.ComponentPropsWithoutRef<'button'>,
-  Omit<IconProps, 'size'> {
+    Omit<IconProps, 'size'> {
   children: string | number;
   icon: React.VFC<IconProps>;
 }

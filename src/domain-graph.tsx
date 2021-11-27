@@ -29,14 +29,12 @@ export const DomainGraph: React.VFC<DomainGraphProps> = ({
   }, [saveState]);
 
   const [store, setStore] = useState<ApplicationStore>();
-  const [
-    subscribedRepository,
-    setSubscribedRepository,
-  ] = useState<SaveStateRepository>(
-    onSaveState
-      ? new SubscribedStateRepository(repository, onSaveState)
-      : repository,
-  );
+  const [subscribedRepository, setSubscribedRepository] =
+    useState<SaveStateRepository>(
+      onSaveState
+        ? new SubscribedStateRepository(repository, onSaveState)
+        : repository,
+    );
   useEffect(() => {
     setSubscribedRepository(
       onSaveState

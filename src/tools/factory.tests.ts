@@ -8,44 +8,9 @@ import {
   buildInputFields,
   buildInputs,
   buildNodes,
-  factory,
 } from './factory';
 
 describe('factory', () => {
-  describe(factory, () => {
-    it('works', () => {
-      // ARRANGE
-      const document = parse(`
-        """
-        The query node
-        """
-        type Query {
-          x: ComplexType
-        }
-      
-        type ComplexType {
-          id: ID!
-          value: String
-        }
-        
-        enum EnumA {
-          FOO
-          BAR
-        }
-        
-        input ReviewInput {
-          stars: Int!
-          commentary: String
-        }`);
-
-      // ACT
-      const result = factory(document);
-
-      // ASSERT
-      // console.log(result);
-    });
-  });
-
   describe(buildNodes, () => {
     it('builds nodes', () => {
       // ARRANGE

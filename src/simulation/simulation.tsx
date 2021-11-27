@@ -221,14 +221,12 @@ export const Simulation: React.FC = ({ children }) => {
       node.call(drag(simulation, nodeEventsByNodeId.current));
 
       simulation.on('end', () => {
-        const payload: Record<
-          string,
-          { x: number; y: number }
-        > = clonedNodes.reduce((acc, item) => {
-          acc[item.id] = { x: r10(item.x || 0), y: r10(item.y || 0) };
+        const payload: Record<string, { x: number; y: number }> =
+          clonedNodes.reduce((acc, item) => {
+            acc[item.id] = { x: r10(item.x || 0), y: r10(item.y || 0) };
 
-          return acc;
-        }, {});
+            return acc;
+          }, {});
 
         dispatch(updateNodeLocations(payload));
       });

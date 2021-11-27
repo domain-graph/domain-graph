@@ -28,16 +28,8 @@ export async function getStore(
     composeEnhancers(applyMiddleware(thunk)),
   );
 
-  const {
-    nodes,
-    edges,
-    fields,
-    args,
-    enums,
-    enumValues,
-    inputs,
-    inputFields,
-  } = factory(documentNode, [connections]);
+  const { nodes, edges, fields, args, enums, enumValues, inputs, inputFields } =
+    factory(documentNode, [connections]);
 
   store.dispatch(
     importState(
