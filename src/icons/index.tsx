@@ -15,6 +15,7 @@ export { Info } from './info';
 export { Lock } from './lock';
 export { Maximize2 } from './maximize-2';
 export { Minimize2 } from './minimize-2';
+export { Relay } from './relay';
 export { Search } from './search';
 export { Trash } from './trash';
 export { Unlock } from './unlock';
