@@ -14,6 +14,6 @@
     "strictNullChecks": true,
     "downlevelIteration": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": []
 }
