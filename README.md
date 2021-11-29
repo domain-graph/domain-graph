@@ -81,6 +81,7 @@ This component renders all of the of UI for opening or dropping files; however, 
 
 #### Examples:
 
+- VSCode Extension: [github.com/domain-graph/vscode](https://github.com/domain-graph/vscode/blob/master/src/app.tsx)
 - Web implementation: [github.com/domain-graph/website](https://github.com/domain-graph/website/blob/master/src/app.tsx)
 - Desktop (Electron) implementation: [github.com/domain-graph/desktop](https://github.com/domain-graph/desktop/blob/master/src/app.tsx)
 
