@@ -29,7 +29,7 @@ export const App: React.FC = () => {
 
 ### DataProvider
 
-This component provides an opinionated, cross-platform UI for opening or dropping files. The result is an `IntrospectionQuery` object that is passed via a render prop. The resulting object can then be passed to a `<DomainGraph />` component. Both GraphQL SDL files (`*.gql` or `*.graphql`) and introspection files (`*.json`) are supported. If a file is not valid (eg. a `*.json` file that does not actually contain a valid introspection), parse errors will be displayed in the UI.
+This component provides an opinionated, cross-platform UI for opening or dropping files. The result is an `DocumentNode` object that is passed via a render prop. The resulting object can then be passed to a `<DomainGraph />` component. If the GraphQL SDL file (`*.gql` or `*.graphql`) is not valid, parse errors will be displayed in the UI.
 
 ```tsx
 import React, { useCallback } from 'react';
@@ -48,7 +48,7 @@ export const App: React.FC = () => {
 
   return (
     <DataProvider onDrop={handleDrop} onShowFileDialog={handleShowFileDialog}>
-      {(introspection) => <DomainGraph introspection={introspection} />}
+      {(documentNode) => <DomainGraph documentNode={documentNode} />}
     </DataProvider>
   );
 };
@@ -104,7 +104,7 @@ This project contains a development server than can be started by running `npm s
 To run the server:
 
 1. `npm start`
-1. Open `localhost:9000` in your browser
+1. Open `localhost:9999` in your browser
 
 Any changes to `index.html`, `*.ts`, or `*.less` files will be immediately reflected in the browser without required a page refresh.
 
@@ -122,7 +122,7 @@ Publishing is automated via a [workflow](https://github.com/domain-graph/domain-
 
 1. Checkout `master` and pull latest changes.
 1. Run `npm version [major|minor|patch]` to create a new version commit and tag
-1. Run `npm push origin master --follow-tags` to push the tag (and version commit) and start the workflow
+1. Run `git push origin master --follow-tags` to push the tag (and version commit) and start the workflow
 1. Wait for [the workflow](https://github.com/domain-graph/domain-graph/actions?query=workflow%3Apublish) to detect the tag and publish the package.
 
 ### Add code or style files
