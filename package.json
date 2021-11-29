@@ -4,13 +4,15 @@
   "description": "Beautiful interactive visualizations for GraphQL schemas",
   "main": "lib/index.js",
   "files": [
-    "lib"
+    "lib",
+    "umd"
   ],
   "scripts": {
     "test": "jest",
     "start": "webpack serve --config webpack.dev.js",
-    "prebuild": "npm run lint && rimraf lib/*",
-    "build": "tsc -p tsconfig.build.json && copyfiles --up 1 \"./src/**/*.less\" lib && rimraf ./lib/bootstrap/**/*.less",
+    "prebuild": "npm run lint && rimraf lib/* umd",
+    "build": "tsc -p tsconfig.build.json && webpack --config webpack.umd.js && copyfiles --up 1 \"./src/**/*.less\" lib",
+    "postbuild": "rimraf ./lib/bootstrap ./lib/umd",
     "lint": "eslint ./src/**/*.ts ./src/**/*.tsx ./*.js && prettier -c .",
     "fix": "eslint ./src/**/*.ts ./src/**/*.tsx ./*.js --fix && prettier -w .",
     "pretest": "rimraf coverage/*",
