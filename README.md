@@ -9,6 +9,29 @@ Beautiful, interactive visualizations for GraphQL schemas
 
 ## Quick Start
 
+Import the script and styles from [unpkg](https://unpkg.com/) and mount your schema:
+
+```html
+<html>
+  <head>
+    <script src="https://unpkg.com/domain-graph/umd/domain-graph.min.js"></script>
+    <link
+      href="https://unpkg.com/domain-graph/umd/domain-graph.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app-root"></div>
+    <script>
+      var schema = 'type MyType { id: ID! }'; // The content of your GQL schema
+      domainGraph.mount('app-root', 'my-schema-name', schema);
+    </script>
+  </body>
+</html>
+```
+
+Alternatively, you can build DomainGraph into a React web application.
+
 This library exposes two main components. The `<DomainGraph />` component displays the interactive graph. The `<DataProvider />` component provides an opinionated, cross-platform UI for opening or dropping files.
 
 ### DomainGraph
