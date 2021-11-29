@@ -118,4 +118,5 @@ dist
 data
 
 # build output
-lib
+/lib
+/umd
