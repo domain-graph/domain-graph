@@ -76,7 +76,7 @@
     "fast-fuzzy": "^1.10.10",
     "flux-standard-functions": "^0.2.0",
     "graphql": "^15.4.0",
-    "react-redux": "^7.2.2",
+    "react-redux": "^8.0.2",
     "redux": "^4.0.5",
     "redux-thunk": "^2.3.0",
     "ts-registry": "^1.0.3"
