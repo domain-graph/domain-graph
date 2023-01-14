@@ -100,23 +100,35 @@ export class DocumentCache {
         }
       }
 
-      if (type.kind === 'ListType') throw new Error('Invalid use of ListType');
+      let normalizeTypeNode: NormalizedTypeNode;
 
-      this.normalizeFieldTypesByTypeNode.set(
-        typeNode,
-        typeof isListElementNotNull === 'boolean'
-          ? {
-              namedType: type,
-              isNotNull,
-              isList,
-              isListElementNotNull,
-            }
-          : {
-              namedType: type,
-              isNotNull,
-              isList,
-            },
-      );
+      if (type.kind === 'ListType') {
+        // TODO: Support nested lists #84
+        normalizeTypeNode = {
+          isList: true,
+          isNotNull,
+          namedType: {
+            kind: 'NamedType',
+            name: { kind: 'Name', value: 'UnsupportedNestedList' },
+          },
+          isListElementNotNull,
+        };
+      } else if (typeof isListElementNotNull === 'boolean') {
+        normalizeTypeNode = {
+          namedType: type,
+          isNotNull,
+          isList,
+          isListElementNotNull,
+        };
+      } else {
+        normalizeTypeNode = {
+          namedType: type,
+          isNotNull,
+          isList,
+        };
+      }
+
+      this.normalizeFieldTypesByTypeNode.set(typeNode, normalizeTypeNode);
     }
     return this.normalizeFieldTypesByTypeNode.get(typeNode)!;
   }
